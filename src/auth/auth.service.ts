@@ -21,10 +21,8 @@ export class AuthService {
       throw new ConflictException("Email already registered");
     }
 
-    const hashed_password = await bcrypt.hash(
-      dto.password,
-      this.config.get<number>("BCRYPT_HASHING_ROUNDS") ?? 12,
-    );
+    const salt = parseInt(this.config.get("BCRYPT_HASHING_ROUNDS") ?? "12", 10);
+    const hashed_password = await bcrypt.hash(dto.password, salt);
     const user = await this.prisma.users.create({
       data: {
         email,
