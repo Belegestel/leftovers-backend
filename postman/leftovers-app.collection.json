@@ -1,0 +1,38 @@
+{
+  "info": {
+    "name": "NestJS Leftovers API",
+    "description": "Postman collection for Leftovers NestJS application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Root - check list of users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/"
+        },
+        "description": "Returns a list of users"
+      }
+    },
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health"
+        },
+        "description": "Checks if the server is running."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
