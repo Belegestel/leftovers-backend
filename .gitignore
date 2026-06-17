@@ -55,3 +55,6 @@ pnpm-lock.yaml
 /.history
 
 .env
+
+/generated/prisma
+/src/generated/
