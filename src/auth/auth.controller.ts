@@ -72,9 +72,9 @@ export class AuthController {
     description: "User provided invalid credentials",
     schema: {
       example: {
-        statusCode: 403,
+        statusCode: 401,
         message: ["Invalid credentials"],
-        error: "Forbidden",
+        error: "Unauthorized",
       },
     },
   })
