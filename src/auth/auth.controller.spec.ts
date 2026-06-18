@@ -22,6 +22,7 @@ describe("AuthController", () => {
 
   const mockAuthService = {
     signup: jest.fn(),
+    login: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -52,5 +53,19 @@ describe("AuthController", () => {
     const result = await controller.signup(dto);
     expect(result).toEqual(expectedResult);
     expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
+  });
+
+  it("should login the user and return JWT", async () => {
+    const dto = {
+      email: "john.doe@email.com",
+      password: "password",
+    };
+    const expectedResult = "jwt-token";
+
+    mockAuthService.login.mockResolvedValue(expectedResult);
+
+    const result = await controller.login(dto);
+    expect(result).toEqual(expectedResult);
+    expect(mockAuthService.login).toHaveBeenCalledWith(dto);
   });
 });
