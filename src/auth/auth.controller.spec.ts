@@ -1,18 +1,56 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthController } from './auth.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AuthController } from "./auth.controller";
+import { AuthService } from "./auth.service";
+import { SignupDto } from "./dto/signup.dto";
 
-describe('AuthController', () => {
+const mockPrismaService = {
+  user: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+  },
+};
+
+jest.mock("../prisma/prisma.service", () => {
+  return {
+    PrismaService: jest.fn().mockImplementation(() => mockPrismaService),
+  };
+});
+
+describe("AuthController", () => {
   let controller: AuthController;
+
+  const mockAuthService = {
+    signup: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
+      providers: [{ provide: AuthService, useValue: mockAuthService }],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should create a user", async () => {
+    const dto: SignupDto = {
+      email: "john.doe@email.com",
+      password: "password",
+      name: "John Doe",
+    };
+    const expectedResult = {
+      id: 1,
+      email: dto.email,
+    };
+
+    mockAuthService.signup.mockResolvedValue(expectedResult);
+    const result = await controller.signup(dto);
+    expect(result).toEqual(expectedResult);
+    expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
   });
 });
