@@ -12,11 +12,14 @@ import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
+  private readonly bcryptHashingRounds: number; 
+
   constructor(
-    private usersRepository: UsersRepository,
+    private readonly usersRepository: UsersRepository,
     private config: ConfigService,
-    private jwtService: JwtService,
-  ) {}
+  ) {
+    this.bcryptHashingRounds = parseInt(this.config.get("BCRYPT_HASHING_ROUNDS") ?? "12", 10);
+  }
 
   async signup(dto: SignupDto) {
     const email = dto.email.toLowerCase();
@@ -26,12 +29,12 @@ export class AuthService {
       throw new ConflictException("Email already registered");
     }
 
-    const salt = parseInt(this.config.get("BCRYPT_HASHING_ROUNDS") ?? "12", 10);
-    const hashed_password = await bcrypt.hash(dto.password, salt);
+    const salt = this.bcryptHashingRounds;
+    const hashedPassword = await bcrypt.hash(dto.password, salt);
     const user = await this.usersRepository.create({
       email,
       name: dto.name,
-      password: hashed_password,
+      password: hashedPassword
     });
 
     return {
