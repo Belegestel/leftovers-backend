@@ -12,13 +12,17 @@ import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
-  private readonly bcryptHashingRounds: number; 
+  private readonly bcryptHashingRounds: number;
 
   constructor(
     private readonly usersRepository: UsersRepository,
     private config: ConfigService,
+    private readonly jwtService: JwtService,
   ) {
-    this.bcryptHashingRounds = parseInt(this.config.get("BCRYPT_HASHING_ROUNDS") ?? "12", 10);
+    this.bcryptHashingRounds = parseInt(
+      this.config.get("BCRYPT_HASHING_ROUNDS") ?? "12",
+      10,
+    );
   }
 
   async signup(dto: SignupDto) {
@@ -34,7 +38,7 @@ export class AuthService {
     const user = await this.usersRepository.create({
       email,
       name: dto.name,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
     return {
