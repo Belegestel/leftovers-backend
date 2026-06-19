@@ -47,6 +47,23 @@
         }
       },
       "description": "Creates new user account."
+    },
+    {
+      "name": "Auth login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        }
+      },
+      "description": "Logs in a user and returns a JWT."
     }
   ],
   "variable": [
