@@ -108,7 +108,8 @@ describe("AuthService", () => {
         password: "hashed-password",
       });
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      mockJwtService.signAsync.mockResolvedValue("jwt-token");
+      const expectedResult = "jwt-token";
+      mockJwtService.signAsync.mockResolvedValue(expectedResult);
 
       const result = await service.login(dto);
 
@@ -119,7 +120,7 @@ describe("AuthService", () => {
       );
       expect(mockJwtService.signAsync).toHaveBeenCalled();
       expect(result).toEqual({
-        accessToken: "jwt-token",
+        accessToken: expectedResult,
       });
     });
 

@@ -1,15 +1,20 @@
+import { Test } from "@nestjs/testing";
 import { JwtStrategy } from "./jwt.strategy";
-import { ConfigService } from "@nestjs/config";
+import { ConfigModule } from "@nestjs/config";
 
 describe("JwtStrategy", () => {
   let strategy: JwtStrategy;
 
-  beforeEach(() => {
-    const configService = {
-      get: jest.fn().mockReturnValue("test-secret"),
-    } as any as ConfigService;
-
-    strategy = new JwtStrategy(configService);
+  beforeEach(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+        }),
+      ],
+      providers: [JwtStrategy],
+    }).compile();
+    strategy = moduleRef.get(JwtStrategy);
   });
 
   it("should validate and transform payload correctly", async () => {
