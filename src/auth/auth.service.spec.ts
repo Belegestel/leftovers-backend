@@ -2,41 +2,20 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { UsersRepository } from "../users/users.repository";
 import { SignupDto } from "./dto/signup.dto";
-import { ConflictException, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { ConflictException } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
+import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
+import { mockUsersRepository } from "../../test/unit/mocks/mockUsersRepository";
+import { PrismaService } from "../prisma/prisma.service";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
-  compare: jest.fn(),
 }));
-
-const mockPrismaService = {
-  user: {
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    create: jest.fn(),
-  },
-};
-
-jest.mock("../prisma/prisma.service", () => {
-  return {
-    PrismaService: jest.fn().mockImplementation(() => mockPrismaService),
-  };
-});
 
 describe("AuthService", () => {
   let service: AuthService;
-
-  const mockUsersRepository = {
-    findByEmail: jest.fn(),
-    create: jest.fn(),
-  };
-
-  const mockConfigService = {
-    get: jest.fn(),
-  };
 
   const mockJwtService = {
     signAsync: jest.fn(),
@@ -47,13 +26,21 @@ describe("AuthService", () => {
       providers: [
         AuthService,
         { provide: UsersRepository, useValue: mockUsersRepository },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: PrismaService, useValue: mockPrismaService },
+      ],
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: "test.env",
+        }),
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+  });
 
+  afterEach(async () => {
     jest.clearAllMocks();
   });
 
@@ -66,7 +53,6 @@ describe("AuthService", () => {
       };
 
       mockUsersRepository.findByEmail.mockResolvedValue(null);
-      mockConfigService.get.mockReturnValue("12");
       (bcrypt.hash as jest.Mock).mockResolvedValue("hashed-password");
       mockUsersRepository.create.mockResolvedValue({
         id: 1,
