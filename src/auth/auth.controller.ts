@@ -31,7 +31,7 @@ export class AuthController {
     description: "Invalid input data - validation error",
     schema: {
       example: {
-        statusCode: 400,
+        statusCode: HttpStatus.BAD_REQUEST,
         message: ["password must be longer than or equal to 8 characters"],
         error: "Bad request",
       },
@@ -41,7 +41,7 @@ export class AuthController {
     description: "User email already exists or the input is invalid",
     schema: {
       example: {
-        statusCode: 409,
+        statusCode: HttpStatus.CONFLICT,
         message: "Email already registered",
         error: "Conflict",
       },
@@ -72,7 +72,7 @@ export class AuthController {
     description: "Invalid input data - validation error",
     schema: {
       example: {
-        statusCode: 400,
+        statusCode: HttpStatus.BAD_REQUEST,
         message: ["email must be an email"],
         error: "Bad request",
       },
@@ -82,7 +82,7 @@ export class AuthController {
     description: "User provided invalid credentials",
     schema: {
       example: {
-        statusCode: 401,
+        statusCode: HttpStatus.UNAUTHORIZED,
         message: ["Invalid credentials"],
         error: "Unauthorized",
       },
