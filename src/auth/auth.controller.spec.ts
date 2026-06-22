@@ -30,7 +30,7 @@ describe("AuthController", () => {
     jest.clearAllMocks();
   });
 
-  it("should create a user", async () => {
+  it("should call auth service and return created user", async () => {
     const dto: SignupDto = {
       email: "john.doe@email.com",
       password: "password",

@@ -8,6 +8,7 @@ import {
   ApiOperation,
   ApiBadRequestResponse,
   ApiForbiddenResponse,
+  ApiBody,
 } from "@nestjs/swagger";
 import { LoginDto } from "./dto/login.dto";
 
@@ -18,6 +19,10 @@ export class AuthController {
 
   @ApiOperation({
     summary: "Create a new user account, if not exists.",
+  })
+  @ApiBody({
+    type: SignupDto,
+    description: "User registration data",
   })
   @ApiOkResponse({
     description: "User account successfully created.",
@@ -50,13 +55,18 @@ export class AuthController {
   @ApiOperation({
     summary: "Log in to user account and return JWT, if account exists.",
   })
+  @ApiBody({
+    type: LoginDto,
+    description: "User login data",
+  })
   @ApiOkResponse({
     description: "User logged in.",
     schema: {
       example: {
-        accessToken: "qUeFkWKTAuDQtyqEwIsCOSTGFslErWADsDfrREoROBYFtSIXykvPJHZvwHwybAUqmxXuMSjFYcqSgRtaXGcHFaawDQnLgfMqfOCV"
-      }
-    }
+        accessToken:
+          "qUeFkWKTAuDQtyqEwIsCOSTGFslErWADsDfrREoROBYFtSIXykvPJHZvwHwybAUqmxXuMSjFYcqSgRtaXGcHFaawDQnLgfMqfOCV",
+      },
+    },
   })
   @ApiBadRequestResponse({
     description: "Invalid input data - validation error",
