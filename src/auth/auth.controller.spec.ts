@@ -3,8 +3,13 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { SignupDto } from "./dto/signup.dto";
 import { PrismaService } from "../prisma/prisma.service";
-import { mockPrismaService } from '../../test/unit/mocks/mockPrismaService';
+import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { mockAuthService } from "../../test/unit/mocks/mockAuthService";
+
+jest.mock("bcrypt", () => ({
+  hash: jest.fn(),
+  compare: jest.fn(),
+}));
 
 describe("AuthController", () => {
   let controller: AuthController;
@@ -25,7 +30,7 @@ describe("AuthController", () => {
     jest.clearAllMocks();
   });
 
-  it("should create a user", async () => {
+  it("should call auth service and return created user", async () => {
     const dto: SignupDto = {
       email: "john.doe@email.com",
       password: "password",
@@ -40,5 +45,19 @@ describe("AuthController", () => {
     const result = await controller.signup(dto);
     expect(result).toEqual(expectedResult);
     expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
+  });
+
+  it("should login the user and return JWT", async () => {
+    const dto = {
+      email: "john.doe@email.com",
+      password: "password",
+    };
+    const expectedResult = "jwt-token";
+
+    mockAuthService.login.mockResolvedValue(expectedResult);
+
+    const result = await controller.login(dto);
+    expect(result).toEqual(expectedResult);
+    expect(mockAuthService.login).toHaveBeenCalledWith(dto);
   });
 });

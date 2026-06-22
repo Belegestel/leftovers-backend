@@ -1,4 +1,4 @@
-import { Body, Post, Controller } from "@nestjs/common";
+import { Body, Post, Controller, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignupDto } from "./dto/signup.dto";
 import {
@@ -7,7 +7,10 @@ import {
   ApiTags,
   ApiOperation,
   ApiBadRequestResponse,
+  ApiForbiddenResponse,
+  ApiBody,
 } from "@nestjs/swagger";
+import { LoginDto } from "./dto/login.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -16,6 +19,10 @@ export class AuthController {
 
   @ApiOperation({
     summary: "Create a new user account, if not exists.",
+  })
+  @ApiBody({
+    type: SignupDto,
+    description: "User registration data",
   })
   @ApiOkResponse({
     description: "User account successfully created.",
@@ -43,5 +50,47 @@ export class AuthController {
   @Post("signup")
   signup(@Body() dto: SignupDto) {
     return this.authService.signup(dto);
+  }
+
+  @ApiOperation({
+    summary: "Log in to user account and return JWT, if account exists.",
+  })
+  @ApiBody({
+    type: LoginDto,
+    description: "User login data",
+  })
+  @ApiOkResponse({
+    description: "User logged in.",
+    schema: {
+      example: {
+        accessToken:
+          "qUeFkWKTAuDQtyqEwIsCOSTGFslErWADsDfrREoROBYFtSIXykvPJHZvwHwybAUqmxXuMSjFYcqSgRtaXGcHFaawDQnLgfMqfOCV",
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: "Invalid input data - validation error",
+    schema: {
+      example: {
+        statusCode: 400,
+        message: ["email must be an email"],
+        error: "Bad request",
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    description: "User provided invalid credentials",
+    schema: {
+      example: {
+        statusCode: 401,
+        message: ["Invalid credentials"],
+        error: "Unauthorized",
+      },
+    },
+  })
+  @Post("login")
+  @HttpCode(HttpStatus.OK)
+  login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
   }
 }

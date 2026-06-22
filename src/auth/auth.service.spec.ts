@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { UsersRepository } from "../users/users.repository";
 import { SignupDto } from "./dto/signup.dto";
-import { ConflictException } from "@nestjs/common";
+import { ConflictException, UnauthorizedException } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
@@ -12,6 +12,7 @@ import { PrismaService } from "../prisma/prisma.service";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
+  compare: jest.fn(),
 }));
 
 describe("AuthService", () => {
@@ -91,6 +92,59 @@ describe("AuthService", () => {
 
       await expect(service.signup(dto)).rejects.toThrow(ConflictException);
       expect(mockUsersRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("login", () => {
+    it("should return a JWT for valid credentials", async () => {
+      const dto = {
+        email: "john.doe@email.com",
+        password: "password",
+      };
+
+      mockUsersRepository.findByEmail.mockResolvedValue({
+        id: 1,
+        email: dto.email,
+        password: "hashed-password",
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      mockJwtService.signAsync.mockResolvedValue("jwt-token");
+
+      const result = await service.login(dto);
+
+      expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith(dto.email);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        "password",
+        "hashed-password",
+      );
+      expect(mockJwtService.signAsync).toHaveBeenCalled();
+      expect(result).toEqual({
+        accessToken: "jwt-token",
+      });
+    });
+
+    it("should throw UnauthorizedException if user does not exist", async () => {
+      const dto = {
+        email: "missing@email.com",
+        password: "password",
+      };
+      mockUsersRepository.findByEmail.mockResolvedValue(null);
+      await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it("should throw UnauthorizedException if the password is incorrect", async () => {
+      const dto = {
+        email: "john.doe@email.com",
+        password: "incorrect",
+      };
+      mockUsersRepository.findByEmail.mockResolvedValue({
+        id: 1,
+        email: dto.email,
+        password: "hashed-password",
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
     });
   });
 });
