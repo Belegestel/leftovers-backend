@@ -2,33 +2,25 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { SignupDto } from "./dto/signup.dto";
+import { PrismaService } from "../prisma/prisma.service";
+import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
+import { mockAuthService } from "../../test/unit/mocks/mockAuthService";
 
-const mockPrismaService = {
-  user: {
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    create: jest.fn(),
-  },
-};
-
-jest.mock("../prisma/prisma.service", () => {
-  return {
-    PrismaService: jest.fn().mockImplementation(() => mockPrismaService),
-  };
-});
+jest.mock("bcrypt", () => ({
+  hash: jest.fn(),
+  compare: jest.fn(),
+}));
 
 describe("AuthController", () => {
   let controller: AuthController;
 
-  const mockAuthService = {
-    signup: jest.fn(),
-    login: jest.fn(),
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [{ provide: AuthService, useValue: mockAuthService }],
+      providers: [
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: PrismaService, useValue: mockPrismaService },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);

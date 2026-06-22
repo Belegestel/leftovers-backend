@@ -3,40 +3,20 @@ import { AuthService } from "./auth.service";
 import { UsersRepository } from "../users/users.repository";
 import { SignupDto } from "./dto/signup.dto";
 import { ConflictException, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { ConfigModule } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
+import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
+import { mockUsersRepository } from "../../test/unit/mocks/mockUsersRepository";
+import { PrismaService } from "../prisma/prisma.service";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
   compare: jest.fn(),
 }));
 
-const mockPrismaService = {
-  user: {
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    create: jest.fn(),
-  },
-};
-
-jest.mock("../prisma/prisma.service", () => {
-  return {
-    PrismaService: jest.fn().mockImplementation(() => mockPrismaService),
-  };
-});
-
 describe("AuthService", () => {
   let service: AuthService;
-
-  const mockUsersRepository = {
-    findByEmail: jest.fn(),
-    create: jest.fn(),
-  };
-
-  const mockConfigService = {
-    get: jest.fn(),
-  };
 
   const mockJwtService = {
     signAsync: jest.fn(),
@@ -47,13 +27,21 @@ describe("AuthService", () => {
       providers: [
         AuthService,
         { provide: UsersRepository, useValue: mockUsersRepository },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: PrismaService, useValue: mockPrismaService },
+      ],
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: "test.env",
+        }),
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+  });
 
+  afterEach(async () => {
     jest.clearAllMocks();
   });
 
@@ -66,7 +54,6 @@ describe("AuthService", () => {
       };
 
       mockUsersRepository.findByEmail.mockResolvedValue(null);
-      mockConfigService.get.mockReturnValue("12");
       (bcrypt.hash as jest.Mock).mockResolvedValue("hashed-password");
       mockUsersRepository.create.mockResolvedValue({
         id: 1,
@@ -145,15 +132,15 @@ describe("AuthService", () => {
       await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
     });
 
-    it('should throw UnauthorizedException if the password is incorrect', async () => {
+    it("should throw UnauthorizedException if the password is incorrect", async () => {
       const dto = {
-        email: 'john.doe@email.com',
-        password: 'incorrect'
+        email: "john.doe@email.com",
+        password: "incorrect",
       };
       mockUsersRepository.findByEmail.mockResolvedValue({
         id: 1,
         email: dto.email,
-        password: 'hashed-password'
+        password: "hashed-password",
       });
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
