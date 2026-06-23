@@ -64,6 +64,40 @@
         }
       },
       "description": "Logs in a user and returns a JWT."
+    },
+    {
+      "name": "Auth register (initial setup)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\", \"name\": \"{{name}}\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "register"]
+        }
+      },
+      "description": "Initiates registration flow - creates signup request and sends confirmation email. User is not being created yet."
+    },
+    {
+      "name": "Auth register confirmation - user creation",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{email}}\", \"token\": \"{{token}}\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/confirm-registration",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "confirm-registration"]
+        }
+      },
+      "description": "Confirms user registration with email and token. Creates user and removes the registration request."
     }
   ],
   "variable": [
@@ -85,6 +119,11 @@
     {
       "key": "name",
       "value": "John Doe",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "token-from-confirmation-email",
       "type": "string"
     }
   ]

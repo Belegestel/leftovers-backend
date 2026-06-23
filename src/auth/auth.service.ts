@@ -110,7 +110,7 @@ export class AuthService {
     await this.emailService.sendEmail(
       email,
       "Confirm your registration",
-      "registration-configrmation",
+      "registration-confirmation",
       { name: dto.name, confirmationLink },
     );
     return { message: "Confirmation email sent." };
