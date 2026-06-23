@@ -1,6 +1,7 @@
 import { Body, Post, Controller, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignupDto } from "./dto/signup.dto";
+import { ConfirmRegistrationDto } from "./dto/confirm-registration.dto";
 import {
   ApiOkResponse,
   ApiConflictResponse,
@@ -18,7 +19,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({
-    summary: "Create a new user account, if not exists.",
+    summary: "[DEPRECATED] Create a new user account, if not exists.",
+    deprecated: true,
   })
   @ApiBody({
     type: SignupDto,
@@ -92,5 +94,19 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post("register")
+  @HttpCode(HttpStatus.OK)
+  register(@Body() dto: SignupDto) {
+    return this.authService.register(dto);
+  }
+
+  @ApiOperation({ summary: "Confirm registration using email and token " })
+  @ApiOkResponse({ description: "User account sucessfuly created" })
+  @ApiBadRequestResponse({ description: "Invalid or expired token or email " })
+  @Post("confirm-registration")
+  ConfirmRegistration(@Body() dto: ConfirmRegistrationDto) {
+    return this.authService.confirmRegistration(dto);
   }
 }

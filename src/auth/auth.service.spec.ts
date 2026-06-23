@@ -9,6 +9,10 @@ import { JwtService } from "@nestjs/jwt";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { mockUsersRepository } from "../../test/unit/mocks/mockUsersRepository";
 import { PrismaService } from "../prisma/prisma.service";
+import { SignupRequestsRepository } from "./signup-requests.repository";
+import { mockSignupRequestsRepository } from "../../test/unit/mocks/mockSignupRequestsRepository";
+import { mockEmailService } from "../../test/unit/mocks/mockEmailService";
+import { EmailService } from "../email/email.service";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
@@ -29,6 +33,8 @@ describe("AuthService", () => {
         { provide: UsersRepository, useValue: mockUsersRepository },
         { provide: JwtService, useValue: mockJwtService },
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: SignupRequestsRepository, useValue: mockSignupRequestsRepository },
+        { provide: EmailService, useValue: mockEmailService}
       ],
       imports: [
         ConfigModule.forRoot({
