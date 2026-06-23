@@ -25,7 +25,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
             from: '"No Reply" <no-reply@example.com>',
           },
           template: {
-            dir: join(__dirname, "templates"),
+            dir: join(process.cwd(), "src/email/templates"),
             adapter: new HandlebarsAdapter(),
             options: {
               strict: true,
