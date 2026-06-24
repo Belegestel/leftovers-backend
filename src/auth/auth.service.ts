@@ -2,13 +2,18 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  BadRequestException,
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { SignupDto } from "./dto/signup.dto";
 import { LoginDto } from "./dto/login.dto";
 import { ConfigService } from "@nestjs/config";
 import { UsersRepository } from "../users/users.repository";
+import { SignupRequestsRepository } from "./signup-requests.repository";
 import { JwtService } from "@nestjs/jwt";
+import { EmailService } from "../email/email.service";
+import { randomBytes } from "crypto";
+import { ConfirmRegistrationDto } from "./dto/confirm-registration.dto";
 
 @Injectable()
 export class AuthService {
@@ -16,6 +21,8 @@ export class AuthService {
 
   constructor(
     private readonly usersRepository: UsersRepository,
+    private readonly signupRequestsRepository: SignupRequestsRepository,
+    private readonly emailService: EmailService,
     private config: ConfigService,
     private readonly jwtService: JwtService,
   ) {
@@ -66,5 +73,70 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken };
+  }
+
+  async register(dto: SignupDto) {
+    const email = dto.email.toLowerCase();
+    const exisitingUser = await this.usersRepository.findByEmail(email);
+    const existingSignupRequest =
+      await this.signupRequestsRepository.findByEmail(email);
+    if (exisitingUser || existingSignupRequest) {
+      throw new ConflictException("Email already registered");
+    }
+
+    const hashedPassword = await bcrypt.hash(
+      dto.password,
+      this.bcryptHashingRounds,
+    );
+
+    const token = randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await this.signupRequestsRepository.create({
+      email,
+      name: dto.name,
+      password_hash: hashedPassword,
+      token,
+      expires_at: expiresAt,
+    });
+
+    const frontendUrl =
+      this.config.get<string>("FRONTEND_URL") || "http://localhost:3000";
+
+    const confirmationLink =
+      `${frontendUrl}/confirm-registration` +
+      `?email=${encodeURIComponent(email)}` +
+      `&token=${encodeURIComponent(token)}`;
+
+    await this.emailService.sendEmail(
+      email,
+      "Confirm your registration",
+      "registration-confirmation",
+      { name: dto.name, confirmationLink },
+    );
+    return { message: "Confirmation email sent." };
+  }
+
+  async confirmRegistration(dto: ConfirmRegistrationDto) {
+    const email = dto.email.toLowerCase();
+    const req = await this.signupRequestsRepository.findByEmail(email);
+    if (!req) {
+      throw new BadRequestException("Invalid or expired token");
+    }
+    if (req.token !== dto.token) {
+      throw new BadRequestException("Invalid token");
+    }
+    if (req.expires_at < new Date()) {
+      throw new BadRequestException("Token expired");
+    }
+
+    const user = await this.usersRepository.create({
+      email: req.email,
+      name: req.name,
+      password: req.password_hash,
+    });
+
+    this.signupRequestsRepository.deleteById(req.id);
+
+    return { id: user.id, email: user.email };
   }
 }

@@ -30,21 +30,34 @@ describe("AuthController", () => {
     jest.clearAllMocks();
   });
 
-  it("should call auth service and return created user", async () => {
+  it("should initiate registration and call auth service", async () => {
     const dto: SignupDto = {
       email: "john.doe@email.com",
-      password: "password",
+      password: "password123",
       name: "John Doe",
     };
-    const expectedResult = {
-      id: 1,
-      email: dto.email,
-    };
 
-    mockAuthService.signup.mockResolvedValue(expectedResult);
-    const result = await controller.signup(dto);
-    expect(result).toEqual(expectedResult);
-    expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
+    const expectedResult = {
+      status: "ok",
+      message: "Confirmation email sent.",
+    };
+    mockAuthService.register.mockResolvedValue(expectedResult);
+    const res = await controller.register(dto);
+    expect(res).toEqual(expectedResult);
+    expect(mockAuthService.register).toHaveBeenCalledWith(dto);
+  });
+
+  it("should confirm registration and create user", async () => {
+    const dto = {
+      email: "john.doe@email.com",
+      token: "valid-token",
+    };
+    const expectedResult = { id: 1, email: dto.email };
+    mockAuthService.confirmRegistration.mockResolvedValue(expectedResult);
+    const res = await controller.ConfirmRegistration(dto);
+
+    expect(res).toEqual(expectedResult);
+    expect(mockAuthService.confirmRegistration).toHaveBeenCalledWith(dto);
   });
 
   it("should login the user and return JWT", async () => {

@@ -1,6 +1,7 @@
 import { Body, Post, Controller, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignupDto } from "./dto/signup.dto";
+import { ConfirmRegistrationDto } from "./dto/confirm-registration.dto";
 import {
   ApiOkResponse,
   ApiConflictResponse,
@@ -18,7 +19,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({
-    summary: "Create a new user account, if not exists.",
+    summary: "[DEPRECATED] Create a new user account, if not exists.",
+    deprecated: true,
   })
   @ApiBody({
     type: SignupDto,
@@ -92,5 +94,68 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @ApiOperation({
+    summary: "Start the signup process to get an email with confirmation link",
+  })
+  @ApiBody({
+    type: SignupDto,
+    description: "User registration data",
+  })
+  @ApiOkResponse({
+    description: "User logged in",
+    schema: {
+      example: {
+        message: "Confirmation email sent.",
+      },
+    },
+  })
+  @ApiConflictResponse({
+    description: "User already exists or has a not confirmed signup request",
+    schema: {
+      example: {
+        message: "Email already registered",
+        error: "Conflict",
+        statusCode: 409,
+      },
+    },
+  })
+  @Post("register")
+  @HttpCode(HttpStatus.OK)
+  register(@Body() dto: SignupDto) {
+    return this.authService.register(dto);
+  }
+
+  @ApiOperation({
+    summary: "Confirm registration using email and token",
+  })
+  @ApiBody({
+    type: ConfirmRegistrationDto,
+    description: "Email and verification token received via email",
+  })
+  @ApiOkResponse({
+    description: "User account sucessfuly created",
+    schema: {
+      example: {
+        id: 123,
+        email: "john.doe@email.com",
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: "Invalid or expired token, or no valid email in the request",
+    schema: {
+      example: {
+        statusCode: 400,
+        message: "Invlaid or expired token",
+        error: "Bad Request",
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: "Invalid or expired token or email " })
+  @Post("confirm-registration")
+  ConfirmRegistration(@Body() dto: ConfirmRegistrationDto) {
+    return this.authService.confirmRegistration(dto);
   }
 }
