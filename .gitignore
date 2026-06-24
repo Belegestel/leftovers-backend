@@ -57,3 +57,5 @@ pnpm-lock.yaml
 
 /generated/prisma
 /src/generated/
+
+/dist/**
