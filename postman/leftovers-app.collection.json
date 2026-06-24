@@ -80,7 +80,7 @@
           "path": ["auth", "register"]
         }
       },
-      "description": "Initiates registration flow - creates signup request and sends confirmation email. User is not being created yet."
+      "description": "Finishes the registration flow. User is being created."
     },
     {
       "name": "Auth register confirmation - user creation",

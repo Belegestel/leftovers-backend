@@ -96,14 +96,63 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @ApiOperation({
+    summary: "Start the signup process to get an email with confirmation link",
+  })
+  @ApiBody({
+    type: SignupDto,
+    description: "User registration data",
+  })
+  @ApiOkResponse({
+    description: "User logged in",
+    schema: {
+      example: {
+        message: "Confirmation email sent.",
+      },
+    },
+  })
+  @ApiConflictResponse({
+    description: "User already exists or has a not confirmed signup request",
+    schema: {
+      example: {
+        message: "Email already registered",
+        error: "Conflict",
+        statusCode: 409,
+      },
+    },
+  })
   @Post("register")
   @HttpCode(HttpStatus.OK)
   register(@Body() dto: SignupDto) {
     return this.authService.register(dto);
   }
 
-  @ApiOperation({ summary: "Confirm registration using email and token " })
-  @ApiOkResponse({ description: "User account sucessfuly created" })
+  @ApiOperation({
+    summary: "Confirm registration using email and token",
+  })
+  @ApiBody({
+    type: ConfirmRegistrationDto,
+    description: "Email and verification token received via email",
+  })
+  @ApiOkResponse({
+    description: "User account sucessfuly created",
+    schema: {
+      example: {
+        id: 123,
+        email: "john.doe@email.com",
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: "Invalid or expired token, or no valid email in the request",
+    schema: {
+      example: {
+        statusCode: 400,
+        message: "Invlaid or expired token",
+        error: "Bad Request",
+      },
+    },
+  })
   @ApiBadRequestResponse({ description: "Invalid or expired token or email " })
   @Post("confirm-registration")
   ConfirmRegistration(@Body() dto: ConfirmRegistrationDto) {
