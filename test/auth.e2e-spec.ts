@@ -17,9 +17,11 @@ describe("Auth E2E", () => {
 
   beforeEach(async () => {
     await clearDatabase(prisma);
+    jest.clearAllMocks();
   });
 
   afterAll(async () => {
+    await prisma.$disconnect();
     await app.close();
   });
 
