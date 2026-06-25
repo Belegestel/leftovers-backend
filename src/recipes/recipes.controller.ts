@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards, Req, Query } from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
-import { OptionalJwtAuthGuard } from "src/auth/optional-jwt-guard";
+import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
 import { toRecipeDetailsDto, toRecipeListDto } from "./recipes.mapper";
 import { RecipeFiltersDto } from "./dto/recipe-filters.dto";
 import { RecipeSearchDto } from "./dto/recipe-search.dto";

@@ -26,7 +26,7 @@ describe("RecipesService", () => {
 
       expect(prismaMock.recipe.findMany).toHaveBeenCalledWith({
         where: {
-          AND: [{ isPublic: true }, {}, {}, {}, {}],
+          AND: [{ isPublic: true }],
         },
         orderBy: {
           created_at: "desc",
@@ -34,14 +34,14 @@ describe("RecipesService", () => {
       });
     });
 
-    it("returns public recieps and own private recieps for logged in users", async () => {
+    it("returns public recipes and own private recipes for logged in users", async () => {
       prismaMock.recipe.findMany.mockResolvedValue([]);
 
       await service.findAll(1);
 
       expect(prismaMock.recipe.findMany).toHaveBeenCalledWith({
         where: {
-          AND: [{ OR: [{ isPublic: true }, { author_id: 5 }] }, {}, {}, {}, {}],
+          AND: [{ OR: [{ isPublic: true }, { author_id: 1 }] }],
         },
         orderBy: {
           created_at: "desc",
@@ -58,15 +58,13 @@ describe("RecipesService", () => {
       expect(prismaMock.recipe.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            AND: [
-              expect.arrayContaining([
-                {
-                  category: {
-                    in: ["Dessert", "Dinner"],
-                  },
+            AND: expect.arrayContaining([
+              {
+                category: {
+                  in: ["Dessert", "Dinner"],
                 },
-              ]),
-            ],
+              },
+            ]),
           },
         }),
       );

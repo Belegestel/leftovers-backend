@@ -28,7 +28,7 @@ describe("RecipesController", () => {
     recipesServiceMock.findAll.mockResolvedValue([]);
     await controller.findAll({ user: { userId: "1" } }, {} as RecipeFiltersDto);
     expect(recipesServiceMock.findAll).toHaveBeenCalledWith(
-      12,
+      1,
       {} as RecipeFiltersDto,
     );
   });
@@ -57,6 +57,6 @@ describe("RecipesController", () => {
 
     recipesServiceMock.findAll.mockResolvedValue([recipe]);
     const result = await controller.findAll({}, {} as RecipeFiltersDto, 'true');
-    expect(result).toEqual(recipe);
+    expect(result).toEqual([recipe]);
   });
 });
