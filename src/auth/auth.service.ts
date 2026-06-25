@@ -33,7 +33,7 @@ export class AuthService {
   }
 
   async signup(dto: SignupDto) {
-    const email = dto.email;
+    const email = dto.email.toLowerCase();
     const existingUser = await this.usersRepository.findByEmail(email);
 
     if (existingUser) {
