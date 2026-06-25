@@ -98,6 +98,53 @@
         }
       },
       "description": "Confirms user registration with email and token. Creates user and removes the registration request."
+    },
+    {
+      "name": "Recipes - get all (filtered + search)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text",
+            "disabled": "true"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/recipes?details=true&category=italian&rating=4&title=pasta",
+          "host": ["{{baseUrl}}"],
+          "path": ["recipes"],
+          "query": [
+            { "key": "details", "value": "true" },
+            { "key": "category", "value": "italian" },
+            { "key": "rating", "value": "4" },
+            { "key": "title", "value": "pasta" }
+          ]
+        },
+        "description": "Fetch recipes with optional filters, search and detailed output. Supports category, rating, date range and text search fields"
+      }
+    },
+    {
+      "name": "Recipes - get all - authenticated",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/recipes?details=true&category=italian&rating=4&title=pasta",
+          "host": ["{{baseUrl}}"],
+          "path": ["recipes"],
+          "query": [
+            { "key": "details", "value": "false" }
+          ]
+        },
+        "description": "Fetch recipes with as an authenticated user"
+      }
     }
   ],
   "variable": [
