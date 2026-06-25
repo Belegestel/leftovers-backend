@@ -57,10 +57,12 @@ export class AuthService {
   async login(dto: LoginDto) {
     const email = dto.email;
     const user = await this.usersRepository.findByEmail(email);
+
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
     }
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+
     if (!isPasswordValid) {
       throw new UnauthorizedException("Invalid credentials");
     }
@@ -80,6 +82,7 @@ export class AuthService {
     const exisitingUser = await this.usersRepository.findByEmail(email);
     const existingSignupRequest =
       await this.signupRequestsRepository.findByEmail(email);
+
     if (exisitingUser || existingSignupRequest) {
       throw new ConflictException("Email already registered");
     }
@@ -119,6 +122,7 @@ export class AuthService {
   async confirmRegistration(dto: ConfirmRegistrationDto) {
     const email = dto.email;
     const req = await this.signupRequestsRepository.findByEmail(email);
+
     if (!req) {
       throw new BadRequestException("Invalid or expired token");
     }
