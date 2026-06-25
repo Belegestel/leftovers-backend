@@ -23,7 +23,7 @@ export class AuthService {
     private readonly usersRepository: UsersRepository,
     private readonly signupRequestsRepository: SignupRequestsRepository,
     private readonly emailService: EmailService,
-    private config: ConfigService,
+    private readonly config: ConfigService,
     private readonly jwtService: JwtService,
   ) {
     this.bcryptHashingRounds = parseInt(
@@ -33,7 +33,7 @@ export class AuthService {
   }
 
   async signup(dto: SignupDto) {
-    const email = dto.email.toLowerCase();
+    const email = dto.email;
     const existingUser = await this.usersRepository.findByEmail(email);
 
     if (existingUser) {
@@ -55,7 +55,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const email = dto.email.toLowerCase();
+    const email = dto.email;
     const user = await this.usersRepository.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
@@ -76,7 +76,7 @@ export class AuthService {
   }
 
   async register(dto: SignupDto) {
-    const email = dto.email.toLowerCase();
+    const email = dto.email;
     const exisitingUser = await this.usersRepository.findByEmail(email);
     const existingSignupRequest =
       await this.signupRequestsRepository.findByEmail(email);
@@ -117,7 +117,7 @@ export class AuthService {
   }
 
   async confirmRegistration(dto: ConfirmRegistrationDto) {
-    const email = dto.email.toLowerCase();
+    const email = dto.email;
     const req = await this.signupRequestsRepository.findByEmail(email);
     if (!req) {
       throw new BadRequestException("Invalid or expired token");
