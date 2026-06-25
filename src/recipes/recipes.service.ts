@@ -1,13 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { RecipeFiltersDto } from "./dto/recipe-filters.dto";
-import { RecipeSearchDto } from "./dto/recipe-search.dto";
+import { RecipeQueryDto } from "./dto/recipe-query.dto";
 import { recipeWhereInput } from "src/generated/prisma/models";
 
 @Injectable()
 export class RecipesService {
   constructor(private prisma: PrismaService) {}
-  async findAll(userId?: number, filters?: RecipeFiltersDto & RecipeSearchDto) {
+  async findAll(userId?: number, filters?: RecipeQueryDto) {
     const categoryList = filters?.category
       ? filters?.category?.split(",").map((c) => c.trim())
       : undefined;
