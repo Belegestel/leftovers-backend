@@ -52,3 +52,13 @@ model signup_requests {
   expires_at DateTime
   created_at DateTime @default(now())
 }
+
+model signup_requests {
+  id Int @default(autoincrement()) @id 
+  email String @unique 
+  name String
+  password_hash String
+  token String @unique 
+  expires_at DateTime
+  created_at DateTime @default(now())
+}

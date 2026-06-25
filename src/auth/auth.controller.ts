@@ -20,6 +20,7 @@ export class AuthController {
 
   @ApiOperation({
     summary: "[DEPRECATED] Create a new user account, if not exists.",
+    description: "Deprecated. Use POST /auth/register instead",
     deprecated: true,
   })
   @ApiBody({
@@ -117,7 +118,7 @@ export class AuthController {
       example: {
         message: "Email already registered",
         error: "Conflict",
-        statusCode: 409,
+        statusCode: HttpStatus.CONFLICT,
       },
     },
   })
@@ -147,8 +148,8 @@ export class AuthController {
     description: "Invalid or expired token, or no valid email in the request",
     schema: {
       example: {
-        statusCode: 400,
-        message: "Invlaid or expired token",
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid or expired token",
         error: "Bad Request",
       },
     },

@@ -23,7 +23,7 @@ export class AuthService {
     private readonly usersRepository: UsersRepository,
     private readonly signupRequestsRepository: SignupRequestsRepository,
     private readonly emailService: EmailService,
-    private config: ConfigService,
+    private readonly config: ConfigService,
     private readonly jwtService: JwtService,
   ) {
     this.bcryptHashingRounds = parseInt(
@@ -55,12 +55,14 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const email = dto.email.toLowerCase();
+    const email = dto.email;
     const user = await this.usersRepository.findByEmail(email);
+
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
     }
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+
     if (!isPasswordValid) {
       throw new UnauthorizedException("Invalid credentials");
     }
