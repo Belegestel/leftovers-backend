@@ -5,6 +5,7 @@ import { SignupDto } from "./dto/signup.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { mockAuthService } from "../../test/unit/mocks/mockAuthService";
+import { LoginResultDto } from "./dto/response/loginResult.dto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
@@ -65,7 +66,7 @@ describe("AuthController", () => {
       email: "john.doe@email.com",
       password: "password",
     };
-    const expectedResult = "jwt-token";
+    const expectedResult: LoginResultDto = { accessToken: "jwt-token" };
 
     mockAuthService.login.mockResolvedValue(expectedResult);
 

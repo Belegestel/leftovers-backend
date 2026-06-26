@@ -2,6 +2,7 @@ import { Body, Post, Controller, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignupDto } from "./dto/signup.dto";
 import { ConfirmRegistrationDto } from "./dto/confirm-registration.dto";
+import { SignupRequestDto } from "./dto/request/signupRequest.dto";
 import {
   ApiOkResponse,
   ApiConflictResponse,
@@ -12,6 +13,9 @@ import {
   ApiBody,
 } from "@nestjs/swagger";
 import { LoginDto } from "./dto/login.dto";
+import { LoginRequestDto } from "./dto/request/loginRequest.dto";
+import { LoginResponseDto } from "./dto/response/loginRepsonse.dto";
+import { SignupResponseDto } from "./dto/response/signupResponse.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -51,8 +55,9 @@ export class AuthController {
     },
   })
   @Post("signup")
-  signup(@Body() dto: SignupDto) {
-    return this.authService.signup(dto);
+  signup(@Body() dto: SignupRequestDto): Promise<SignupResponseDto> {
+    const result = this.authService.signup(dto);
+    return result;
   }
 
   @ApiOperation({
@@ -93,8 +98,12 @@ export class AuthController {
   })
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() dto: LoginRequestDto): Promise<LoginResponseDto> {
+    const result = await this.authService.login(dto);
+    const response: LoginResponseDto = {
+      accessToken: result.accessToken
+    };
+    return response;
   }
 
   @ApiOperation({

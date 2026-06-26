@@ -5,8 +5,6 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
-import { SignupDto } from "./dto/signup.dto";
-import { LoginDto } from "./dto/login.dto";
 import { ConfigService } from "@nestjs/config";
 import { UsersRepository } from "../users/users.repository";
 import { SignupRequestsRepository } from "./signup-requests.repository";
@@ -14,6 +12,11 @@ import { JwtService } from "@nestjs/jwt";
 import { EmailService } from "../email/email.service";
 import { randomBytes } from "crypto";
 import { ConfirmRegistrationDto } from "./dto/confirm-registration.dto";
+import { attemptLoginDto } from "./dto/request/attemptLogin.dto";
+import { LoginResultDto } from "./dto/response/loginResult.dto";
+import { LoginRequestDto } from "./dto/request/loginRequest.dto";
+import { SignupAttemptDto } from "./dto/request/signupAttempt.dto";
+import { SignupResultDto } from "./dto/response/signupResult.dto";
 
 @Injectable()
 export class AuthService {
@@ -32,7 +35,7 @@ export class AuthService {
     );
   }
 
-  async signup(dto: SignupDto) {
+  async signup(dto: SignupAttemptDto): Promise<SignupResultDto> {
     const email = dto.email.toLowerCase();
     const existingUser = await this.usersRepository.findByEmail(email);
 
@@ -54,8 +57,8 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto) {
-    const email = dto.email;
+  async login(dto: attemptLoginDto): Promise<LoginResultDto> {
+    const email = dto.email.toLowerCase();
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {
@@ -74,7 +77,10 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(payload);
 
-    return { accessToken };
+    const result: LoginResultDto = {
+      accessToken,
+    };
+    return result;
   }
 
   async register(dto: SignupDto) {

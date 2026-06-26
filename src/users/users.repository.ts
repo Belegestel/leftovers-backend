@@ -23,6 +23,7 @@ export class UsersRepository {
     name: string;
     password: string;
   }): Promise<User> {
+    console.log('Prisma input', data);
     const user = await this.prisma.users.create({
       data,
     });
