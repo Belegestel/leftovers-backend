@@ -1,5 +1,6 @@
 import { IsEmail, IsString, MinLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { SignupRequestDto } from "./signupRequest.dto";
 
 export class SignupAttemptDto {
   @ApiProperty({
@@ -23,4 +24,12 @@ export class SignupAttemptDto {
   })
   @IsString()
   name: string;
+
+  static from(signupRequest: SignupRequestDto): SignupAttemptDto {
+    return {
+      email: signupRequest.email,
+      password: signupRequest.password,
+      name: signupRequest.name,
+    };
+  }
 }

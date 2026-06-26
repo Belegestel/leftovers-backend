@@ -146,7 +146,7 @@ export class AuthService {
       password: req.password_hash,
     });
 
-    await this.signupRequestsRepository.deleteById(req.id);
+    this.signupRequestsRepository.deleteById(req.id);
 
     return { id: user.id, email: user.email };
   }

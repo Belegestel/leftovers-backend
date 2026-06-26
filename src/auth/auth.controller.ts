@@ -19,6 +19,7 @@ import { RegisterRequestDto } from "./dto/request/registerRequest.dto";
 import { RegisterResponseDto } from "./dto/response/registerResponse.dto";
 import { ConfirmRegistrationRequestDto } from "./dto/request/confirmRegistrationRequest.dto";
 import { ConfirmRegistrationResponseDto } from "./dto/response/confirmRegistrationResponse.dto";
+import { ConfirmRegistrationAttemptDto } from "./dto/request/confirmRegistrationAttempt.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -60,16 +61,9 @@ export class AuthController {
   })
   @Post("signup")
   async signup(@Body() dto: SignupRequestDto): Promise<SignupResponseDto> {
-    const input: SignupAttemptDto = {
-      email: dto.email,
-      password: dto.password,
-      name: dto.name,
-    };
+    const input = SignupAttemptDto.from(dto);
     const result = await this.authService.signup(input);
-    return {
-      id: result.id,
-      email: result.email,
-    };
+    return SignupResponseDto.from(result);
   }
 
   @ApiOperation({
@@ -106,14 +100,9 @@ export class AuthController {
   @Post("login")
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginRequestDto): Promise<LoginResponseDto> {
-    const input: LoginAttemptDto = {
-      email: dto.email,
-      password: dto.password,
-    };
+    const input = LoginAttemptDto.from(dto);
     const result = await this.authService.login(input);
-    return {
-      accessToken: result.accessToken,
-    };
+    return LoginResponseDto.from(result);
   }
 
   @ApiOperation({
@@ -142,16 +131,9 @@ export class AuthController {
   async register(
     @Body() dto: RegisterRequestDto,
   ): Promise<RegisterResponseDto> {
-    const input: SignupAttemptDto = {
-      email: dto.email,
-      password: dto.password,
-      name: dto.name,
-    };
+    const input = SignupAttemptDto.from(dto);
     const result = await this.authService.register(input);
-    const response: RegisterResponseDto = {
-      message: result.message,
-    };
-    return response;
+    return RegisterResponseDto.from(result);
   }
 
   @ApiOperation({
@@ -179,13 +161,8 @@ export class AuthController {
   async confirmRegistration(
     @Body() dto: ConfirmRegistrationRequestDto,
   ): Promise<ConfirmRegistrationResponseDto> {
-    const result = await this.authService.confirmRegistration({
-      email: dto.email,
-      token: dto.token,
-    });
-    return {
-      id: result.id,
-      email: result.email,
-    };
+    const input = ConfirmRegistrationAttemptDto.from(dto);
+    const result = await this.authService.confirmRegistration(input);
+    return ConfirmRegistrationResponseDto.from(result);
   }
 }

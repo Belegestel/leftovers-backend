@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { RegisterRequestDto } from "./registerRequest.dto";
 
 export class RegisterAttemptDto {
   @ApiProperty({
@@ -18,4 +19,12 @@ export class RegisterAttemptDto {
     description: "User name.",
   })
   name: string;
+
+  static from(registerRequest: RegisterRequestDto): RegisterAttemptDto {
+    return {
+      email: registerRequest.email,
+      password: registerRequest.password,
+      name: registerRequest.name,
+    };
+  }
 }
