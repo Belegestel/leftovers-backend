@@ -19,6 +19,7 @@ import { SignupResultDto } from "./dto/response/signupResult.dto";
 import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
 import { RegisterResultDto } from "./dto/response/registerResult.dto";
 import { ConfirmRegistrationResultDto } from "./dto/response/confirmRegistrationResult.dto";
+import { SignupRequestCreateAttemptDto } from "./dto/request/signupRequestCreateAttempt.dto";
 
 @Injectable()
 export class AuthService {
@@ -99,13 +100,16 @@ export class AuthService {
 
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await this.signupRequestsRepository.create({
+
+    const input = new SignupRequestCreateAttemptDto(
       email,
-      name: dto.name,
-      password_hash: hashedPassword,
+      dto.name,
+      hashedPassword,
       token,
-      expires_at: expiresAt,
-    });
+      expiresAt,
+    );
+
+    await this.signupRequestsRepository.create(input);
 
     const frontendUrl =
       this.config.get<string>("FRONTEND_URL") || "http://localhost:3000";
