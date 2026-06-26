@@ -11,12 +11,14 @@ import { SignupRequestsRepository } from "./signup-requests.repository";
 import { JwtService } from "@nestjs/jwt";
 import { EmailService } from "../email/email.service";
 import { randomBytes } from "crypto";
-import { ConfirmRegistrationDto } from "./dto/confirm-registration.dto";
-import { attemptLoginDto } from "./dto/request/attemptLogin.dto";
+import { ConfirmRegistrationAttemptDto } from "./dto/request/confirmRegistrationAttempt.dto";
+import { LoginAttemptDto } from "./dto/request/loginAttempt.dto";
 import { LoginResultDto } from "./dto/response/loginResult.dto";
-import { LoginRequestDto } from "./dto/request/loginRequest.dto";
 import { SignupAttemptDto } from "./dto/request/signupAttempt.dto";
 import { SignupResultDto } from "./dto/response/signupResult.dto";
+import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
+import { RegisterResultDto } from "./dto/response/registerResult.dto";
+import { ConfirmRegistrationResultDto } from "./dto/response/confirmRegistrationResult.dto";
 
 @Injectable()
 export class AuthService {
@@ -36,7 +38,7 @@ export class AuthService {
   }
 
   async signup(dto: SignupAttemptDto): Promise<SignupResultDto> {
-    const email = dto.email.toLowerCase();
+    const email = dto.email;
     const existingUser = await this.usersRepository.findByEmail(email);
 
     if (existingUser) {
@@ -57,8 +59,8 @@ export class AuthService {
     };
   }
 
-  async login(dto: attemptLoginDto): Promise<LoginResultDto> {
-    const email = dto.email.toLowerCase();
+  async login(dto: LoginAttemptDto): Promise<LoginResultDto> {
+    const email = dto.email;
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {
@@ -77,19 +79,16 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(payload);
 
-    const result: LoginResultDto = {
-      accessToken,
-    };
-    return result;
+    return { accessToken };
   }
 
-  async register(dto: SignupDto) {
+  async register(dto: RegisterAttemptDto): Promise<RegisterResultDto> {
     const email = dto.email;
-    const exisitingUser = await this.usersRepository.findByEmail(email);
+    const existingUser = await this.usersRepository.findByEmail(email);
     const existingSignupRequest =
       await this.signupRequestsRepository.findByEmail(email);
 
-    if (exisitingUser || existingSignupRequest) {
+    if (existingUser || existingSignupRequest) {
       throw new ConflictException("Email already registered");
     }
 
@@ -125,7 +124,9 @@ export class AuthService {
     return { message: "Confirmation email sent." };
   }
 
-  async confirmRegistration(dto: ConfirmRegistrationDto) {
+  async confirmRegistration(
+    dto: ConfirmRegistrationAttemptDto,
+  ): Promise<ConfirmRegistrationResultDto> {
     const email = dto.email;
     const req = await this.signupRequestsRepository.findByEmail(email);
 
@@ -145,7 +146,7 @@ export class AuthService {
       password: req.password_hash,
     });
 
-    this.signupRequestsRepository.deleteById(req.id);
+    await this.signupRequestsRepository.deleteById(req.id);
 
     return { id: user.id, email: user.email };
   }

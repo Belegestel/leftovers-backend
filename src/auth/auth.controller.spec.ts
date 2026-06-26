@@ -6,6 +6,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { mockAuthService } from "../../test/unit/mocks/mockAuthService";
 import { LoginResultDto } from "./dto/response/loginResult.dto";
+import { RegisterResponseDto } from "./dto/response/registerResponse.dto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
@@ -38,8 +39,7 @@ describe("AuthController", () => {
       name: "John Doe",
     };
 
-    const expectedResult = {
-      status: "ok",
+    const expectedResult: RegisterResponseDto = {
       message: "Confirmation email sent.",
     };
     mockAuthService.register.mockResolvedValue(expectedResult);
@@ -55,7 +55,7 @@ describe("AuthController", () => {
     };
     const expectedResult = { id: 1, email: dto.email };
     mockAuthService.confirmRegistration.mockResolvedValue(expectedResult);
-    const res = await controller.ConfirmRegistration(dto);
+    const res = await controller.confirmRegistration(dto);
 
     expect(res).toEqual(expectedResult);
     expect(mockAuthService.confirmRegistration).toHaveBeenCalledWith(dto);
