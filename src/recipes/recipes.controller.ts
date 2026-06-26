@@ -4,12 +4,13 @@ import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
 import { toRecipeDetailsDto, toRecipeListDto } from "./recipes.mapper";
 import { RecipeQueryDto } from "./dto/recipe-query.dto";
 import {
-    ApiBadRequestResponse,
+  ApiBadRequestResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
+import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -56,7 +57,7 @@ export class RecipesController {
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   async findAll(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Query() filters: RecipeQueryDto,
     @Query("details") details?: string,
   ) {

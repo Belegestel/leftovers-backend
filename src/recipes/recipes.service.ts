@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RecipeQueryDto } from "./dto/recipe-query.dto";
-import { recipeWhereInput } from "src/generated/prisma/models";
+import { recipeWhereInput } from "../generated/prisma/models";
 
 @Injectable()
 export class RecipesService {
