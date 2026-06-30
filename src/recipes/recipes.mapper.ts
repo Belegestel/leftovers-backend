@@ -14,23 +14,23 @@ export class RecipesQueryReturnModel {
   ingredients?: string;
   steps?: string;
 
-  static fromRecipe(r: Recipe, detailed: boolean): RecipesQueryReturnModel {
+  static fromRecipe(recipe: Recipe, detailed: boolean): RecipesQueryReturnModel {
     if (!detailed) {
       return {
-        id: r.id,
-        title: r.title,
-        prepTime: r.prep_time,
+        id: recipe.id,
+        title: recipe.title,
+        prepTime: recipe.prep_time,
       };
     } else {
       return {
-        id: r.id,
-        title: r.title,
-        description: r.description,
-        prepTime: r.prep_time,
-        isPublic: r.isPublic,
-        createdAt: r.createdAt,
-        editedAt: r.editedAt,
-        authorId: r.authorId,
+        id: recipe.id,
+        title: recipe.title,
+        description: recipe.description,
+        prepTime: recipe.prep_time,
+        isPublic: recipe.isPublic,
+        createdAt: recipe.createdAt,
+        editedAt: recipe.editedAt,
+        authorId: recipe.authorId,
       };
     }
   }

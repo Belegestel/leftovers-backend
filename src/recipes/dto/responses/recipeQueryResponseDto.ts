@@ -3,9 +3,9 @@ import { RecipesQueryReturnModel } from "src/recipes/recipes.mapper";
 export class RecipeQueryResponseDto {
   recipes: RecipesQueryReturnModel[];
 
-  static from(r: RecipesQueryReturnModel[]) {
+  static from(recipesReturnModel: RecipesQueryReturnModel[]) {
     return {
-      recipes: r,
+      recipes: recipesReturnModel,
     };
   }
 }
