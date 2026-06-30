@@ -4,14 +4,14 @@ CREATE TABLE "recipe" (
     "title" TEXT NOT NULL,
     "description" TEXT,
     "prep_time" INTEGER,
-    "isPublic" BOOLEAN NOT NULL DEFAULT true,
+    "is_public" BOOLEAN NOT NULL DEFAULT true,
     "author_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "edited_at" TIMESTAMP(3) NOT NULL,
     "rating" INTEGER NOT NULL,
     "category" TEXT,
-    "ingredients" TEXT,
-    "steps" TEXT,
+    "ingredients" TEXT NOT NULL,
+    "steps" TEXT NOT NULL,
 
     CONSTRAINT "recipe_pkey" PRIMARY KEY ("id")
 );
