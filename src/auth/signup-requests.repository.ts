@@ -19,7 +19,15 @@ export class SignupRequestsRepository {
   }
 
   create(data: SignupRequestCreateAttemptDto) {
-    return this.prisma.signup_requests.create({ data });
+    return this.prisma.signup_requests.create({
+      data: {
+        email: data.email,
+        name: data.name,
+        password_hash: data.passwordHash,
+        token: data.token,
+        expires_at: data.expiresAt,
+      },
+    });
   }
 
   deleteById(id: number) {

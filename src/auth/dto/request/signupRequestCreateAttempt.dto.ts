@@ -11,9 +11,9 @@ export class SignupRequestCreateAttemptDto {
   ) {
     this.email = email;
     this.name = name;
-    this.password_hash = hashedPassword;
+    this.passwordHash = hashedPassword;
     this.token = token;
-    this.expires_at = expiresAt;
+    this.expiresAt = expiresAt;
   }
 
   @ApiProperty({
@@ -36,7 +36,7 @@ export class SignupRequestCreateAttemptDto {
     example: "grfdgHJhGFdrty",
   })
   @IsString()
-  password_hash: string;
+  passwordHash: string;
 
   @ApiProperty({
     description: "User registration token",
@@ -48,5 +48,5 @@ export class SignupRequestCreateAttemptDto {
     description: "Token expiration date",
     example: new Date("2027-07-07"),
   })
-  expires_at: Date;
+  expiresAt: Date;
 }
