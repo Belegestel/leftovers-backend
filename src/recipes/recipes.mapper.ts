@@ -1,22 +1,37 @@
-import { recipe } from "../generated/prisma/client";
+import { Recipe } from "./recipes.model";
 
-export function toRecipeListDto(r: recipe) {
-  return {
-    id: r.id,
-    title: r.title,
-    prep_time: r.prep_time,
-  };
-}
+export class RecipesQueryReturnModel {
+  id: number;
+  title: string;
+  description?: string;
+  prepTime?: number;
+  isPublic?: boolean;
+  authorId?: number;
+  createdAt?: Date;
+  editedAt?: Date;
+  rating?: number;
+  category?: string;
+  ingredients?: string;
+  steps?: string;
 
-export function toRecipeDetailsDto(r: recipe) {
-  return {
-    id: r.id,
-    title: r.title,
-    description: r.description,
-    prep_time: r.prep_time,
-    isPublic: r.isPublic,
-    created_at: r.created_at,
-    edited_at: r.edited_at,
-    author_id: r.author_id,
+  static fromRecipe(r: Recipe, detailed: boolean): RecipesQueryReturnModel {
+    if (!detailed) {
+      return {
+        id: r.id,
+        title: r.title,
+        prepTime: r.prep_time,
+      };
+    } else {
+      return {
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        prepTime: r.prep_time,
+        isPublic: r.isPublic,
+        createdAt: r.createdAt,
+        editedAt: r.editedAt,
+        authorId: r.authorId,
+      };
+    }
   }
 }

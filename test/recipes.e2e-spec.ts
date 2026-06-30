@@ -58,8 +58,8 @@ describe("Recipes E2E", () => {
     const response = await request(app.getHttpServer())
       .get("/recipes")
       .expect(200);
-    expect(response.body).toHaveLength(1);
-    expect(response.body[0].title).toBe("Public recipe");
+    expect(response.body.recipes).toHaveLength(1);
+    expect(response.body.recipes[0].title).toBe("Public recipe");
   });
 
   it("GET /recipes should return public and own private recipes for a logged in user", async () => {
@@ -109,7 +109,7 @@ describe("Recipes E2E", () => {
       .set("Authorization", `Bearer ${userA.token}`)
       .expect(200);
 
-    const titles = response.body.map((r) => r.title);
+    const titles = response.body.recipes.map((r) => r.title);
 
     expect(titles).toContain("Public recipe");
     expect(titles).toContain("Private recipe");
@@ -146,7 +146,7 @@ describe("Recipes E2E", () => {
       .set("Authorization", `Bearer ${userA.token}`)
       .expect(200);
 
-    expect(response.body).toEqual([]);
+    expect(response.body.recipes).toEqual([]);
   });
 
   it("GET /recipes?details=true should return detailed DTO", async () => {
@@ -171,13 +171,13 @@ describe("Recipes E2E", () => {
     const response = await request(app.getHttpServer())
       .get("/recipes?details=true")
       .expect(200);
-    expect(response.body).toEqual([
+    expect(response.body.recipes).toEqual([
       expect.objectContaining({
         id: recipe.id,
         title: recipe.title,
         description: recipe.description,
         isPublic: true,
-        author_id: userA.user.id,
+        authorId: userA.user.id,
       }),
     ]);
   });

@@ -2,7 +2,7 @@ import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { IsOptional, IsString, IsInt, Min, Max } from "class-validator";
 
-export class RecipeQueryDto {
+export class RecipeQueryRequestDto {
   // Filter
   @ApiPropertyOptional()
   @IsOptional()

@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { RecipesService } from "./recipes.service";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { PrismaService } from "../prisma/prisma.service";
+import { RecipesRepository } from "./recipes.repository";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -12,6 +13,7 @@ describe("RecipesService", () => {
       providers: [
         RecipesService,
         { provide: PrismaService, useValue: prismaMock },
+        RecipesRepository,
       ],
     }).compile();
 

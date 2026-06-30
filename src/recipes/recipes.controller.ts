@@ -1,8 +1,15 @@
-import { Controller, Get, UseGuards, Req, Query, HttpStatus } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Req,
+  Query,
+  HttpStatus,
+} from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
-import { toRecipeDetailsDto, toRecipeListDto } from "./recipes.mapper";
-import { RecipeQueryDto } from "./dto/recipe-query.dto";
+import { RecipesQueryReturnModel } from "./recipes.mapper";
+import { RecipeQueryRequestDto } from "./dto/requests/recipeQueryRequest.dto";
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -11,6 +18,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
+import { RecipeQueryResponseDto } from "./dto/responses/recipeQueryResponseDto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -50,20 +58,23 @@ export class RecipesController {
       example: {
         statusCode: HttpStatus.BAD_REQUEST,
         message: ["rating must be a number"],
-        error: "Bad Request"
-      }
-    }
+        error: "Bad Request",
+      },
+    },
   })
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   async findAll(
     @Req() req: AuthenticatedRequest,
-    @Query() filters: RecipeQueryDto,
+    @Query() filters: RecipeQueryRequestDto,
     @Query("details") details?: string,
-  ) {
+  ): Promise<RecipeQueryResponseDto> {
     const userId = req.user?.userId ? Number(req.user.userId) : undefined;
     const recipes = await this.recipesService.findAll(userId, filters);
     const isDetails = details === "true";
-    return recipes.map(isDetails ? toRecipeDetailsDto : toRecipeListDto);
+    const res = recipes.recipes.map((value) =>
+      RecipesQueryReturnModel.fromRecipe(value, isDetails),
+    );
+    return RecipeQueryResponseDto.from(res);
   }
 }
