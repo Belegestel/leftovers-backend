@@ -13,7 +13,7 @@ export async function createUserAndLogin(
     .send({ email, password, name: "test name" })
     .expect(200);
 
-  const signupRequest = await prisma.signup_requests.findUnique({
+  const signupRequest = await prisma.signupRequest.findUnique({
     where: { email },
   });
 
@@ -26,7 +26,7 @@ export async function createUserAndLogin(
     .post("/auth/login")
     .send({ email, password })
     .expect(200);
-  const user = await prisma.users.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { email } });
 
 
   return { user: user!, token: loginReponse.body.accessToken };

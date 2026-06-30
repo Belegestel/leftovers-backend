@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RecipeQueryRequestDto } from "./dto/requests/recipeQueryRequest.dto";
-import { recipeWhereInput } from "../generated/prisma/models";
+import { RecipeWhereInput } from "src/generated/prisma/models";
 import { Recipe } from "./recipes.model";
 
 @Injectable()
@@ -38,7 +38,7 @@ export class RecipesRepository {
       });
     }
 
-    let conditions: recipeWhereInput[] = [];
+    let conditions: RecipeWhereInput[] = [];
     if (userId) {
       conditions.push({ OR: [{ isPublic: true }, { author_id: userId }] });
     } else {

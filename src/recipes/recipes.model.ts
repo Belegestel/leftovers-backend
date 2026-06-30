@@ -1,4 +1,4 @@
-import { recipe } from "../generated/prisma/client";
+import { Recipe as PrismaRecipe } from "../generated/prisma/client";
 
 export class Recipe {
   id: number;
@@ -14,7 +14,7 @@ export class Recipe {
   ingredients: string;
   steps: string;
 
-  static fromPrisma(recipe: recipe): Recipe {
+  static fromPrisma(recipe: PrismaRecipe): Recipe {
     return {
       id: recipe.id,
       title: recipe.title,

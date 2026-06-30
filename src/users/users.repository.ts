@@ -7,12 +7,12 @@ export class UsersRepository {
   constructor(private prisma: PrismaService) {}
 
   async findAll(): Promise<User[]> {
-    const res = await this.prisma.users.findMany();
+    const res = await this.prisma.user.findMany();
     return res.map(UserMapper.toDto);
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const res = await this.prisma.users.findUnique({
+    const res = await this.prisma.user.findUnique({
       where: { email },
     });
     return res ? UserMapper.toDto(res) : null;
@@ -23,7 +23,7 @@ export class UsersRepository {
     name: string;
     password: string;
   }): Promise<User> {
-    const user = await this.prisma.users.create({
+    const user = await this.prisma.user.create({
       data,
     });
     return UserMapper.toDto(user);

@@ -1,4 +1,4 @@
-import { users } from "../generated/prisma/client";
+import { User as PrismaUser } from "../generated/prisma/client";
 
 export class User {
   constructor(
@@ -10,7 +10,7 @@ export class User {
 }
 
 export class UserMapper {
-  static toDto(user: users) {
+  static toDto(user: PrismaUser) {
     return new User(user.id, user.name, user.email, user.password);
   }
 }

@@ -20,7 +20,7 @@ model User {
   email String @unique
   password String
 
-  recipes recipe[]
+  recipes Recipe[]
 
   @@map("users")
 }
@@ -33,7 +33,7 @@ model Recipe {
   isPublic Boolean @default(true)
 
   author_id Int 
-  author users @relation(fields: [author_id], references: [id])
+  author User @relation(fields: [author_id], references: [id])
 
   created_at DateTime @default(now())
   edited_at DateTime @updatedAt
@@ -56,5 +56,5 @@ model SignupRequest {
   expires_at DateTime
   created_at DateTime @default(now())
 
-  @@map("signupRequest")
+  @@map("signup_requests")
 }

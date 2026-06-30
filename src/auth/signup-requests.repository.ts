@@ -6,13 +6,13 @@ export class SignupRequestsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   findByEmail(email: string) {
-    return this.prisma.signup_requests.findUnique({
+    return this.prisma.signupRequest.findUnique({
       where: { email },
     });
   }
 
   findByToken(token: string) {
-    return this.prisma.signup_requests.findUnique({
+    return this.prisma.signupRequest.findUnique({
       where: { token },
     });
   }
@@ -24,11 +24,11 @@ export class SignupRequestsRepository {
     token: string;
     expires_at: Date;
   }) {
-    return this.prisma.signup_requests.create({ data });
+    return this.prisma.signupRequest.create({ data });
   }
 
   deleteById(id: number) {
-    this.prisma.signup_requests.delete({
+    this.prisma.signupRequest.delete({
       where: { id },
     });
   }

@@ -55,7 +55,7 @@ describe("Auth E2E", () => {
       .send({ email, password, name: "John Doe" })
       .expect(200);
 
-    const signupRequest = await prisma.signup_requests.findUnique({
+    const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
     });
 
@@ -79,7 +79,7 @@ describe("Auth E2E", () => {
       .send({ email, password, name: "John Doe" })
       .expect(200);
 
-    const signupRequest = await prisma.signup_requests.findUnique({
+    const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
     });
 
@@ -113,7 +113,7 @@ describe("Auth E2E", () => {
       .expect(200);
 
     expect(response.body).toEqual({ message: "Confirmation email sent." });
-    const signupRequest = await prisma.signup_requests.findUnique({
+    const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
     });
 
@@ -142,7 +142,7 @@ describe("Auth E2E", () => {
       .send({ email, password: "password", name: "John Doe" })
       .expect(200);
 
-    const signupRequest = await prisma.signup_requests.findUnique({
+    const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
     });
 
@@ -156,7 +156,7 @@ describe("Auth E2E", () => {
     expect(response).not.toBeNull();
     expect(response.body.email).toBe(email);
 
-    const user = await prisma.users.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
     expect(user).not.toBeNull();
   });
 
@@ -183,7 +183,7 @@ describe("Auth E2E", () => {
       .send({ email, password, name: "John Doe" })
       .expect(200);
 
-    const signupRequest = await prisma.signup_requests.findUnique({
+    const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
     });
 
