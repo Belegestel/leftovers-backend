@@ -2,20 +2,6 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsString } from "class-validator";
 
 export class CreateSignupRequest {
-  constructor(
-    email: string,
-    name: string,
-    hashedPassword: string,
-    token: string,
-    expiresAt: Date,
-  ) {
-    this.email = email;
-    this.name = name;
-    this.passwordHash = hashedPassword;
-    this.token = token;
-    this.expiresAt = expiresAt;
-  }
-
   @ApiProperty({
     description: "User email",
     example: "john.doe@email.com",
@@ -49,4 +35,20 @@ export class CreateSignupRequest {
     example: new Date("2027-07-07"),
   })
   expiresAt: Date;
+
+  static from(
+    email: string,
+    name: string,
+    hashedPassword: string,
+    token: string,
+    expiresAt: Date,
+  ): CreateSignupRequest {
+    return {
+      email,
+      name,
+      passwordHash: hashedPassword,
+      token,
+      expiresAt,
+    };
+  }
 }

@@ -101,7 +101,7 @@ export class AuthService {
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    const input = new CreateSignupRequest(
+    const input = CreateSignupRequest.from(
       email,
       dto.name,
       hashedPassword,
