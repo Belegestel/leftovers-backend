@@ -71,18 +71,21 @@ describe("RecipesController", () => {
     recipesServiceMock.findAll.mockResolvedValue({ recipes: [recipe] });
     const result = await controller.findAll(
       {} as AuthenticatedRequest,
-      {} as RecipeQueryRequestDto,
-      "true",
+      { details: true } as RecipeQueryRequestDto,
     );
-    expect(result).toEqual({ recipes: [{
-      id: 1,
-      title: "Pizza",
-      description: "Classic pizza",
-      prepTime: 30,
-      isPublic: true,
-      createdAt: new Date("2021-01-01"),
-      editedAt: new Date("2021-02-02"),
-      authorId: 1,
-    }] });
+    expect(result).toEqual({
+      recipes: [
+        {
+          id: 1,
+          title: "Pizza",
+          description: "Classic pizza",
+          prepTime: 30,
+          isPublic: true,
+          createdAt: new Date("2021-01-01"),
+          editedAt: new Date("2021-02-02"),
+          authorId: 1,
+        },
+      ],
+    });
   });
 });

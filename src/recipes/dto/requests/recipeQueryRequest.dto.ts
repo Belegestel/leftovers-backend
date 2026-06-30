@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { IsOptional, IsString, IsInt, Min, Max } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  Max,
+  IsBoolean
+} from "class-validator";
 
 export class RecipeQueryRequestDto {
   // Filter
@@ -50,6 +57,7 @@ export class RecipeQueryRequestDto {
 
   @ApiPropertyOptional({ example: "true" })
   @IsOptional()
-  @IsString()
-  details?: string;
+  @Transform(({ value }) => value === "true")
+  @IsBoolean()
+  details?: boolean;
 }

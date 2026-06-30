@@ -31,7 +31,7 @@ export class RecipeQueryAttemptDto {
   steps?: string;
 
   @ApiPropertyOptional({ example: "true" })
-  details?: string;
+  details?: boolean;
 
   static from(
     userId: number | undefined,

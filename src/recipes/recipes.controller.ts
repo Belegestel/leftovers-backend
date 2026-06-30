@@ -67,11 +67,11 @@ export class RecipesController {
   async findAll(
     @Req() req: AuthenticatedRequest,
     @Query() filters: RecipeQueryRequestDto,
-    @Query("details") details?: string,
   ): Promise<RecipeQueryResponseDto> {
     const userId = req.user?.userId ? Number(req.user.userId) : undefined;
     const recipes = await this.recipesService.findAll(userId, filters);
-    const isDetails = details === "true";
+    const isDetails = filters.details === true;
+    console.log('Raw details', filters.details);
     const res = recipes.recipes.map((value) =>
       RecipesQueryReturnModel.fromRecipe(value, isDetails),
     );
