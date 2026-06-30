@@ -21,7 +21,6 @@ describe("Auth E2E", () => {
   });
 
   afterAll(async () => {
-    await prisma.$disconnect();
     await app.close();
   });
 
