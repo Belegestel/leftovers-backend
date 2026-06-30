@@ -7,12 +7,11 @@ import { AuthenticatedRequest } from "src/types/authenticated-request.interface"
 
 describe("RecipesController", () => {
   let controller: RecipesController;
-  const recipesServiceMock = mockRecipesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RecipesController],
-      providers: [{ provide: RecipesService, useValue: recipesServiceMock }],
+      providers: [{ provide: RecipesService, useValue: mockRecipesService }],
     }).compile();
 
     controller = module.get<RecipesController>(RecipesController);
@@ -20,29 +19,28 @@ describe("RecipesController", () => {
   });
 
   it("passes undefined userId for guests", async () => {
-    recipesServiceMock.findAll.mockResolvedValue({ recipes: [] });
+    mockRecipesService.findAll.mockResolvedValue({ recipes: [] });
     await controller.findAll(
       {} as AuthenticatedRequest,
       {} as RecipeQueryRequestDto,
     );
-    expect(recipesServiceMock.findAll).toHaveBeenCalledWith(undefined, {});
+    expect(mockRecipesService.findAll).toHaveBeenCalledWith(undefined, {});
   });
 
   it("passes userId for authenticated users", async () => {
-    recipesServiceMock.findAll.mockResolvedValue({ recipes: [] });
-    // await controller.findAll({ user: { userId: 1 } }, {} as RecipeQueryRequestDto);
+    mockRecipesService.findAll.mockResolvedValue({ recipes: [] });
     await controller.findAll(
       { user: { userId: 1 } } as AuthenticatedRequest,
       {} as RecipeQueryRequestDto,
     );
-    expect(recipesServiceMock.findAll).toHaveBeenCalledWith(
+    expect(mockRecipesService.findAll).toHaveBeenCalledWith(
       1,
       {} as RecipeQueryRequestDto,
     );
   });
 
   it("returns list DTOs by default", async () => {
-    recipesServiceMock.findAll.mockResolvedValue({
+    mockRecipesService.findAll.mockResolvedValue({
       recipes: [{ id: 1, title: "Pizza", prep_time: 30 }],
     });
 
@@ -68,7 +66,7 @@ describe("RecipesController", () => {
       authorId: 1,
     };
 
-    recipesServiceMock.findAll.mockResolvedValue({ recipes: [recipe] });
+    mockRecipesService.findAll.mockResolvedValue({ recipes: [recipe] });
     const result = await controller.findAll(
       {} as AuthenticatedRequest,
       { details: true } as RecipeQueryRequestDto,
