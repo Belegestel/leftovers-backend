@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsString } from "class-validator";
 
-export class SignupRequestCreateAttemptDto {
+export class CreateSignupRequest {
   constructor(
     email: string,
     name: string,

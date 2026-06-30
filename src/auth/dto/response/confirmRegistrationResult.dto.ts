@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class ConfirmRegistrationResultDto {
+export class ConfirmRegistrationResult {
   @ApiProperty({
     description: "User ID",
     example: 7438,

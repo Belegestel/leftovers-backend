@@ -1,6 +1,6 @@
 import { Body, Post, Controller, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { SignupRequestDto } from "./dto/request/signupRequest.dto";
+import { SignupRequest } from "./dto/request/signupRequest.dto";
 import {
   ApiOkResponse,
   ApiConflictResponse,
@@ -10,16 +10,16 @@ import {
   ApiBody,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
-import { LoginRequestDto } from "./dto/request/loginRequest.dto";
-import { LoginResponseDto } from "./dto/response/loginResponse.dto";
-import { SignupResponseDto } from "./dto/response/signupResponse.dto";
-import { SignupAttemptDto } from "./dto/request/signupAttempt.dto";
-import { LoginAttemptDto } from "./dto/request/loginAttempt.dto";
-import { RegisterRequestDto } from "./dto/request/registerRequest.dto";
-import { RegisterResponseDto } from "./dto/response/registerResponse.dto";
-import { ConfirmRegistrationRequestDto } from "./dto/request/confirmRegistrationRequest.dto";
-import { ConfirmRegistrationResponseDto } from "./dto/response/confirmRegistrationResponse.dto";
-import { ConfirmRegistrationAttemptDto } from "./dto/request/confirmRegistrationAttempt.dto";
+import { LoginRequest } from "./dto/request/loginRequest.dto";
+import { LoginResponse } from "./dto/response/loginResponse.dto";
+import { SignupResponse } from "./dto/response/signupResponse.dto";
+import { SignupUser } from "./dto/signupUser.dto";
+import { LoginUser } from "./dto/loginUser.dto";
+import { RegisterRequest } from "./dto/request/registerRequest.dto";
+import { RegisterResponse } from "./dto/response/registerResponse.dto";
+import { ConfirmRegistrationRequest } from "./dto/request/confirmRegistrationRequest.dto";
+import { ConfirmRegistrationResponse } from "./dto/response/confirmRegistrationResponse.dto";
+import { ConfirmRegistration } from "./dto/confirmRegistration.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -32,12 +32,12 @@ export class AuthController {
     deprecated: true,
   })
   @ApiBody({
-    type: SignupRequestDto,
+    type: SignupRequest,
     description: "User registration data",
   })
   @ApiOkResponse({
     description: "User account successfully created.",
-    type: SignupResponseDto,
+    type: SignupResponse,
   })
   @ApiBadRequestResponse({
     description: "Invalid input data - validation error",
@@ -60,22 +60,22 @@ export class AuthController {
     },
   })
   @Post("signup")
-  async signup(@Body() dto: SignupRequestDto): Promise<SignupResponseDto> {
-    const input = SignupAttemptDto.from(dto);
+  async signup(@Body() dto: SignupRequest): Promise<SignupResponse> {
+    const input = SignupUser.from(dto);
     const result = await this.authService.signup(input);
-    return SignupResponseDto.from(result);
+    return SignupResponse.from(result);
   }
 
   @ApiOperation({
     summary: "Log in to user account and return JWT, if account exists.",
   })
   @ApiBody({
-    type: LoginRequestDto,
+    type: LoginRequest,
     description: "User login data",
   })
   @ApiOkResponse({
     description: "User logged in.",
-    type: LoginResponseDto,
+    type: LoginResponse,
   })
   @ApiBadRequestResponse({
     description: "Invalid input data - validation error",
@@ -99,22 +99,22 @@ export class AuthController {
   })
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginRequestDto): Promise<LoginResponseDto> {
-    const input = LoginAttemptDto.from(dto);
+  async login(@Body() dto: LoginRequest): Promise<LoginResponse> {
+    const input = LoginUser.from(dto);
     const result = await this.authService.login(input);
-    return LoginResponseDto.from(result);
+    return LoginResponse.from(result);
   }
 
   @ApiOperation({
     summary: "Start the signup process to get an email with confirmation link",
   })
   @ApiBody({
-    type: RegisterRequestDto,
+    type: RegisterRequest,
     description: "User registration data",
   })
   @ApiOkResponse({
     description: "User logged in",
-    type: RegisterResponseDto,
+    type: RegisterResponse,
   })
   @ApiConflictResponse({
     description: "User already exists or has a not confirmed signup request",
@@ -129,23 +129,23 @@ export class AuthController {
   @Post("register")
   @HttpCode(HttpStatus.OK)
   async register(
-    @Body() dto: RegisterRequestDto,
-  ): Promise<RegisterResponseDto> {
-    const input = SignupAttemptDto.from(dto);
+    @Body() dto: RegisterRequest,
+  ): Promise<RegisterResponse> {
+    const input = SignupUser.from(dto);
     const result = await this.authService.register(input);
-    return RegisterResponseDto.from(result);
+    return RegisterResponse.from(result);
   }
 
   @ApiOperation({
     summary: "Confirm registration using email and token",
   })
   @ApiBody({
-    type: ConfirmRegistrationRequestDto,
+    type: ConfirmRegistrationRequest,
     description: "Email and verification token received via email",
   })
   @ApiOkResponse({
     description: "User account sucessfuly created",
-    type: ConfirmRegistrationResponseDto,
+    type: ConfirmRegistrationResponse,
   })
   @ApiBadRequestResponse({
     description: "Invalid or expired token, or no valid email in the request",
@@ -159,10 +159,10 @@ export class AuthController {
   })
   @Post("confirm-registration")
   async confirmRegistration(
-    @Body() dto: ConfirmRegistrationRequestDto,
-  ): Promise<ConfirmRegistrationResponseDto> {
-    const input = ConfirmRegistrationAttemptDto.from(dto);
+    @Body() dto: ConfirmRegistrationRequest,
+  ): Promise<ConfirmRegistrationResponse> {
+    const input = ConfirmRegistration.from(dto);
     const result = await this.authService.confirmRegistration(input);
-    return ConfirmRegistrationResponseDto.from(result);
+    return ConfirmRegistrationResponse.from(result);
   }
 }

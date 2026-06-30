@@ -11,15 +11,15 @@ import { SignupRequestsRepository } from "./signup-requests.repository";
 import { JwtService } from "@nestjs/jwt";
 import { EmailService } from "../email/email.service";
 import { randomBytes } from "crypto";
-import { ConfirmRegistrationAttemptDto } from "./dto/request/confirmRegistrationAttempt.dto";
-import { LoginAttemptDto } from "./dto/request/loginAttempt.dto";
-import { LoginResultDto } from "./dto/response/loginResult.dto";
-import { SignupAttemptDto } from "./dto/request/signupAttempt.dto";
-import { SignupResultDto } from "./dto/response/signupResult.dto";
-import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
-import { RegisterResultDto } from "./dto/response/registerResult.dto";
-import { ConfirmRegistrationResultDto } from "./dto/response/confirmRegistrationResult.dto";
-import { SignupRequestCreateAttemptDto } from "./dto/request/signupRequestCreateAttempt.dto";
+import { ConfirmRegistration } from "./dto/confirmRegistration.dto";
+import { LoginUser } from "./dto/loginUser.dto";
+import { LoginResult } from "./dto/response/loginResult.dto";
+import { SignupUser } from "./dto/signupUser.dto";
+import { SignupResult } from "./dto/response/signupResult.dto";
+import { RegisterUser } from "./dto/registerUser.dto";
+import { RegisterResult } from "./dto/response/registerResult.dto";
+import { ConfirmRegistrationResult } from "./dto/response/confirmRegistrationResult.dto";
+import { CreateSignupRequest } from "./dto/createSignupRequest.dto";
 
 @Injectable()
 export class AuthService {
@@ -38,7 +38,7 @@ export class AuthService {
     );
   }
 
-  async signup(dto: SignupAttemptDto): Promise<SignupResultDto> {
+  async signup(dto: SignupUser): Promise<SignupResult> {
     const email = dto.email;
     const existingUser = await this.usersRepository.findByEmail(email);
 
@@ -60,7 +60,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginAttemptDto): Promise<LoginResultDto> {
+  async login(dto: LoginUser): Promise<LoginResult> {
     const email = dto.email;
     const user = await this.usersRepository.findByEmail(email);
 
@@ -83,7 +83,7 @@ export class AuthService {
     return { accessToken };
   }
 
-  async register(dto: RegisterAttemptDto): Promise<RegisterResultDto> {
+  async register(dto: RegisterUser): Promise<RegisterResult> {
     const email = dto.email;
     const existingUser = await this.usersRepository.findByEmail(email);
     const existingSignupRequest =
@@ -101,7 +101,7 @@ export class AuthService {
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    const input = new SignupRequestCreateAttemptDto(
+    const input = new CreateSignupRequest(
       email,
       dto.name,
       hashedPassword,
@@ -129,8 +129,8 @@ export class AuthService {
   }
 
   async confirmRegistration(
-    dto: ConfirmRegistrationAttemptDto,
-  ): Promise<ConfirmRegistrationResultDto> {
+    dto: ConfirmRegistration,
+  ): Promise<ConfirmRegistrationResult> {
     const email = dto.email;
     const req = await this.signupRequestsRepository.findByEmail(email);
 

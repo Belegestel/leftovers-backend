@@ -1,8 +1,8 @@
 import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { LoginResultDto } from "./loginResult.dto";
+import { LoginResult } from "./loginResult.dto";
 
-export class LoginResponseDto {
+export class LoginResponse {
   @ApiProperty({
     example: "VGzaxSmzmSKULOLvrHrdFDCjHQywmd",
     description: "JWT access token",
@@ -10,7 +10,7 @@ export class LoginResponseDto {
   @IsString()
   accessToken: string;
 
-  static from(loginResult: LoginResultDto): LoginResponseDto {
+  static from(loginResult: LoginResult): LoginResponse {
     return { accessToken: loginResult.accessToken };
   }
 }

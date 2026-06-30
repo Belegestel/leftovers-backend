@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { SignupResultDto } from "./signupResult.dto";
+import { SignupResult } from "./signupResult.dto";
 
-export class SignupResponseDto {
+export class SignupResponse {
   @ApiProperty({
     description: "User ID",
     example: 127,
@@ -14,7 +14,7 @@ export class SignupResponseDto {
   })
   email: string;
 
-  static from(signupResult: SignupResultDto): SignupResponseDto {
+  static from(signupResult: SignupResult): SignupResponse {
     return { id: signupResult.id, email: signupResult.email };
   }
 }

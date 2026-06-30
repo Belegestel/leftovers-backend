@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ConfirmRegistrationRequestDto } from "./confirmRegistrationRequest.dto";
+import { ConfirmRegistrationRequest } from "./request/confirmRegistrationRequest.dto";
 
-export class ConfirmRegistrationAttemptDto {
+export class ConfirmRegistration {
   @ApiProperty({
     example: "john.doe@email.com",
   })
@@ -13,8 +13,8 @@ export class ConfirmRegistrationAttemptDto {
   token: string;
 
   static from(
-    confirmRegistrationRequest: ConfirmRegistrationRequestDto,
-  ): ConfirmRegistrationAttemptDto {
+    confirmRegistrationRequest: ConfirmRegistrationRequest,
+  ): ConfirmRegistration {
     return {
       email: confirmRegistrationRequest.email,
       token: confirmRegistrationRequest.token,

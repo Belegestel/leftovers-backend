@@ -1,14 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { RegisterResultDto } from "./registerResult.dto";
+import { RegisterResult } from "./registerResult.dto";
 
-export class RegisterResponseDto {
+export class RegisterResponse {
   @ApiProperty({
     description: "Message to user",
     example: "Confirmation email sent.",
   })
   message: string;
 
-  static from(registerResult: RegisterResultDto): RegisterResponseDto {
+  static from(registerResult: RegisterResult): RegisterResponse {
     return { message: registerResult.message };
   }
 }

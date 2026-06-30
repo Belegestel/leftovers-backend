@@ -1,8 +1,8 @@
 import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { LoginRequestDto } from "./loginRequest.dto";
+import { LoginRequest } from "./request/loginRequest.dto";
 
-export class LoginAttemptDto {
+export class LoginUser {
   @ApiProperty({
     description: "User email",
     example: "john.doe@email.com",
@@ -17,7 +17,7 @@ export class LoginAttemptDto {
   @IsString()
   password: string;
 
-  static from(loginRequest: LoginRequestDto): LoginAttemptDto {
+  static from(loginRequest: LoginRequest): LoginUser {
     return {
       email: loginRequest.email,
       password: loginRequest.password,

@@ -2,7 +2,7 @@ import { IsEmail, IsString, MinLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 
-export class RegisterRequestDto {
+export class RegisterRequest {
   @ApiProperty({
     example: "john.doe@email.com",
     description: "User email.",
