@@ -108,7 +108,7 @@
             "key": "Authorization",
             "value": "Bearer {{token}}",
             "type": "text",
-            "disabled": "true"
+            "disabled": true
           }
         ],
         "url": {
@@ -139,11 +139,29 @@
           "raw": "{{baseUrl}}/recipes?details=true&category=italian&rating=4&title=pasta",
           "host": ["{{baseUrl}}"],
           "path": ["recipes"],
-          "query": [
-            { "key": "details", "value": "false" }
-          ]
+          "query": [{ "key": "details", "value": "false" }]
         },
         "description": "Fetch recipes with as an authenticated user"
+      }
+    },
+    {
+      "name": "Recipes - get by ID (public or private owned)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/recipes/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["recipes", "1"]
+        },
+        "description": "Fetch a single recipe by ID. Returns public recipes for all users. Private recipes are available only to their owners, when logged in."
       }
     }
   ],
