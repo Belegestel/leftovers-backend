@@ -10,16 +10,18 @@ import {
   ApiBody,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
-import { LoginRequest } from "./dto/request/loginRequest.dto";
-import { LoginResponse } from "./dto/response/loginResponse.dto";
-import { SignupResponse } from "./dto/response/signupResponse.dto";
-import { SignupUser } from "./dto/signupUser.dto";
-import { LoginUser } from "./dto/loginUser.dto";
-import { RegisterRequest } from "./dto/request/registerRequest.dto";
-import { RegisterResponse } from "./dto/response/registerResponse.dto";
-import { ConfirmRegistrationRequest } from "./dto/request/confirmRegistrationRequest.dto";
-import { ConfirmRegistrationResponse } from "./dto/response/confirmRegistrationResponse.dto";
-import { ConfirmRegistration } from "./dto/confirmRegistration.dto";
+import {
+  LoginResponse,
+  SignupResponse,
+  RegisterResponse,
+  ConfirmRegistrationResponse,
+} from "./dto/response";
+import { SignupUser, LoginUser, ConfirmRegistration } from "./dto";
+import {
+  LoginRequest,
+  RegisterRequest,
+  ConfirmRegistrationRequest,
+} from "./dto/request";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -128,9 +130,7 @@ export class AuthController {
   })
   @Post("register")
   @HttpCode(HttpStatus.OK)
-  async register(
-    @Body() dto: RegisterRequest,
-  ): Promise<RegisterResponse> {
+  async register(@Body() dto: RegisterRequest): Promise<RegisterResponse> {
     const input = SignupUser.from(dto);
     const result = await this.authService.register(input);
     return RegisterResponse.from(result);
