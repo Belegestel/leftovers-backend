@@ -3,6 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { RecipeWhereInput } from "src/generated/prisma/models";
 import { Recipe } from "./recipes.model";
+import { RecipeCategory, prismaFromCategory } from "./recipe-categories.enum";
 
 @Injectable()
 export class RecipesRepository {
@@ -13,7 +14,7 @@ export class RecipesRepository {
     recipeQuery?: RecipeQueryRequest,
   ): Promise<Recipe[]> {
     const categoryList = recipeQuery?.category
-      ? recipeQuery?.category?.split(",").map((c) => c.trim())
+      ? recipeQuery?.category?.split(",").map((c) => c.trim().toUpperCase() as RecipeCategory)
       : undefined;
 
     const searchConditions: any = [];
@@ -66,5 +67,31 @@ export class RecipesRepository {
       orderBy: { created_at: "desc" },
     });
     return result.map(Recipe.fromPrisma);
+  }
+
+  async create(
+    title: string,
+    description: string,
+    category: RecipeCategory,
+    prep_time: number,
+    servings: number,
+    ingredients: string[],
+    steps: string[],
+    userId: number,
+  ): Promise<Recipe> {
+    const recipe = await this.prisma.recipe.create({
+      data: {
+        title,
+        description,
+        category: prismaFromCategory(category),
+        prep_time,
+        servings,
+        ingredients,
+        steps,
+        author_id: userId,
+      },
+    });
+
+    return Recipe.fromPrisma(recipe);
   }
 }

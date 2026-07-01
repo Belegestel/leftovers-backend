@@ -5,6 +5,10 @@ import {
   Req,
   Query,
   HttpStatus,
+  Post,
+  HttpCode,
+  Body,
+  Headers,
 } from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
@@ -18,6 +22,10 @@ import {
 } from "@nestjs/swagger";
 import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
 import { RecipeQueryResponse } from "./dto/responses/recipeQueryResponse.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { CreateRecipeRequest } from "./dto/requests/createRecipeRequest.dto";
+import { CreateRecipeResponse } from "./dto/responses/createRecipeResponse.dto";
+import { CreateRecipe } from "./dto/createRecipe.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -71,5 +79,18 @@ export class RecipesController {
     const recipes = await this.recipesService.findAll(userId, filters);
     const isDetails = filters.details === true;
     return RecipeQueryResponse.from(recipes, isDetails);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async createRecipe(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreateRecipeRequest,
+  ): Promise<CreateRecipeResponse> {
+    const userId = req.user!.userId;
+    const input = CreateRecipe.from(dto);
+    const recipe = await this.recipesService.createRecipe(userId, input);
+    return CreateRecipeResponse.from(recipe);
   }
 }

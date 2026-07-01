@@ -5,6 +5,7 @@ import { clearDatabase } from "./utils/clear-db";
 import { createUserAndLogin } from "./utils/create-user-and-login";
 import { randomUUID } from "crypto";
 import request from "supertest";
+import { RecipeCategory } from "../src/recipes/recipe-categories.enum";
 
 describe("Recipes E2E", () => {
   let app: INestApplication;
@@ -37,23 +38,26 @@ describe("Recipes E2E", () => {
       data: [
         {
           title: "Public recipe",
-          ingredients: "a",
-          steps: "b",
+          ingredients: ["a"],
+          steps: ["b"],
           rating: 5,
           isPublic: true,
           author_id: user.user.id,
+          servings: 1,
+          category: RecipeCategory.ITALIAN,
         },
         {
           title: "Private recipe",
-          ingredients: "c",
-          steps: "d",
+          ingredients: ["c"],
+          steps: ["d"],
           rating: 4,
           isPublic: false,
           author_id: user.user.id,
+          servings: 2,
+          category: RecipeCategory.ASIAN,
         },
       ],
     });
-
 
     const response = await request(app.getHttpServer())
       .get("/recipes")
@@ -79,27 +83,33 @@ describe("Recipes E2E", () => {
       data: [
         {
           title: "Public recipe",
-          ingredients: "a",
-          steps: "b",
+          ingredients: ["a"],
+          steps: ["b"],
           rating: 5,
           isPublic: true,
           author_id: userA.user.id,
+          servings: 1,
+          category: RecipeCategory.ITALIAN,
         },
         {
           title: "Private recipe",
-          ingredients: "c",
-          steps: "d",
+          ingredients: ["c"],
+          steps: ["d"],
           rating: 4,
           isPublic: false,
           author_id: userA.user.id,
+          servings: 2,
+          category: RecipeCategory.ASIAN,
         },
         {
           title: "Another private recipe",
-          ingredients: "e",
-          steps: "f",
+          ingredients: ["e"],
+          steps: ["f"],
           rating: 3,
           isPublic: false,
           author_id: userB.user.id,
+          servings: 2,
+          category: RecipeCategory.ASIAN,
         },
       ],
     });
@@ -133,11 +143,13 @@ describe("Recipes E2E", () => {
     await prisma.recipe.create({
       data: {
         title: "Private recipe",
-        ingredients: "g",
-        steps: "h",
+        ingredients: ["g"],
+        steps: ["h"],
         rating: 2,
         isPublic: false,
         author_id: userB.user.id,
+        servings: 1,
+        category: RecipeCategory.VEGAN,
       },
     });
 
@@ -159,12 +171,14 @@ describe("Recipes E2E", () => {
     const recipe = await prisma.recipe.create({
       data: {
         title: "Public recipe",
-        ingredients: "i",
-        steps: "j",
+        ingredients: ["i"],
+        steps: ["j"],
         rating: 1,
         isPublic: true,
         author_id: userA.user.id,
         description: "desc",
+        servings: 8,
+        category: RecipeCategory.OTHER,
       },
     });
 

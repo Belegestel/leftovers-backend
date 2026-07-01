@@ -24,3 +24,19 @@ export function categoryFromPrisma(prisma: PrismaCategory): RecipeCategory {
       return RecipeCategory.OTHER;
   }
 }
+export function prismaFromCategory(category: RecipeCategory): PrismaCategory {
+  switch (category) {
+    case RecipeCategory.ITALIAN:
+      return PrismaCategory.ITALIAN;
+    case RecipeCategory.ASIAN:
+      return PrismaCategory.ASIAN;
+    case RecipeCategory.DESSERT:
+      return PrismaCategory.DESSERT;
+    case RecipeCategory.VEGETARIAN:
+      return PrismaCategory.VEGETARIAN;
+    case RecipeCategory.VEGAN:
+      return PrismaCategory.VEGAN;
+    case RecipeCategory.OTHER:
+      return PrismaCategory.OTHER;
+  }
+}
