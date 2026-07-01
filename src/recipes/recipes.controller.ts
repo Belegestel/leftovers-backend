@@ -9,7 +9,7 @@ import {
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
 import { RecipesQueryReturnModel } from "./recipes.mapper";
-import { RecipeQueryRequestDto } from "./dto/requests/recipeQueryRequest.dto";
+import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -18,7 +18,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
-import { RecipeQueryResponseDto } from "./dto/responses/recipeQueryResponseDto";
+import { RecipeQueryResponse } from "./dto/responses/recipeQueryResponseDto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -66,14 +66,11 @@ export class RecipesController {
   @UseGuards(OptionalJwtAuthGuard)
   async findAll(
     @Req() req: AuthenticatedRequest,
-    @Query() filters: RecipeQueryRequestDto,
-  ): Promise<RecipeQueryResponseDto> {
+    @Query() filters: RecipeQueryRequest,
+  ): Promise<RecipeQueryResponse> {
     const userId = req.user?.userId;
     const recipes = await this.recipesService.findAll(userId, filters);
     const isDetails = filters.details === true;
-    const res = recipes.recipes.map((value) =>
-      RecipesQueryReturnModel.fromRecipe(value, isDetails),
-    );
-    return RecipeQueryResponseDto.from(res);
+    return RecipeQueryResponse.from(recipes, isDetails);
   }
 }

@@ -9,7 +9,7 @@ import {
   IsBoolean
 } from "class-validator";
 
-export class RecipeQueryRequestDto {
+export class RecipeQueryRequest {
   // Filter
   @ApiPropertyOptional()
   @IsOptional()

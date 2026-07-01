@@ -1,11 +1,15 @@
 import { RecipesQueryReturnModel } from "src/recipes/recipes.mapper";
+import { RecipeQueryResult } from "../recipeQueryResultDto";
+import { Recipe } from "src/recipes/recipes.model";
 
-export class RecipeQueryResponseDto {
+export class RecipeQueryResponse {
   recipes: RecipesQueryReturnModel[];
 
-  static from(recipesReturnModel: RecipesQueryReturnModel[]) {
+  static from(recipes: RecipeQueryResult, isDetail: boolean) {
     return {
-      recipes: recipesReturnModel,
+      recipes: recipes.recipes.map((value: Recipe) =>
+        RecipesQueryReturnModel.fromRecipe(value, isDetail),
+      ),
     };
   }
 }

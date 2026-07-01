@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { RecipeQueryRequestDto } from "./dto/requests/recipeQueryRequest.dto";
+import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { RecipeWhereInput } from "src/generated/prisma/models";
 import { Recipe } from "./recipes.model";
 
@@ -10,7 +10,7 @@ export class RecipesRepository {
 
   async findAll(
     userId?: number,
-    recipeQuery?: RecipeQueryRequestDto,
+    recipeQuery?: RecipeQueryRequest,
   ): Promise<Recipe[]> {
     const categoryList = recipeQuery?.category
       ? recipeQuery?.category?.split(",").map((c) => c.trim())

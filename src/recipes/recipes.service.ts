@@ -1,15 +1,15 @@
 import { Injectable } from "@nestjs/common";
-import { RecipeQueryRequestDto } from "./dto/requests/recipeQueryRequest.dto";
+import { RecipeQueryResult } from "./dto/recipeQueryResultDto";
 import { RecipesRepository } from "./recipes.repository";
-import { RecipeQueryAttemptDto } from "./dto/requests/recipeQueryAttempt.dto";
-import { RecipeQueryResultDto } from "./dto/responses/recipeQueryResultDto";
+import { RecipeQueryFilters } from "./dto/recipeQueryFilters.dto";
+import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 
 @Injectable()
 export class RecipesService {
   constructor(private recipesRepository: RecipesRepository) {}
-  async findAll(userId?: number, filters?: RecipeQueryRequestDto): Promise<RecipeQueryResultDto> {
-    const input = RecipeQueryAttemptDto.from(userId, filters);
+  async findAll(userId?: number, filters?: RecipeQueryRequest): Promise<RecipeQueryResult> {
+    const input = RecipeQueryFilters.from(userId, filters);
     const result = await this.recipesRepository.findAll(userId, input);
-    return RecipeQueryResultDto.from(result);
+    return RecipeQueryResult.from(result);
   }
 }

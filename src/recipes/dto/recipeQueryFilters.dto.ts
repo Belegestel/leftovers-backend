@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { RecipeQueryRequestDto } from "./recipeQueryRequest.dto";
+import { RecipeQueryRequest } from "./requests/recipeQueryRequest.dto";
 
-export class RecipeQueryAttemptDto {
+export class RecipeQueryFilters {
   @ApiPropertyOptional()
   userId?: number;
   // Filter
@@ -35,8 +35,8 @@ export class RecipeQueryAttemptDto {
 
   static from(
     userId: number | undefined,
-    recipeQueryRequest: RecipeQueryRequestDto | undefined,
-  ): RecipeQueryAttemptDto {
+    recipeQueryRequest: RecipeQueryRequest | undefined,
+  ): RecipeQueryFilters {
     return {
       userId: userId,
       category: recipeQueryRequest?.category,
