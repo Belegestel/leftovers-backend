@@ -86,4 +86,18 @@ describe("RecipesController", () => {
       ],
     });
   });
+
+  it("passes undefined user ID (guest) for GET /recipes/:id", async () => {
+    mockRecipesService.findById.mockResolvedValue({ recipes: [{ id: 1 }] });
+    await controller.findById(1, {} as AuthenticatedRequest);
+    expect(mockRecipesService.findById).toHaveBeenCalledWith(1, undefined);
+  });
+
+  it("passes userID for GET /recipes/:id", async () => {
+    mockRecipesService.findById.mockResolvedValue({ recipes: [{ id: 1 }] });
+    await controller.findById(1, {
+      user: { userId: 2 },
+    } as AuthenticatedRequest);
+    expect(mockRecipesService.findById).toHaveBeenCalledWith(1, 2);
+  });
 });
