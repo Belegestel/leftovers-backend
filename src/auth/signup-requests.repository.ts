@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { CreateSignupRequest } from "./dto/createSignupRequest.dto";
 
 @Injectable()
 export class SignupRequestsRepository {
@@ -17,14 +18,16 @@ export class SignupRequestsRepository {
     });
   }
 
-  create(data: {
-    email: string;
-    name: string;
-    password_hash: string;
-    token: string;
-    expires_at: Date;
-  }) {
-    return this.prisma.signup_requests.create({ data });
+  create(data: CreateSignupRequest) {
+    return this.prisma.signup_requests.create({
+      data: {
+        email: data.email,
+        name: data.name,
+        password_hash: data.passwordHash,
+        token: data.token,
+        expires_at: data.expiresAt,
+      },
+    });
   }
 
   deleteById(id: number) {

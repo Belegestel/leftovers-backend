@@ -1,7 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { UsersRepository } from "../users/users.repository";
-import { SignupDto } from "./dto/signup.dto";
 import { ConflictException, UnauthorizedException } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
@@ -13,7 +12,7 @@ import { SignupRequestsRepository } from "./signup-requests.repository";
 import { mockSignupRequestsRepository } from "../../test/unit/mocks/mockSignupRequestsRepository";
 import { mockEmailService } from "../../test/unit/mocks/mockEmailService";
 import { EmailService } from "../email/email.service";
-import { warn } from "console";
+import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
@@ -57,7 +56,7 @@ describe("AuthService", () => {
 
   describe("register", () => {
     it("should create a signup request and send email", async () => {
-      const dto: SignupDto = {
+      const dto: RegisterAttemptDto = {
         email: "john.doe@email.com",
         name: "John Doe",
         password: "password123",
@@ -86,7 +85,7 @@ describe("AuthService", () => {
     });
 
     it("should throw ConflictException if email already exists", async () => {
-      const dto: SignupDto = {
+      const dto: RegisterAttemptDto = {
         email: "john.doe@email.com",
         name: "John Doe",
         password: "password123",

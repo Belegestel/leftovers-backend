@@ -5,15 +5,21 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
-import { SignupDto } from "./dto/signup.dto";
-import { LoginDto } from "./dto/login.dto";
 import { ConfigService } from "@nestjs/config";
 import { UsersRepository } from "../users/users.repository";
 import { SignupRequestsRepository } from "./signup-requests.repository";
 import { JwtService } from "@nestjs/jwt";
 import { EmailService } from "../email/email.service";
 import { randomBytes } from "crypto";
-import { ConfirmRegistrationDto } from "./dto/confirm-registration.dto";
+import { ConfirmRegistration } from "./dto/confirmRegistration.dto";
+import { LoginUser } from "./dto/loginUser.dto";
+import { LoginResult } from "./dto/response/loginResult.dto";
+import { SignupUser } from "./dto/signupUser.dto";
+import { SignupResult } from "./dto/response/signupResult.dto";
+import { RegisterUser } from "./dto/registerUser.dto";
+import { RegisterResult } from "./dto/response/registerResult.dto";
+import { ConfirmRegistrationResult } from "./dto/response/confirmRegistrationResult.dto";
+import { CreateSignupRequest } from "./dto/createSignupRequest.dto";
 
 @Injectable()
 export class AuthService {
@@ -32,8 +38,8 @@ export class AuthService {
     );
   }
 
-  async signup(dto: SignupDto) {
-    const email = dto.email.toLowerCase();
+  async signup(dto: SignupUser): Promise<SignupResult> {
+    const email = dto.email;
     const existingUser = await this.usersRepository.findByEmail(email);
 
     if (existingUser) {
@@ -54,7 +60,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginUser): Promise<LoginResult> {
     const email = dto.email;
     const user = await this.usersRepository.findByEmail(email);
 
@@ -77,13 +83,13 @@ export class AuthService {
     return { accessToken };
   }
 
-  async register(dto: SignupDto) {
+  async register(dto: RegisterUser): Promise<RegisterResult> {
     const email = dto.email;
-    const exisitingUser = await this.usersRepository.findByEmail(email);
+    const existingUser = await this.usersRepository.findByEmail(email);
     const existingSignupRequest =
       await this.signupRequestsRepository.findByEmail(email);
 
-    if (exisitingUser || existingSignupRequest) {
+    if (existingUser || existingSignupRequest) {
       throw new ConflictException("Email already registered");
     }
 
@@ -94,13 +100,16 @@ export class AuthService {
 
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await this.signupRequestsRepository.create({
+
+    const input = CreateSignupRequest.from(
       email,
-      name: dto.name,
-      password_hash: hashedPassword,
+      dto.name,
+      hashedPassword,
       token,
-      expires_at: expiresAt,
-    });
+      expiresAt,
+    );
+
+    await this.signupRequestsRepository.create(input);
 
     const frontendUrl =
       this.config.get<string>("FRONTEND_URL") || "http://localhost:3000";
@@ -119,7 +128,9 @@ export class AuthService {
     return { message: "Confirmation email sent." };
   }
 
-  async confirmRegistration(dto: ConfirmRegistrationDto) {
+  async confirmRegistration(
+    dto: ConfirmRegistration,
+  ): Promise<ConfirmRegistrationResult> {
     const email = dto.email;
     const req = await this.signupRequestsRepository.findByEmail(email);
 
