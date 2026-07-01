@@ -67,4 +67,9 @@ export class RecipesRepository {
     });
     return result.map(Recipe.fromPrisma);
   }
+
+  async findById(id: number): Promise<Recipe | null> {
+    const recipe = await this.prisma.recipe.findUnique({ where: { id } });
+    return recipe ? Recipe.fromPrisma(recipe) : null;
+  }
 }

@@ -5,14 +5,19 @@ import {
   Req,
   Query,
   HttpStatus,
+  Param,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import {
   ApiBadRequestResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
@@ -71,5 +76,51 @@ export class RecipesController {
     const recipes = await this.recipesService.findAll(userId, filters);
     const isDetails = filters.details === true;
     return RecipeQueryResponse.from(recipes, isDetails);
+  }
+
+  @ApiOperation({
+    summary: "Get a single recipe by id",
+    description:
+      "Get a single recipe by ID. If user is not logged in, only public recieps are available. Otherwise, also their private recipes are available.",
+  })
+  @ApiOkResponse({
+    description: "Recipe found and returned succesfully",
+    type: RecipeQueryResponse,
+  })
+  @ApiNotFoundResponse({
+    description: "Recipe not found",
+    schema: {
+      example: {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "Recipe not found",
+        error: "Not Found",
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    description: "Access to this recipe is forbidden for current user",
+    schema: {
+      example: {
+        statusCode: HttpStatus.FORBIDDEN,
+        message: "You do not have access to this recipe",
+        error: "Forbidden",
+      },
+    },
+  })
+  @ApiParam({
+    name: "id",
+    type: Number,
+    description: "Recipe ID",
+    example: 1,
+  })
+  @Get(":id")
+  @UseGuards(OptionalJwtAuthGuard)
+  async findById(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<RecipeQueryResponse> {
+    const userId = req.user?.userId;
+    const recipe = await this.recipesService.findById(id, userId);
+    return RecipeQueryResponse.from(recipe, true);
   }
 }

@@ -30,7 +30,7 @@ model Recipe {
   title String
   description String?
   prep_time Int?
-  isPublic Boolean @default(true)
+  isPublic Boolean @default(true) @map("is_public")
 
   author_id Int 
   author User @relation(fields: [author_id], references: [id])
