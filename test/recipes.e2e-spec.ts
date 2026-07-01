@@ -33,7 +33,7 @@ describe("Recipes E2E", () => {
       "password123",
     );
 
-    const res = await prisma.recipe.createMany({
+    await prisma.recipe.createMany({
       data: [
         {
           title: "Public recipe",
@@ -53,7 +53,6 @@ describe("Recipes E2E", () => {
         },
       ],
     });
-
 
     const response = await request(app.getHttpServer())
       .get("/recipes")
@@ -180,5 +179,33 @@ describe("Recipes E2E", () => {
         authorId: userA.user.id,
       }),
     ]);
+  });
+
+  it("GET /recipes/:id returns a public recipe for guests", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+    const recipe = await prisma.recipe.create({
+      data: {
+        title: "Public recipe",
+        ingredients: "i",
+        steps: "j",
+        rating: 1,
+        isPublic: true,
+        author_id: user.user.id,
+        description: "desc",
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .get(`/recipes/${recipe.id}`)
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      recipes: [{ id: recipe.id, title: "Public recipe" }],
+    });
   });
 });
