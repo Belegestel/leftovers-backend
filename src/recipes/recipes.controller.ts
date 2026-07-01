@@ -8,7 +8,6 @@ import {
 } from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
-import { RecipesQueryReturnModel } from "./recipes.mapper";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import {
   ApiBadRequestResponse,
@@ -18,7 +17,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
-import { RecipeQueryResponse } from "./dto/responses/recipeQueryResponseDto";
+import { RecipeQueryResponse } from "./dto/responses/recipeQueryResponse.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")

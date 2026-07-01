@@ -1,4 +1,4 @@
-import { RecipesQueryReturnModel } from "src/recipes/recipes.mapper";
+import { RecipesQueryReturnModel } from "../recipesQueryReturnModel.dto";
 import { RecipeQueryResult } from "../recipeQueryResultDto";
 import { Recipe } from "src/recipes/recipes.model";
 
@@ -8,7 +8,7 @@ export class RecipeQueryResponse {
   static from(recipes: RecipeQueryResult, isDetail: boolean) {
     return {
       recipes: recipes.recipes.map((value: Recipe) =>
-        RecipesQueryReturnModel.fromRecipe(value, isDetail),
+        RecipesQueryReturnModel.from(value, isDetail),
       ),
     };
   }

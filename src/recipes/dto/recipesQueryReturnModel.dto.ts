@@ -1,4 +1,4 @@
-import { Recipe } from "./recipes.model";
+import { Recipe } from "../recipes.model";
 
 export class RecipesQueryReturnModel {
   id: number;
@@ -14,7 +14,7 @@ export class RecipesQueryReturnModel {
   ingredients?: string;
   steps?: string;
 
-  static fromRecipe(recipe: Recipe, detailed: boolean): RecipesQueryReturnModel {
+  static from(recipe: Recipe, detailed: boolean): RecipesQueryReturnModel {
     if (!detailed) {
       return {
         id: recipe.id,
