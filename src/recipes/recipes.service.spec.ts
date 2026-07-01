@@ -2,6 +2,10 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { RecipesService } from "./recipes.service";
 import { RecipesRepository } from "./recipes.repository";
 import { mockRecipesRepository } from "../../test/unit/mocks/mockRecipesRepository";
+import { CreateRecipe } from "./dto/createRecipe.dto";
+import { RecipeCategory } from "./recipe-categories.enum";
+import { Recipe } from "./recipes.model";
+import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -80,6 +84,47 @@ describe("RecipesService", () => {
         undefined,
         expect.objectContaining({ title: "cake", ingredients: "flour" }),
       );
+    });
+
+    it("creates a recipe via repository and returns a result", async () => {
+      const dto: CreateRecipe = {
+        title: "Pizza",
+        description: "TastyPizza",
+        category: RecipeCategory.ITALIAN,
+        prepTime: 30,
+        servings: 2,
+        ingredients: ["Flour", "Water"],
+        steps: ["mix", "bake"],
+      };
+      const repoResult: Recipe = {
+        id: 123,
+        title: "Pizza",
+        description: "TastyPizza",
+        category: RecipeCategory.ITALIAN,
+        prep_time: 30,
+        servings: 2,
+        ingredients: ["Flour", "Water"],
+        steps: ["mix", "bake"],
+        isPublic: true,
+        createdAt: new Date(),
+        editedAt: new Date(),
+        rating: 1,
+        authorId: 1,
+      };
+
+      mockRecipesRepository.create.mockResolvedValue(repoResult);
+      const result = await service.createRecipe(1, dto);
+      expect(mockRecipesRepository.create).toHaveBeenCalledWith(
+        "Pizza",
+        "TastyPizza",
+        RecipeCategory.ITALIAN,
+        30,
+        2,
+        ["Flour", "Water"],
+        ["mix", "bake"],
+        1,
+      );
+      expect(result).toEqual(CreateRecipeResult.from(repoResult));
     });
   });
 });
