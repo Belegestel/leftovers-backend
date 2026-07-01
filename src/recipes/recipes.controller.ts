@@ -8,17 +8,20 @@ import {
   Post,
   HttpCode,
   Body,
-  Headers,
 } from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
 import { RecipeQueryResponse } from "./dto/responses/recipeQueryResponse.dto";
@@ -81,6 +84,41 @@ export class RecipesController {
     return RecipeQueryResponse.from(recipes, isDetails);
   }
 
+  @ApiOperation({
+    summary: "Create a new recipe",
+    description:
+      "Creates a new recipe owned by the authenticated user. Ingredients and steps must contain at least one item each.",
+  })
+  @ApiBearerAuth()
+  @ApiBody({
+    type: CreateRecipeRequest,
+  })
+  @ApiCreatedResponse({
+    description: "Recipe created succesfully",
+    type: CreateRecipeResponse,
+  })
+  @ApiBadRequestResponse({
+    description: "Bad request data",
+    schema: {
+      example: {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: [
+          "title must be shorter than or equal to 100 characters",
+          "prep_time must not be less than 5",
+        ],
+        error: "Bad Request",
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: "Missing or invalid JWT token",
+    schema: {
+      example: {
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: "Unauthorized",
+      },
+    },
+  })
   @Post()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
