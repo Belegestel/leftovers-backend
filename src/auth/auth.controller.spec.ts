@@ -1,10 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { SignupDto } from "./dto/signup.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { mockAuthService } from "../../test/unit/mocks/mockAuthService";
+import { LoginResultDto } from "./dto/response/loginResult.dto";
+import { RegisterResponseDto } from "./dto/response/registerResponse.dto";
+import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
@@ -31,14 +33,13 @@ describe("AuthController", () => {
   });
 
   it("should initiate registration and call auth service", async () => {
-    const dto: SignupDto = {
+    const dto: RegisterAttemptDto = {
       email: "john.doe@email.com",
       password: "password123",
       name: "John Doe",
     };
 
-    const expectedResult = {
-      status: "ok",
+    const expectedResult: RegisterResponseDto = {
       message: "Confirmation email sent.",
     };
     mockAuthService.register.mockResolvedValue(expectedResult);
@@ -54,7 +55,7 @@ describe("AuthController", () => {
     };
     const expectedResult = { id: 1, email: dto.email };
     mockAuthService.confirmRegistration.mockResolvedValue(expectedResult);
-    const res = await controller.ConfirmRegistration(dto);
+    const res = await controller.confirmRegistration(dto);
 
     expect(res).toEqual(expectedResult);
     expect(mockAuthService.confirmRegistration).toHaveBeenCalledWith(dto);
@@ -65,7 +66,7 @@ describe("AuthController", () => {
       email: "john.doe@email.com",
       password: "password",
     };
-    const expectedResult = "jwt-token";
+    const expectedResult: LoginResultDto = { accessToken: "jwt-token" };
 
     mockAuthService.login.mockResolvedValue(expectedResult);
 

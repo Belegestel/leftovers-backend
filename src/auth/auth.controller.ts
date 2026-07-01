@@ -1,17 +1,27 @@
 import { Body, Post, Controller, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { SignupDto } from "./dto/signup.dto";
-import { ConfirmRegistrationDto } from "./dto/confirm-registration.dto";
+import { SignupRequest } from "./dto/request/signupRequest.dto";
 import {
   ApiOkResponse,
   ApiConflictResponse,
   ApiTags,
   ApiOperation,
   ApiBadRequestResponse,
-  ApiForbiddenResponse,
   ApiBody,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
-import { LoginDto } from "./dto/login.dto";
+import {
+  LoginResponse,
+  SignupResponse,
+  RegisterResponse,
+  ConfirmRegistrationResponse,
+} from "./dto/response";
+import { SignupUser, LoginUser, ConfirmRegistration } from "./dto";
+import {
+  LoginRequest,
+  RegisterRequest,
+  ConfirmRegistrationRequest,
+} from "./dto/request";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -24,11 +34,12 @@ export class AuthController {
     deprecated: true,
   })
   @ApiBody({
-    type: SignupDto,
+    type: SignupRequest,
     description: "User registration data",
   })
   @ApiOkResponse({
     description: "User account successfully created.",
+    type: SignupResponse,
   })
   @ApiBadRequestResponse({
     description: "Invalid input data - validation error",
@@ -51,25 +62,22 @@ export class AuthController {
     },
   })
   @Post("signup")
-  signup(@Body() dto: SignupDto) {
-    return this.authService.signup(dto);
+  async signup(@Body() dto: SignupRequest): Promise<SignupResponse> {
+    const input = SignupUser.from(dto);
+    const result = await this.authService.signup(input);
+    return SignupResponse.from(result);
   }
 
   @ApiOperation({
     summary: "Log in to user account and return JWT, if account exists.",
   })
   @ApiBody({
-    type: LoginDto,
+    type: LoginRequest,
     description: "User login data",
   })
   @ApiOkResponse({
     description: "User logged in.",
-    schema: {
-      example: {
-        accessToken:
-          "qUeFkWKTAuDQtyqEwIsCOSTGFslErWADsDfrREoROBYFtSIXykvPJHZvwHwybAUqmxXuMSjFYcqSgRtaXGcHFaawDQnLgfMqfOCV",
-      },
-    },
+    type: LoginResponse,
   })
   @ApiBadRequestResponse({
     description: "Invalid input data - validation error",
@@ -81,7 +89,7 @@ export class AuthController {
       },
     },
   })
-  @ApiForbiddenResponse({
+  @ApiUnauthorizedResponse({
     description: "User provided invalid credentials",
     schema: {
       example: {
@@ -93,24 +101,22 @@ export class AuthController {
   })
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() dto: LoginRequest): Promise<LoginResponse> {
+    const input = LoginUser.from(dto);
+    const result = await this.authService.login(input);
+    return LoginResponse.from(result);
   }
 
   @ApiOperation({
     summary: "Start the signup process to get an email with confirmation link",
   })
   @ApiBody({
-    type: SignupDto,
+    type: RegisterRequest,
     description: "User registration data",
   })
   @ApiOkResponse({
     description: "User logged in",
-    schema: {
-      example: {
-        message: "Confirmation email sent.",
-      },
-    },
+    type: RegisterResponse,
   })
   @ApiConflictResponse({
     description: "User already exists or has a not confirmed signup request",
@@ -124,25 +130,22 @@ export class AuthController {
   })
   @Post("register")
   @HttpCode(HttpStatus.OK)
-  register(@Body() dto: SignupDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterRequest): Promise<RegisterResponse> {
+    const input = SignupUser.from(dto);
+    const result = await this.authService.register(input);
+    return RegisterResponse.from(result);
   }
 
   @ApiOperation({
     summary: "Confirm registration using email and token",
   })
   @ApiBody({
-    type: ConfirmRegistrationDto,
+    type: ConfirmRegistrationRequest,
     description: "Email and verification token received via email",
   })
   @ApiOkResponse({
     description: "User account sucessfuly created",
-    schema: {
-      example: {
-        id: 123,
-        email: "john.doe@email.com",
-      },
-    },
+    type: ConfirmRegistrationResponse,
   })
   @ApiBadRequestResponse({
     description: "Invalid or expired token, or no valid email in the request",
@@ -154,9 +157,12 @@ export class AuthController {
       },
     },
   })
-  @ApiBadRequestResponse({ description: "Invalid or expired token or email " })
   @Post("confirm-registration")
-  ConfirmRegistration(@Body() dto: ConfirmRegistrationDto) {
-    return this.authService.confirmRegistration(dto);
+  async confirmRegistration(
+    @Body() dto: ConfirmRegistrationRequest,
+  ): Promise<ConfirmRegistrationResponse> {
+    const input = ConfirmRegistration.from(dto);
+    const result = await this.authService.confirmRegistration(input);
+    return ConfirmRegistrationResponse.from(result);
   }
 }
