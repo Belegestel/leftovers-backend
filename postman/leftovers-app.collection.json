@@ -139,12 +139,27 @@
           "raw": "{{baseUrl}}/recipes?details=true&category=italian&rating=4&title=pasta",
           "host": ["{{baseUrl}}"],
           "path": ["recipes"],
-          "query": [
-            { "key": "details", "value": "false" }
-          ]
+          "query": [{ "key": "details", "value": "false" }]
         },
         "description": "Fetch recipes with as an authenticated user"
       }
+    },
+    {
+      "name": "Create new recipe",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Pizza\",\"description\": \"Tasty pizza\",\"category\": \"ITALIAN\",\"prep_time\": 30,\"servings\": 2,\"ingredients\": [\"flour\", \"water\"],\"steps\": [\"mix\", \"bake\"]}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/recipes",
+          "host": ["{{baseUrl}}"],
+          "path": ["recipes"]
+        }
+      },
+      "description": "Creates a new recipe for an authenticated user"
     }
   ],
   "variable": [
