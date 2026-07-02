@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
-import { RecipeWhereInput } from "src/generated/prisma/models";
+import { RecipeWhereInput } from "../generated/prisma/models";
 import { Recipe } from "./recipes.model";
 
 @Injectable()
@@ -29,12 +29,12 @@ export class RecipesRepository {
     }
     if (recipeQuery?.ingredients) {
       searchConditions.push({
-        ingredients: { contains: recipeQuery.ingredients, mode: "insensitive" },
+        ingredients: { hasSome: recipeQuery.ingredients.split(",") },
       });
     }
     if (recipeQuery?.steps) {
       searchConditions.push({
-        steps: { contains: recipeQuery.steps, mode: "insensitive" },
+        steps: { hasSome: recipeQuery.steps.split(",") },
       });
     }
 
@@ -45,7 +45,7 @@ export class RecipesRepository {
       conditions.push({ isPublic: true });
     }
     if (categoryList?.length) {
-      conditions.push({ category: { in: categoryList } });
+      conditions.push({ category: { in: categoryList as any } }); // Relies on feat/create-recipe-endpoint
     }
     if (recipeQuery?.rating) {
       conditions.push({ rating: { gte: recipeQuery.rating } });

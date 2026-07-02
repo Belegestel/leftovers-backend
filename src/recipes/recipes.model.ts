@@ -11,8 +11,8 @@ export class Recipe {
   editedAt: Date;
   rating: number;
   category?: string;
-  ingredients: string;
-  steps: string;
+  ingredients: string[];
+  steps: string[];
 
   static fromPrisma(recipe: PrismaRecipe): Recipe {
     return {
