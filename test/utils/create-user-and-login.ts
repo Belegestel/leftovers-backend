@@ -17,6 +17,10 @@ export async function createUserAndLogin(
     where: { email },
   });
 
+  if (!signupRequest) {
+    throw new Error("User creation has failed");
+  }
+
   await request(app.getHttpServer())
     .post("/auth/confirm-registration")
     .send({ email, token: signupRequest!.token })
@@ -28,6 +32,9 @@ export async function createUserAndLogin(
     .expect(200);
   const user = await prisma.user.findUnique({ where: { email } });
 
+  if (!user) {
+    throw new Error("User creation has failed");
+  }
 
   return { user: user!, token: loginReponse.body.accessToken };
 }

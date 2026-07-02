@@ -3,7 +3,7 @@ import { PrismaService } from "../src/prisma/prisma.service";
 import { createE2EApp } from "./utils/create-e2e-app";
 import { clearDatabase } from "./utils/clear-db";
 import { createUserAndLogin } from "./utils/create-user-and-login";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import request from "supertest";
 
 describe("Recipes E2E", () => {
@@ -41,7 +41,7 @@ describe("Recipes E2E", () => {
           steps: "b",
           rating: 5,
           isPublic: true,
-          author_id: user.user.id,
+          authorId: user.user.id,
         },
         {
           title: "Private recipe",
@@ -49,11 +49,10 @@ describe("Recipes E2E", () => {
           steps: "d",
           rating: 4,
           isPublic: false,
-          author_id: user.user.id,
+          authorId: user.user.id,
         },
       ],
     });
-
 
     const response = await request(app.getHttpServer())
       .get("/recipes")
@@ -83,7 +82,7 @@ describe("Recipes E2E", () => {
           steps: "b",
           rating: 5,
           isPublic: true,
-          author_id: userA.user.id,
+          authorId: userA.user.id,
         },
         {
           title: "Private recipe",
@@ -91,7 +90,7 @@ describe("Recipes E2E", () => {
           steps: "d",
           rating: 4,
           isPublic: false,
-          author_id: userA.user.id,
+          authorId: userA.user.id,
         },
         {
           title: "Another private recipe",
@@ -99,7 +98,7 @@ describe("Recipes E2E", () => {
           steps: "f",
           rating: 3,
           isPublic: false,
-          author_id: userB.user.id,
+          authorId: userB.user.id,
         },
       ],
     });
@@ -137,7 +136,7 @@ describe("Recipes E2E", () => {
         steps: "h",
         rating: 2,
         isPublic: false,
-        author_id: userB.user.id,
+        authorId: userB.user.id,
       },
     });
 
@@ -163,7 +162,7 @@ describe("Recipes E2E", () => {
         steps: "j",
         rating: 1,
         isPublic: true,
-        author_id: userA.user.id,
+        authorId: userA.user.id,
         description: "desc",
       },
     });
@@ -177,7 +176,7 @@ describe("Recipes E2E", () => {
         title: recipe.title,
         description: recipe.description,
         isPublic: true,
-        authorId: userA.user.id,
+        rating: 1,
       }),
     ]);
   });

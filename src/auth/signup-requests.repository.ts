@@ -19,7 +19,7 @@ export class SignupRequestsRepository {
   }
 
   create(data: CreateSignupRequest) {
-    return this.prisma.signup_requests.create({
+    return this.prisma.signupRequest.create({
       data: {
         email: data.email,
         name: data.name,

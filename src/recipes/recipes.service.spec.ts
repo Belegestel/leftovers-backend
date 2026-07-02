@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { RecipesService } from "./recipes.service";
 import { RecipesRepository } from "./recipes.repository";
 import { mockRecipesRepository } from "../../test/unit/mocks/mockRecipesRepository";
+import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -40,7 +41,7 @@ describe("RecipesService", () => {
     it("applies category filtering", async () => {
       await service.findAll(undefined, {
         category: "Dessert,Dinner",
-      } as any);
+      } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
@@ -62,7 +63,7 @@ describe("RecipesService", () => {
     it("applies title search", async () => {
       await service.findAll(undefined, {
         title: "cake",
-      } as any);
+      } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
@@ -74,7 +75,7 @@ describe("RecipesService", () => {
       await service.findAll(undefined, {
         title: "cake",
         ingredients: "flour",
-      } as any);
+      } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
