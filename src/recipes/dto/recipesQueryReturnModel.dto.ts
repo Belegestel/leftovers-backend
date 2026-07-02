@@ -11,8 +11,8 @@ export class RecipesQueryReturnModel {
   editedAt?: Date;
   rating?: number;
   category?: string;
-  ingredients?: string;
-  steps?: string;
+  ingredients?: string[];
+  steps?: string[];
 
   static from(recipe: Recipe, detailed: boolean): RecipesQueryReturnModel {
     if (!detailed) {
