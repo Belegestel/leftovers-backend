@@ -10,5 +10,6 @@
       "^src/(.*)$": "<rootDir>/../src/$1",
       "^(\\.{1,2}/.*)\\.js$": "$1"
   },
-  "setupFiles": ["./jest-e2e.setup.ts"]
+  "setupFiles": ["./jest-e2e.setup.ts"],
+  "maxWorkers": 1
 }

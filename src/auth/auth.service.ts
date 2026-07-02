@@ -133,7 +133,6 @@ export class AuthService {
   ): Promise<ConfirmRegistrationResult> {
     const email = dto.email;
     const req = await this.signupRequestsRepository.findByEmail(email);
-
     if (!req) {
       throw new BadRequestException("Invalid or expired token");
     }
