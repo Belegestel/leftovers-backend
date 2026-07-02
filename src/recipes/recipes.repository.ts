@@ -16,7 +16,7 @@ export class RecipesRepository {
       ? recipeQuery?.category?.split(",").map((c) => c.trim())
       : undefined;
 
-    const searchConditions: any = [];
+    const searchConditions: RecipeWhereInput[] = [];
     if (recipeQuery?.title) {
       searchConditions.push({
         title: { contains: recipeQuery.title, mode: "insensitive" },
@@ -40,7 +40,7 @@ export class RecipesRepository {
 
     let conditions: RecipeWhereInput[] = [];
     if (userId) {
-      conditions.push({ OR: [{ isPublic: true }, { author_id: userId }] });
+      conditions.push({ OR: [{ isPublic: true }, { authorId: userId }] });
     } else {
       conditions.push({ isPublic: true });
     }
@@ -52,7 +52,7 @@ export class RecipesRepository {
     }
     if (recipeQuery?.startDate || recipeQuery?.endDate) {
       conditions.push({
-        created_at: { gte: recipeQuery.startDate, lte: recipeQuery.endDate },
+        createdAt: { gte: recipeQuery.startDate, lte: recipeQuery.endDate },
       });
     }
     if (searchConditions.length) {
@@ -63,7 +63,7 @@ export class RecipesRepository {
       where: {
         AND: conditions,
       },
-      orderBy: { created_at: "desc" },
+      orderBy: { createdAt: "desc" },
     });
     return result.map(Recipe.fromPrisma);
   }

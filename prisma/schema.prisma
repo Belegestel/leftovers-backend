@@ -29,14 +29,14 @@ model Recipe {
   id Int @default(autoincrement()) @id
   title String
   description String?
-  prep_time Int?
+  prepTime Int? @map("prep_time")
   isPublic Boolean @default(true) @map("is_public")
 
-  author_id Int 
-  author User @relation(fields: [author_id], references: [id])
+  authorId Int @map("author_id")
+  author User @relation(fields: [authorId], references: [id])
 
-  created_at DateTime @default(now())
-  edited_at DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  editedAt DateTime @updatedAt @map("edited_at")
 
   rating Int
   category String?

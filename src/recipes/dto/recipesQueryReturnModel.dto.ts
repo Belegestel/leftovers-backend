@@ -32,18 +32,23 @@ export class RecipesQueryReturnModel {
       return {
         id: recipe.id,
         title: recipe.title,
-        prepTime: recipe.prep_time,
+        prepTime: recipe.prepTime,
+        rating: recipe.rating
       };
     } else {
       return {
         id: recipe.id,
         title: recipe.title,
         description: recipe.description,
-        prepTime: recipe.prep_time,
+        prepTime: recipe.prepTime,
         isPublic: recipe.isPublic,
+        authorId: recipe.authorId,
         createdAt: recipe.createdAt,
         editedAt: recipe.editedAt,
-        authorId: recipe.authorId,
+        rating: recipe.rating,
+        category: recipe.category,
+        ingredients: recipe.ingredients,
+        steps: recipe.steps,
       };
     }
   }
