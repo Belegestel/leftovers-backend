@@ -195,4 +195,73 @@ describe("Recipes E2E", () => {
       }),
     ]);
   });
+
+  it("POST /recipes reject unauthentifcated users", async () => {
+    const response = await request(app.getHttpServer())
+      .post("/recipes")
+      .send({
+        title: "Pizza",
+        description: "Tasty",
+        category: RecipeCategory.ITALIAN,
+        prep_time: 30,
+        servings: 2,
+        ingredients: ["flour"],
+        steps: ["mix"],
+      })
+      .expect(401);
+
+    expect(response.body.message).toBeDefined();
+  });
+
+  it("POST /recipes should reject invalid payload", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+
+    const response = await request(app.getHttpServer())
+      .post("/recipes")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        title: "",
+        description: "ok",
+        category: RecipeCategory.ITALIAN,
+        prep_time: 1,
+        servings: 0,
+        ingredients: [],
+        steps: [],
+      })
+      .expect(400);
+    expect(response.body.message).toBeDefined();
+  });
+
+  it("POST /recipes should create a recipe", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+    const payload = {
+      title: "Pizza",
+      description: "Tasty pizza",
+      category: RecipeCategory.ITALIAN,
+      prep_time: 30,
+      servings: 2,
+      ingredients: ["flour", "water"],
+      steps: ["mix", "bake"],
+    };
+    const response = await request(app.getHttpServer())
+      .post("/recipes")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send(payload)
+      .expect(201);
+    expect(response.body).toMatchObject({ recipe: { id: 1 } });
+    const recipe = await prisma.recipe.findFirst({ where: { title: "Pizza" } });
+    expect(recipe).not.toBeNull();
+    expect(recipe?.author_id).toBe(user.user.id);
+    expect(recipe?.ingredients).toEqual(["flour", "water"]);
+  });
 });
