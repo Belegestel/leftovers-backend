@@ -3,7 +3,7 @@ import { PrismaService } from "../src/prisma/prisma.service";
 import { createE2EApp } from "./utils/create-e2e-app";
 import { clearDatabase } from "./utils/clear-db";
 import { createUserAndLogin } from "./utils/create-user-and-login";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { RecipeCategory } from "../src/recipes/recipe-categories.enum";
 
@@ -42,9 +42,9 @@ describe("Recipes E2E", () => {
           steps: ["b"],
           rating: 5,
           isPublic: true,
-          author_id: user.user.id,
           servings: 1,
           category: RecipeCategory.ITALIAN,
+          authorId: user.user.id,
         },
         {
           title: "Private recipe",
@@ -52,9 +52,9 @@ describe("Recipes E2E", () => {
           steps: ["d"],
           rating: 4,
           isPublic: false,
-          author_id: user.user.id,
           servings: 2,
           category: RecipeCategory.ASIAN,
+          authorId: user.user.id,
         },
       ],
     });
@@ -87,9 +87,9 @@ describe("Recipes E2E", () => {
           steps: ["b"],
           rating: 5,
           isPublic: true,
-          author_id: userA.user.id,
           servings: 1,
           category: RecipeCategory.ITALIAN,
+          authorId: userA.user.id,
         },
         {
           title: "Private recipe",
@@ -97,9 +97,9 @@ describe("Recipes E2E", () => {
           steps: ["d"],
           rating: 4,
           isPublic: false,
-          author_id: userA.user.id,
           servings: 2,
           category: RecipeCategory.ASIAN,
+          authorId: userA.user.id,
         },
         {
           title: "Another private recipe",
@@ -107,9 +107,9 @@ describe("Recipes E2E", () => {
           steps: ["f"],
           rating: 3,
           isPublic: false,
-          author_id: userB.user.id,
           servings: 2,
           category: RecipeCategory.ASIAN,
+          authorId: userB.user.id,
         },
       ],
     });
@@ -147,9 +147,9 @@ describe("Recipes E2E", () => {
         steps: ["h"],
         rating: 2,
         isPublic: false,
-        author_id: userB.user.id,
         servings: 1,
         category: RecipeCategory.VEGAN,
+        authorId: userB.user.id,
       },
     });
 
@@ -175,7 +175,7 @@ describe("Recipes E2E", () => {
         steps: ["j"],
         rating: 1,
         isPublic: true,
-        author_id: userA.user.id,
+        authorId: userA.user.id,
         description: "desc",
         servings: 8,
         category: RecipeCategory.OTHER,
@@ -191,7 +191,7 @@ describe("Recipes E2E", () => {
         title: recipe.title,
         description: recipe.description,
         isPublic: true,
-        authorId: userA.user.id,
+        rating: 1,
       }),
     ]);
   });
@@ -261,7 +261,7 @@ describe("Recipes E2E", () => {
     expect(response.body).toMatchObject({ recipe: { id: 1 } });
     const recipe = await prisma.recipe.findFirst({ where: { title: "Pizza" } });
     expect(recipe).not.toBeNull();
-    expect(recipe?.author_id).toBe(user.user.id);
+    expect(recipe?.authorId).toBe(user.user.id);
     expect(recipe?.ingredients).toEqual(["flour", "water"]);
   });
 });

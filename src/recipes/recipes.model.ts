@@ -5,8 +5,8 @@ export class Recipe {
   id: number;
   title: string;
   description?: string;
-  prep_time?: number;
   servings: number;
+  prepTime?: number;
   isPublic: boolean;
   authorId: number;
   createdAt: Date;
@@ -21,12 +21,12 @@ export class Recipe {
       id: recipe.id,
       title: recipe.title,
       description: recipe.description ?? undefined,
-      prep_time: recipe.prep_time ?? undefined,
       servings: recipe.servings,
+      prepTime: recipe.prepTime ?? undefined,
       isPublic: recipe.isPublic,
-      authorId: recipe.author_id,
-      createdAt: recipe.created_at,
-      editedAt: recipe.edited_at,
+      authorId: recipe.authorId,
+      createdAt: recipe.createdAt,
+      editedAt: recipe.editedAt,
       rating: recipe.rating,
       category: categoryFromPrisma(recipe.category),
       ingredients: recipe.ingredients,

@@ -6,6 +6,7 @@ import { CreateRecipe } from "./dto/createRecipe.dto";
 import { RecipeCategory } from "./recipe-categories.enum";
 import { Recipe } from "./recipes.model";
 import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
+import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -44,7 +45,7 @@ describe("RecipesService", () => {
     it("applies category filtering", async () => {
       await service.findAll(undefined, {
         category: "Dessert,Dinner",
-      } as any);
+      } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
@@ -66,7 +67,7 @@ describe("RecipesService", () => {
     it("applies title search", async () => {
       await service.findAll(undefined, {
         title: "cake",
-      } as any);
+      } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
@@ -78,7 +79,7 @@ describe("RecipesService", () => {
       await service.findAll(undefined, {
         title: "cake",
         ingredients: "flour",
-      } as any);
+      } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,

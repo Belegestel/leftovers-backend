@@ -13,7 +13,7 @@ CREATE TYPE "RecipeCategory" AS ENUM ('ITALIAN', 'ASIAN', 'DESSERT', 'VEGETARIAN
 
 -- AlterTable
 ALTER TABLE "recipe" DROP COLUMN "is_public",
-ADD COLUMN     "isPublic" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "is_public" BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN     "servings" INTEGER NOT NULL,
 ALTER COLUMN "rating" SET DEFAULT 0,
 DROP COLUMN "category",

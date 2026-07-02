@@ -14,10 +14,12 @@ export class RecipesRepository {
     recipeQuery?: RecipeQueryRequest,
   ): Promise<Recipe[]> {
     const categoryList = recipeQuery?.category
-      ? recipeQuery?.category?.split(",").map((c) => c.trim().toUpperCase() as RecipeCategory)
+      ? recipeQuery?.category
+          ?.split(",")
+          .map((c) => c.trim().toUpperCase() as RecipeCategory)
       : undefined;
 
-    const searchConditions: any = [];
+    const searchConditions: RecipeWhereInput[] = [];
     if (recipeQuery?.title) {
       searchConditions.push({
         title: { contains: recipeQuery.title, mode: "insensitive" },
@@ -30,18 +32,18 @@ export class RecipesRepository {
     }
     if (recipeQuery?.ingredients) {
       searchConditions.push({
-        ingredients: { contains: recipeQuery.ingredients, mode: "insensitive" },
+        ingredients: { hasSome: recipeQuery.ingredients.split(",") },
       });
     }
     if (recipeQuery?.steps) {
       searchConditions.push({
-        steps: { contains: recipeQuery.steps, mode: "insensitive" },
+        steps: { hasSome: recipeQuery.steps.split(",") },
       });
     }
 
     let conditions: RecipeWhereInput[] = [];
     if (userId) {
-      conditions.push({ OR: [{ isPublic: true }, { author_id: userId }] });
+      conditions.push({ OR: [{ isPublic: true }, { authorId: userId }] });
     } else {
       conditions.push({ isPublic: true });
     }
@@ -53,7 +55,7 @@ export class RecipesRepository {
     }
     if (recipeQuery?.startDate || recipeQuery?.endDate) {
       conditions.push({
-        created_at: { gte: recipeQuery.startDate, lte: recipeQuery.endDate },
+        createdAt: { gte: recipeQuery.startDate, lte: recipeQuery.endDate },
       });
     }
     if (searchConditions.length) {
@@ -64,7 +66,7 @@ export class RecipesRepository {
       where: {
         AND: conditions,
       },
-      orderBy: { created_at: "desc" },
+      orderBy: { createdAt: "desc" },
     });
     return result.map(Recipe.fromPrisma);
   }
@@ -73,7 +75,7 @@ export class RecipesRepository {
     title: string,
     description: string,
     category: RecipeCategory,
-    prep_time: number,
+    prepTime: number,
     servings: number,
     ingredients: string[],
     steps: string[],
@@ -84,11 +86,11 @@ export class RecipesRepository {
         title,
         description,
         category: prismaFromCategory(category),
-        prep_time,
+        prepTime,
         servings,
         ingredients,
         steps,
-        author_id: userId,
+        authorId: userId,
       },
     });
 
