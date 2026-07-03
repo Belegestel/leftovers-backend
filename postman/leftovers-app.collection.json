@@ -139,12 +139,32 @@
           "raw": "{{baseUrl}}/recipes?details=true&category=italian&rating=4&title=pasta",
           "host": ["{{baseUrl}}"],
           "path": ["recipes"],
-          "query": [
-            { "key": "details", "value": "false" }
-          ]
+          "query": [{ "key": "details", "value": "false" }]
         },
         "description": "Fetch recipes with as an authenticated user"
       }
+    },
+    {
+      "name": "Files - create presigned URL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fileName\": \"img.jpeg\",\"fileType\":\"image/png\",\"folder\":\"{{imageUploadFolder}}\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/files/presigned-url",
+          "host": ["{{baseUrl}}"],
+          "path": ["files", "presigned-url"]
+        }
+      },
+      "description": "Generates a presigned S3 upload URL for an image"
     }
   ],
   "variable": [
@@ -171,6 +191,11 @@
     {
       "key": "token",
       "value": "token-from-confirmation-email",
+      "type": "string"
+    },
+    {
+      "key": "imageUploadFolder",
+      "value": "images",
       "type": "string"
     }
   ]
