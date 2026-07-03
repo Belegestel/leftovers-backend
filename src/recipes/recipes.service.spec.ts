@@ -83,4 +83,40 @@ describe("RecipesService", () => {
       );
     });
   });
+
+  it("throws NotFoundException when recipe does not exist", async () => {
+    mockRecipesRepository.findById.mockResolvedValue(null);
+    await expect(service.findById(1, 1)).rejects.toThrow("Recipe not found");
+  });
+
+  it("throws ForbiddenException when accesing another user's private recipe", async () => {
+    mockRecipesRepository.findById.mockResolvedValue({
+      id: 1,
+      isPublic: false,
+      authorId: 2,
+    });
+    await expect(service.findById(1, 1)).rejects.toThrow(
+      "You do not have access to this recipe",
+    );
+  });
+
+  it("returns a public recipe for a guest", async () => {
+    mockRecipesRepository.findById.mockResolvedValue({
+      id: 1,
+      isPublic: true,
+      authorId: 2,
+    });
+    const result = await service.findById(1, undefined);
+    expect(result).toEqual({ id: 1, isPublic: true, authorId: 2 });
+  });
+
+  it("returns a private recipe when the user is the owner", async () => {
+    mockRecipesRepository.findById.mockResolvedValue({
+      id: 1,
+      isPublic: false,
+      authorId: 1,
+    });
+    const result = await service.findById(1, 1);
+    expect(result).toEqual({ id: 1, isPublic: false, authorId: 1 });
+  });
 });

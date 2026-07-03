@@ -41,7 +41,7 @@ describe("RecipesController", () => {
 
   it("returns list DTOs by default", async () => {
     mockRecipesService.findAll.mockResolvedValue({
-      recipes: [{ id: 1, title: "Pizza", prep_time: 30 }],
+      recipes: [{ id: 1, title: "Pizza", prepTime: 30 }],
     });
 
     const result = await controller.findAll(
@@ -59,7 +59,7 @@ describe("RecipesController", () => {
       id: 1,
       title: "Pizza",
       description: "Classic pizza",
-      prep_time: 30,
+      prepTime: 30,
       isPublic: true,
       createdAt: new Date("2021-01-01"),
       editedAt: new Date("2021-02-02"),
@@ -85,5 +85,19 @@ describe("RecipesController", () => {
         },
       ],
     });
+  });
+
+  it("passes undefined user ID (guest) for GET /recipes/:id", async () => {
+    mockRecipesService.findById.mockResolvedValue({ recipes: [{ id: 1 }] });
+    await controller.findById(1, {} as AuthenticatedRequest);
+    expect(mockRecipesService.findById).toHaveBeenCalledWith(1, undefined);
+  });
+
+  it("passes userID for GET /recipes/:id", async () => {
+    mockRecipesService.findById.mockResolvedValue({ recipes: [{ id: 1 }] });
+    await controller.findById(1, {
+      user: { userId: 2 },
+    } as AuthenticatedRequest);
+    expect(mockRecipesService.findById).toHaveBeenCalledWith(1, 2);
   });
 });
