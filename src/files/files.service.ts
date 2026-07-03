@@ -32,7 +32,7 @@ export class FilesService {
   ): Promise<PresignedUrlResult> {
     const bucket = this.config.getOrThrow<string>("AWS_S3_BUCKET");
     const fileExtension = path.extname(dto.fileName);
-    const key = `${dto.folder}/${randomUUID()}.${fileExtension}`;
+    const key = `${dto.folder}/${randomUUID()}${fileExtension}`;
 
     const command = new PutObjectCommand({
       Bucket: bucket,
