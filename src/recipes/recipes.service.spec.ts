@@ -107,9 +107,7 @@ describe("RecipesService", () => {
       authorId: 2,
     });
     const result = await service.findById(1, undefined);
-    expect(result).toEqual({
-      recipes: [{ id: 1, isPublic: true, authorId: 2 }],
-    });
+    expect(result).toEqual({ id: 1, isPublic: true, authorId: 2 });
   });
 
   it("returns a private recipe when the user is the owner", async () => {
@@ -119,8 +117,6 @@ describe("RecipesService", () => {
       authorId: 1,
     });
     const result = await service.findById(1, 1);
-    expect(result).toEqual({
-      recipes: [{ id: 1, isPublic: false, authorId: 1 }],
-    });
+    expect(result).toEqual({ id: 1, isPublic: false, authorId: 1 });
   });
 });

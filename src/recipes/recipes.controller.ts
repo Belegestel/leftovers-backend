@@ -23,6 +23,7 @@ import {
 } from "@nestjs/swagger";
 import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
 import { RecipeQueryResponse } from "./dto/responses/recipeQueryResponse.dto";
+import { SingleRecipeQueryResponse } from "./dto/responses/singleRecipeQueryResponse.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -118,9 +119,9 @@ export class RecipesController {
   async findById(
     @Param("id", ParseIntPipe) id: number,
     @Req() req: AuthenticatedRequest,
-  ): Promise<RecipeQueryResponse> {
+  ): Promise<SingleRecipeQueryResponse> {
     const userId = req.user?.userId;
     const recipe = await this.recipesService.findById(id, userId);
-    return RecipeQueryResponse.from(recipe, true);
+    return SingleRecipeQueryResponse.from(recipe);
   }
 }

@@ -7,6 +7,7 @@ import { RecipeQueryResult } from "./dto/recipeQueryResultDto";
 import { RecipesRepository } from "./recipes.repository";
 import { RecipeQueryFilters } from "./dto/recipeQueryFilters.dto";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
+import { SingleRecipeQueryResult } from "./dto/singleRecipeQueryResult.dto";
 
 @Injectable()
 export class RecipesService {
@@ -21,7 +22,7 @@ export class RecipesService {
     return RecipeQueryResult.from(result);
   }
 
-  async findById(id: number, userId?: number): Promise<RecipeQueryResult> {
+  async findById(id: number, userId?: number): Promise<SingleRecipeQueryResult> {
     const recipe = await this.recipesRepository.findById(id);
     if (!recipe) {
       throw new NotFoundException("Recipe not found");
@@ -33,6 +34,6 @@ export class RecipesService {
       throw new ForbiddenException("You do not have access to this recipe");
     }
 
-    return RecipeQueryResult.from([recipe]);
+    return SingleRecipeQueryResult.from(recipe);
   }
 }
