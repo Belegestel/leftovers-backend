@@ -20,6 +20,8 @@
     "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1078.0",
+    "@aws-sdk/s3-request-presigner": "3.1078.0",
     "@nestjs-modules/mailer": "2.3.7",
     "@nestjs/common": "11.0.1",
     "@nestjs/config": "4.0.4",
@@ -35,8 +37,6 @@
     "class-validator": "0.15.1",
     "handlebars": "4.7.9",
     "nodemailer": "9.0.1",
-    "passport": "0.7.0",
-    "passport-jwt": "4.0.1",
     "passport": "0.7.0",
     "passport-jwt": "4.0.1",
     "passport-local": "1.0.0",
