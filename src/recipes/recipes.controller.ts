@@ -5,19 +5,36 @@ import {
   Req,
   Query,
   HttpStatus,
+  Post,
+  HttpCode,
+  Body,
+  Param,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
 import { RecipeQueryResponse } from "./dto/responses/recipeQueryResponse.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { CreateRecipeRequest } from "./dto/requests/createRecipeRequest.dto";
+import { CreateRecipeResponse } from "./dto/responses/createRecipeResponse.dto";
+import { CreateRecipe } from "./dto/createRecipe.dto";
+import { SingleRecipeQueryResponse } from "./dto/responses/singleRecipeQueryResponse.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -71,5 +88,99 @@ export class RecipesController {
     const recipes = await this.recipesService.findAll(userId, filters);
     const isDetails = filters.details === true;
     return RecipeQueryResponse.from(recipes, isDetails);
+  }
+
+  @ApiOperation({
+    summary: "Create a new recipe",
+    description:
+      "Creates a new recipe owned by the authenticated user. Ingredients and steps must contain at least one item each.",
+  })
+  @ApiBearerAuth()
+  @ApiBody({
+    type: CreateRecipeRequest,
+  })
+  @ApiCreatedResponse({
+    description: "Recipe created succesfully",
+    type: CreateRecipeResponse,
+  })
+  @ApiBadRequestResponse({
+    description: "Bad request data",
+    schema: {
+      example: {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: [
+          "title must be shorter than or equal to 100 characters",
+          "prep_time must not be less than 5",
+        ],
+        error: "Bad Request",
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: "Missing or invalid JWT token",
+    schema: {
+      example: {
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: "Unauthorized",
+      },
+    },
+  })
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async createRecipe(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreateRecipeRequest,
+  ): Promise<CreateRecipeResponse> {
+    const userId = req.user!.userId;
+    const input = CreateRecipe.from(dto);
+    const recipe = await this.recipesService.createRecipe(userId, input);
+    return CreateRecipeResponse.from(recipe);
+  }
+
+  @ApiOperation({
+    summary: "Get a single recipe by id",
+    description:
+      "Get a single recipe by ID. If user is not logged in, only public recieps are available. Otherwise, also their private recipes are available.",
+  })
+  @ApiOkResponse({
+    description: "Recipe found and returned succesfully",
+    type: RecipeQueryResponse,
+  })
+  @ApiNotFoundResponse({
+    description: "Recipe not found",
+    schema: {
+      example: {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "Recipe not found",
+        error: "Not Found",
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    description: "Access to this recipe is forbidden for current user",
+    schema: {
+      example: {
+        statusCode: HttpStatus.FORBIDDEN,
+        message: "You do not have access to this recipe",
+        error: "Forbidden",
+      },
+    },
+  })
+  @ApiParam({
+    name: "id",
+    type: Number,
+    description: "Recipe ID",
+    example: 1,
+  })
+  @Get(":id")
+  @UseGuards(OptionalJwtAuthGuard)
+  async findById(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<SingleRecipeQueryResponse> {
+    const userId = req.user?.userId;
+    const recipe = await this.recipesService.findById(id, userId);
+    return SingleRecipeQueryResponse.from(recipe);
   }
 }

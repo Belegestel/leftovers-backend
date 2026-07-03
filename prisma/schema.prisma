@@ -3,6 +3,15 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
+enum RecipeCategory {
+  ITALIAN
+  ASIAN
+  DESSERT
+  VEGETARIAN
+  VEGAN 
+  OTHER
+}
+
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -30,6 +39,11 @@ model Recipe {
   title String
   description String?
   prepTime Int? @map("prep_time")
+  servings Int
+
+  ingredients String[]
+  steps String[]
+
   isPublic Boolean @default(true) @map("is_public")
 
   authorId Int @map("author_id")
@@ -38,11 +52,8 @@ model Recipe {
   createdAt DateTime @default(now()) @map("created_at")
   editedAt DateTime @updatedAt @map("edited_at")
 
-  rating Int
-  category String?
-
-  ingredients String
-  steps String
+  rating Int @default(0)
+  category RecipeCategory
 
   @@map("recipe")
 }

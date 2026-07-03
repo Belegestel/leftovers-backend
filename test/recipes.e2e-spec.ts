@@ -5,6 +5,7 @@ import { clearDatabase } from "./utils/clear-db";
 import { createUserAndLogin } from "./utils/create-user-and-login";
 import { randomUUID } from "node:crypto";
 import request from "supertest";
+import { RecipeCategory } from "../src/recipes/recipe-categories.enum";
 
 describe("Recipes E2E", () => {
   let app: INestApplication;
@@ -33,22 +34,26 @@ describe("Recipes E2E", () => {
       "password123",
     );
 
-    const res = await prisma.recipe.createMany({
+    await prisma.recipe.createMany({
       data: [
         {
           title: "Public recipe",
-          ingredients: "a",
-          steps: "b",
+          ingredients: ["a"],
+          steps: ["b"],
           rating: 5,
           isPublic: true,
+          servings: 1,
+          category: RecipeCategory.ITALIAN,
           authorId: user.user.id,
         },
         {
           title: "Private recipe",
-          ingredients: "c",
-          steps: "d",
+          ingredients: ["c"],
+          steps: ["d"],
           rating: 4,
           isPublic: false,
+          servings: 2,
+          category: RecipeCategory.ASIAN,
           authorId: user.user.id,
         },
       ],
@@ -78,26 +83,32 @@ describe("Recipes E2E", () => {
       data: [
         {
           title: "Public recipe",
-          ingredients: "a",
-          steps: "b",
+          ingredients: ["a"],
+          steps: ["b"],
           rating: 5,
           isPublic: true,
+          servings: 1,
+          category: RecipeCategory.ITALIAN,
           authorId: userA.user.id,
         },
         {
           title: "Private recipe",
-          ingredients: "c",
-          steps: "d",
+          ingredients: ["c"],
+          steps: ["d"],
           rating: 4,
           isPublic: false,
+          servings: 2,
+          category: RecipeCategory.ASIAN,
           authorId: userA.user.id,
         },
         {
           title: "Another private recipe",
-          ingredients: "e",
-          steps: "f",
+          ingredients: ["e"],
+          steps: ["f"],
           rating: 3,
           isPublic: false,
+          servings: 2,
+          category: RecipeCategory.ASIAN,
           authorId: userB.user.id,
         },
       ],
@@ -132,10 +143,12 @@ describe("Recipes E2E", () => {
     await prisma.recipe.create({
       data: {
         title: "Private recipe",
-        ingredients: "g",
-        steps: "h",
+        ingredients: ["g"],
+        steps: ["h"],
         rating: 2,
         isPublic: false,
+        servings: 1,
+        category: RecipeCategory.VEGAN,
         authorId: userB.user.id,
       },
     });
@@ -158,12 +171,14 @@ describe("Recipes E2E", () => {
     const recipe = await prisma.recipe.create({
       data: {
         title: "Public recipe",
-        ingredients: "i",
-        steps: "j",
+        ingredients: ["i"],
+        steps: ["j"],
         rating: 1,
         isPublic: true,
         authorId: userA.user.id,
         description: "desc",
+        servings: 8,
+        category: RecipeCategory.OTHER,
       },
     });
 
@@ -179,5 +194,106 @@ describe("Recipes E2E", () => {
         rating: 1,
       }),
     ]);
+  });
+
+  it("POST /recipes reject unauthentifcated users", async () => {
+    const response = await request(app.getHttpServer())
+      .post("/recipes")
+      .send({
+        title: "Pizza",
+        description: "Tasty",
+        category: RecipeCategory.ITALIAN,
+        prep_time: 30,
+        servings: 2,
+        ingredients: ["flour"],
+        steps: ["mix"],
+      })
+      .expect(401);
+
+    expect(response.body.message).toBeDefined();
+  });
+
+  it("POST /recipes should reject invalid payload", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+
+    const response = await request(app.getHttpServer())
+      .post("/recipes")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        title: "",
+        description: "ok",
+        category: RecipeCategory.ITALIAN,
+        prep_time: 1,
+        servings: 0,
+        ingredients: [],
+        steps: [],
+      })
+      .expect(400);
+    expect(response.body.message).toBeDefined();
+  });
+
+  it("POST /recipes should create a recipe", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+    const payload = {
+      title: "Pizza",
+      description: "Tasty pizza",
+      category: RecipeCategory.ITALIAN,
+      prep_time: 30,
+      servings: 2,
+      ingredients: ["flour", "water"],
+      steps: ["mix", "bake"],
+    };
+    const response = await request(app.getHttpServer())
+      .post("/recipes")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send(payload)
+      .expect(201);
+    expect(response.body).toMatchObject({ recipe: { id: 1 } });
+    const recipe = await prisma.recipe.findFirst({ where: { title: "Pizza" } });
+    expect(recipe).not.toBeNull();
+    expect(recipe?.authorId).toBe(user.user.id);
+    expect(recipe?.ingredients).toEqual(["flour", "water"]);
+  });
+
+  it("GET /recipes/:id returns a public recipe for guests", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `user${randomUUID()}@email.com`,
+      "password123",
+    );
+
+    const recipe = await prisma.recipe.create({
+      data: {
+        title: "Public recipe",
+        ingredients: ["i"],
+        steps: ["j"],
+        rating: 1,
+        isPublic: true,
+        authorId: user.user.id,
+        description: "desc",
+        servings: 3,
+        category: RecipeCategory.OTHER,
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .get(`/recipes/${recipe.id}`)
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      id: recipe.id,
+      title: "Public recipe",
+    });
   });
 });

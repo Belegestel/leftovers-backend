@@ -2,6 +2,10 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { RecipesService } from "./recipes.service";
 import { RecipesRepository } from "./recipes.repository";
 import { mockRecipesRepository } from "../../test/unit/mocks/mockRecipesRepository";
+import { CreateRecipe } from "./dto/createRecipe.dto";
+import { RecipeCategory } from "./recipe-categories.enum";
+import { Recipe } from "./recipes.model";
+import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 
 describe("RecipesService", () => {
@@ -82,5 +86,82 @@ describe("RecipesService", () => {
         expect.objectContaining({ title: "cake", ingredients: "flour" }),
       );
     });
+
+    it("creates a recipe via repository and returns a result", async () => {
+      const dto: CreateRecipe = {
+        title: "Pizza",
+        description: "TastyPizza",
+        category: RecipeCategory.ITALIAN,
+        prepTime: 30,
+        servings: 2,
+        ingredients: ["Flour", "Water"],
+        steps: ["mix", "bake"],
+      };
+      const repoResult: Recipe = {
+        id: 123,
+        title: "Pizza",
+        description: "TastyPizza",
+        category: RecipeCategory.ITALIAN,
+        prep_time: 30,
+        servings: 2,
+        ingredients: ["Flour", "Water"],
+        steps: ["mix", "bake"],
+        isPublic: true,
+        createdAt: new Date(),
+        editedAt: new Date(),
+        rating: 1,
+        authorId: 1,
+      };
+
+      mockRecipesRepository.create.mockResolvedValue(repoResult);
+      const result = await service.createRecipe(1, dto);
+      expect(mockRecipesRepository.create).toHaveBeenCalledWith(
+        "Pizza",
+        "TastyPizza",
+        RecipeCategory.ITALIAN,
+        30,
+        2,
+        ["Flour", "Water"],
+        ["mix", "bake"],
+        1,
+      );
+      expect(result).toEqual(CreateRecipeResult.from(repoResult));
+    });
+  });
+
+  it("throws NotFoundException when recipe does not exist", async () => {
+    mockRecipesRepository.findById.mockResolvedValue(null);
+    await expect(service.findById(1, 1)).rejects.toThrow("Recipe not found");
+  });
+
+  it("throws ForbiddenException when accesing another user's private recipe", async () => {
+    mockRecipesRepository.findById.mockResolvedValue({
+      id: 1,
+      isPublic: false,
+      authorId: 2,
+    });
+    await expect(service.findById(1, 1)).rejects.toThrow(
+      "You do not have access to this recipe",
+    );
+  });
+
+  it("returns a public recipe for a guest", async () => {
+    mockRecipesRepository.findById.mockResolvedValue({
+      id: 1,
+      isPublic: true,
+      authorId: 2,
+    });
+    const result = await service.findById(1, undefined);
+    expect(result).toEqual({ id: 1, isPublic: true, authorId: 2 });
+  });
+
+  it("returns a private recipe when the user is the owner", async () => {
+    mockRecipesRepository.findById.mockResolvedValue({
+      id: 1,
+      isPublic: false,
+      authorId: 1,
+    });
+    const result = await service.findById(1, 1);
+    expect(result).toEqual({ id: 1, isPublic: false, authorId: 1 });
   });
 });
