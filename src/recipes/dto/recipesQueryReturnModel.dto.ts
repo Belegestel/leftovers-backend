@@ -1,15 +1,26 @@
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Recipe } from "../recipes.model";
 
 export class RecipesQueryReturnModel {
+  @ApiProperty()
   id: number;
+  @ApiProperty()
   title: string;
+  @ApiPropertyOptional()
   description?: string;
+  @ApiPropertyOptional()
   prepTime?: number;
+  @ApiPropertyOptional()
   isPublic?: boolean;
+  @ApiPropertyOptional()
   authorId?: number;
+  @ApiPropertyOptional()
   createdAt?: Date;
+  @ApiPropertyOptional()
   editedAt?: Date;
+  @ApiPropertyOptional()
   rating?: number;
+  @ApiPropertyOptional()
   category?: string;
   ingredients?: string[];
   steps?: string[];

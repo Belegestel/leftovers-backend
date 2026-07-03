@@ -96,4 +96,9 @@ export class RecipesRepository {
 
     return Recipe.fromPrisma(recipe);
   }
+
+  async findById(id: number): Promise<Recipe | null> {
+    const recipe = await this.prisma.recipe.findUnique({ where: { id } });
+    return recipe ? Recipe.fromPrisma(recipe) : null;
+  }
 }
