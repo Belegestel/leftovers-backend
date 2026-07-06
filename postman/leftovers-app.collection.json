@@ -180,6 +180,22 @@
         },
         "description": "Fetch a single recipe by ID. Returns public recipes for all users. Private recipes are available only to their owners, when logged in."
       }
+    },
+    {
+      "name": "Auth - initiate password reset",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\"email\": \"{{email}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/reset-password",
+          "host": "{{baseUrl}}",
+          "path": ["auth", "reset-password"]
+        }
+      }
     }
   ],
   "variable": [
