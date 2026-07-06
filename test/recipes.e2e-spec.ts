@@ -203,7 +203,7 @@ describe("Recipes E2E", () => {
         title: "Pizza",
         description: "Tasty",
         category: RecipeCategory.ITALIAN,
-        prep_time: 30,
+        prepTime: 30,
         servings: 2,
         ingredients: ["flour"],
         steps: ["mix"],

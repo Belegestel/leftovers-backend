@@ -30,7 +30,7 @@ export class CreateRecipeRequest {
   @IsInt()
   @Min(3)
   @Max(240)
-  prep_time: number;
+  prepTime: number;
 
   @IsInt()
   @Min(1)
