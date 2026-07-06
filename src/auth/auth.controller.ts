@@ -216,8 +216,8 @@ export class AuthController {
     description: "Reset token and new password",
   })
   @ApiOkResponse({
-    description: "The password has been changed succesfully",
-    schema: { example: { message: "Password reset succesfully" } },
+    description: "The password has been changed successfully",
+    schema: { example: { message: "Password reset successfully" } },
   })
   @ApiBadRequestResponse({
     description: "Invalid input data - validation error",

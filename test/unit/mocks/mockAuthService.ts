@@ -4,4 +4,5 @@ export const mockAuthService = {
   register: jest.fn(),
   confirmRegistration: jest.fn(),
   initiatePasswordReset: jest.fn(),
+  confirmPasswordReset: jest.fn(),
 };

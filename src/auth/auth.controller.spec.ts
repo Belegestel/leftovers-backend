@@ -84,6 +84,30 @@ describe("AuthController", () => {
     expect(mockAuthService.initiatePasswordReset).toHaveBeenCalledWith(
       expect.objectContaining({ email: dto.email }),
     );
-    expect(res).toEqual({ message: "If email exists, the message has been sent." });
+    expect(res).toEqual({
+      message: "If email exists, the message has been sent.",
+    });
+  });
+
+  it("should confirm password reset and call auth service", async () => {
+    const dto = { token: "raw-token", newPassword: "password321" };
+    const expectedResult = { message: "Password reset successfully" };
+    mockAuthService.confirmPasswordReset.mockResolvedValue(expectedResult);
+    const res = await controller.confirmResetPassword(dto as any);
+
+    expect(res).toEqual(expectedResult);
+    expect(mockAuthService.confirmPasswordReset).toHaveBeenCalledWith(dto);
+  });
+
+  it("should propagate error when the reset token is invalid", async () => {
+    const dto = { token: "invalid-token", newPassword: "password321" };
+    mockAuthService.confirmPasswordReset.mockRejectedValue(
+      new Error("Invalid data or expired token"),
+    );
+
+    await expect(controller.confirmResetPassword(dto as any)).rejects.toThrow(
+      "Invalid data or expired token",
+    );
+    expect(mockAuthService.confirmPasswordReset).toHaveBeenCalledWith(dto);
   });
 });
