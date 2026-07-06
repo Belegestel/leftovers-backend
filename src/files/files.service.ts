@@ -17,17 +17,17 @@ export class FilesService {
   private readonly bucket: string;
 
   constructor(private readonly config: ConfigService) {
-    const aws_data = {
+    const awsData = {
       region: this.config.getOrThrow<string>("AWS_REGION"),
       accessKeyId: this.config.getOrThrow<string>("AWS_ACCESS_KEY_ID"),
       secretAccessKey: this.config.getOrThrow<string>("AWS_SECRET_ACCESS_KEY"),
     };
 
     this.s3 = new S3Client({
-      region: aws_data.region!,
+      region: awsData.region!,
       credentials: {
-        accessKeyId: aws_data.accessKeyId!,
-        secretAccessKey: aws_data.secretAccessKey!,
+        accessKeyId: awsData.accessKeyId!,
+        secretAccessKey: awsData.secretAccessKey!,
       },
     });
     this.bucket = this.config.getOrThrow<string>("AWS_S3_BUCKET");

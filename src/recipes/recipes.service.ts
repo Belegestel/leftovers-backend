@@ -15,8 +15,8 @@ import { FilesService } from "../files/files.service";
 @Injectable()
 export class RecipesService {
   constructor(
-    private recipesRepository: RecipesRepository,
-    private filesService: FilesService,
+    private readonly recipesRepository: RecipesRepository,
+    private readonly filesService: FilesService,
   ) {}
 
   async findAll(

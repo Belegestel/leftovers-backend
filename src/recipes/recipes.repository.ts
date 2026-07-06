@@ -48,7 +48,7 @@ export class RecipesRepository {
       conditions.push({ isPublic: true });
     }
     if (categoryList?.length) {
-      conditions.push({ category: { in: categoryList as any } }); // Relies on feat/create-recipe-endpoint
+      conditions.push({ category: { in: categoryList } }); 
     }
     if (recipeQuery?.rating) {
       conditions.push({ rating: { gte: recipeQuery.rating } });
