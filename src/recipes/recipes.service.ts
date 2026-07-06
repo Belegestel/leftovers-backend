@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -11,6 +12,10 @@ import { CreateRecipe } from "./dto/createRecipe.dto";
 import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { SingleRecipeQueryResult } from "./dto/singleRecipeQueryResult.dto";
 import { FilesService } from "../files/files.service";
+import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto";
+import path from "path";
+import { randomUUID } from "crypto";
+import { RecipeImageUploadUrl } from "./dto/recipeImageUploadUrl.dto";
 
 @Injectable()
 export class RecipesService {
@@ -28,7 +33,7 @@ export class RecipesService {
     const links = await Promise.all(
       result.map(
         async (value) =>
-          await this.filesService.createPresignedGetUrl(value.imageKey),
+          await (value.imageKey ? this.filesService.createPresignedGetUrl(value.imageKey) : undefined),
       ),
     );
     return RecipeQueryResult.from(result, links);
@@ -47,11 +52,11 @@ export class RecipesService {
       dto.ingredients,
       dto.steps,
       userId,
-      dto.imageKey,
+      undefined
     );
-    const imageLink = await this.filesService.createPresignedGetUrl(
+    const imageLink = recipe.imageKey ? await this.filesService.createPresignedGetUrl(
       recipe.imageKey,
-    );
+    ) : undefined;
     return CreateRecipeResult.from(recipe, imageLink);
   }
   async findById(
@@ -69,9 +74,45 @@ export class RecipesService {
       throw new ForbiddenException("You do not have access to this recipe");
     }
 
-    const imageLink = await this.filesService.createPresignedGetUrl(
+    const imageLink = recipe.imageKey ? await this.filesService.createPresignedGetUrl(
       recipe.imageKey,
-    );
+    ) : undefined;
     return SingleRecipeQueryResult.from(recipe, imageLink);
+  }
+
+  async createRecipeImageUploadUrl(
+    dto: CreateRecipeImageUploadUrl,
+  ): Promise<RecipeImageUploadUrl> {
+    const recipe = await this.recipesRepository.findById(dto.id);
+    if (!recipe) {
+      throw new NotFoundException("The recipe does not exist");
+    }
+    if (recipe.authorId !== dto.userId) {
+      throw new ForbiddenException("You cannot modify this recipe");
+    }
+    const ext = path.extname(dto.fileName);
+    const uuid = randomUUID();
+    const key = `recipes/${dto.id}/${uuid}${ext}`;
+    const uploadUrl = await this.filesService.createPresignedUploadUrl(
+      key,
+      dto.fileType,
+    );
+    return RecipeImageUploadUrl.from(uploadUrl);
+  }
+
+  async confirmReceivedImageUpload(id: number, userId: number, key: string): Promise<string> {
+    const recipe = await this.recipesRepository.findById(id);
+    if (!recipe) {
+      throw new NotFoundException("The recipe does not exist");
+    }
+    if (recipe.authorId !== userId) {
+      throw new ForbiddenException("You cannot modify this recipe");
+    }
+    if (!key.startsWith(`recipes/${id}`)) {
+      throw new BadRequestException("Invalid image key");
+    }
+    await this.recipesRepository.updateImageKey(id, key);
+    const imageUrl = await this.filesService.createPresignedGetUrl(key);
+    return imageUrl
   }
 }

@@ -6,9 +6,6 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { ConfigService } from "@nestjs/config";
-import { CreatePresignedUrl } from "./dto/createPresignedUrl.dto";
-import { randomUUID } from "node:crypto";
-import path from "node:path";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 @Injectable()
@@ -34,15 +31,13 @@ export class FilesService {
   }
 
   async createPresignedUploadUrl(
-    dto: CreatePresignedUrl,
+    key: string,
+    contentType: string,
   ): Promise<PresignedUrlResult> {
-    const fileExtension = path.extname(dto.fileName);
-    const key = `${dto.folder}/${randomUUID()}${fileExtension}`;
-
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
-      ContentType: dto.fileType,
+      ContentType: contentType,
     });
     const url = await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 });
     return PresignedUrlResult.from(url, key);

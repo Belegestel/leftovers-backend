@@ -5,9 +5,9 @@ export class RecipeQueryResult {
   @ApiProperty()
   recipes: Recipe[];
   @ApiProperty()
-  imageLinks: string[];
+  imageLinks: (string | undefined)[];
 
-  static from(recipes: Recipe[], imageLinks: string[]): RecipeQueryResult {
+  static from(recipes: Recipe[], imageLinks: (string | undefined)[]): RecipeQueryResult {
     return {
       recipes,
       imageLinks,

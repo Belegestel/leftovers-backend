@@ -55,7 +55,7 @@ model Recipe {
   rating Int @default(0)
   category RecipeCategory
 
-  imageKey String @map("image_key")
+  imageKey String? @map("image_key")
 
   @@map("recipe")
 }

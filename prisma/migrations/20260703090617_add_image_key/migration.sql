@@ -5,4 +5,4 @@
 
 */
 -- AlterTable
-ALTER TABLE "recipe" ADD COLUMN     "image_key" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "recipe" ADD COLUMN     "image_key" TEXT;

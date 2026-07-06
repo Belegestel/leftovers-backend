@@ -48,7 +48,7 @@ export class RecipesRepository {
       conditions.push({ isPublic: true });
     }
     if (categoryList?.length) {
-      conditions.push({ category: { in: categoryList } }); 
+      conditions.push({ category: { in: categoryList } });
     }
     if (recipeQuery?.rating) {
       conditions.push({ rating: { gte: recipeQuery.rating } });
@@ -80,7 +80,7 @@ export class RecipesRepository {
     ingredients: string[],
     steps: string[],
     userId: number,
-    imageKey: string,
+    imageKey: string | undefined,
   ): Promise<Recipe> {
     const recipe = await this.prisma.recipe.create({
       data: {
@@ -101,6 +101,14 @@ export class RecipesRepository {
 
   async findById(id: number): Promise<Recipe | null> {
     const recipe = await this.prisma.recipe.findUnique({ where: { id } });
+    return recipe ? Recipe.fromPrisma(recipe) : null;
+  }
+
+  async updateImageKey(recipeId: number, key: string) {
+    const recipe = await this.prisma.recipe.update({
+      where: { id: recipeId },
+      data: { imageKey: key },
+    });
     return recipe ? Recipe.fromPrisma(recipe) : null;
   }
 }

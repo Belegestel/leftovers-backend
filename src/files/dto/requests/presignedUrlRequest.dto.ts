@@ -9,7 +9,4 @@ export class PresignedUrlRequest {
   @IsMimeType()
   @IsIn(["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"])
   fileType: string;
-
-  @IsString()
-  folder: string;
 }

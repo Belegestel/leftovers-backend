@@ -13,9 +13,9 @@ export class SingleRecipeQueryResult {
   category?: string;
   ingredients: string[];
   steps: string[];
-  imageLink: string;
+  imageLink: string | undefined;
 
-  static from(recipe: Recipe, imageLink: string): SingleRecipeQueryResult {
+  static from(recipe: Recipe, imageLink: string | undefined): SingleRecipeQueryResult {
     return {
       id: recipe.id,
       title: recipe.title,

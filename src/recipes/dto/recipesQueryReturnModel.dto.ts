@@ -28,12 +28,12 @@ export class RecipesQueryReturnModel {
   @ApiPropertyOptional()
   steps?: string[];
   @ApiProperty()
-  imageLink: string;
+  imageLink: string | undefined;
 
   static from(
     recipe: Recipe,
     detailed: boolean,
-    imageLink: string,
+    imageLink: string | undefined,
   ): RecipesQueryReturnModel {
     if (!detailed) {
       return {

@@ -27,7 +27,7 @@ export class SingleRecipeQueryResponse {
   @ApiProperty()
   steps: string[];
   @ApiProperty()
-  imageLink: string;
+  imageLink: string | undefined;
 
   static from(result: SingleRecipeQueryResult): SingleRecipeQueryResponse {
     return {

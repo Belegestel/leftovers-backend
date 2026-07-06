@@ -35,6 +35,10 @@ import { CreateRecipeRequest } from "./dto/requests/createRecipeRequest.dto";
 import { CreateRecipeResponse } from "./dto/responses/createRecipeResponse.dto";
 import { CreateRecipe } from "./dto/createRecipe.dto";
 import { SingleRecipeQueryResponse } from "./dto/responses/singleRecipeQueryResponse.dto";
+import { RecipeImageUploadRequest } from "./dto/requests/recipeImageUploadRequest.dto";
+import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto";
+import { ConfirmReceivedImageRequest } from "./dto/confirmReceivedImageRequest.dto";
+import { RecipeImageUploadResponse } from "./dto/responses/recipeImageUploadResponse.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -182,5 +186,34 @@ export class RecipesController {
     const userId = req.user?.userId;
     const recipe = await this.recipesService.findById(id, userId);
     return SingleRecipeQueryResponse.from(recipe);
+  }
+
+  @Post(":id/image-upload-url")
+  @UseGuards(JwtAuthGuard)
+  async getRecipeImageUploadUrl(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+    @Body() body: RecipeImageUploadRequest,
+  ): Promise<RecipeImageUploadResponse> {
+    const userId = req.user.userId;
+    const input = CreateRecipeImageUploadUrl.from(id, body, userId);
+    const res = await this.recipesService.createRecipeImageUploadUrl(input);
+    return RecipeImageUploadResponse.from(res);
+  }
+
+  @Post(":id/image-confirm")
+  @UseGuards(JwtAuthGuard)
+  async confirmReceivedImageUpload(
+    @Param("id") id: number,
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: ConfirmReceivedImageRequest,
+  ) {
+    const userId = req.user.userId;
+    const res = this.recipesService.confirmReceivedImageUpload(
+      id,
+      userId,
+      dto.key,
+    );
+    console.log('TODO DTO')
   }
 }
