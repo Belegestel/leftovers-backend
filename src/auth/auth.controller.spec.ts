@@ -74,4 +74,16 @@ describe("AuthController", () => {
     expect(result).toEqual(expectedResult);
     expect(mockAuthService.login).toHaveBeenCalledWith(dto);
   });
+
+  it("should initiate password reset and call auth service", async () => {
+    const dto = { email: "john.doe@email.com" };
+    mockAuthService.initiatePasswordReset.mockResolvedValue(undefined);
+
+    const res = await controller.resetPassword(dto as any);
+
+    expect(mockAuthService.initiatePasswordReset).toHaveBeenCalledWith(
+      expect.objectContaining({ email: dto.email }),
+    );
+    expect(res).toEqual({ message: "If email exists, the message has been sent." });
+  });
 });
