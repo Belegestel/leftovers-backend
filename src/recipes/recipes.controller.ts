@@ -110,7 +110,7 @@ export class RecipesController {
         statusCode: HttpStatus.BAD_REQUEST,
         message: [
           "title must be shorter than or equal to 100 characters",
-          "prep_time must not be less than 5",
+          "prepTime must not be less than 3",
         ],
         error: "Bad Request",
       },
@@ -132,7 +132,7 @@ export class RecipesController {
     @Req() req: AuthenticatedRequest,
     @Body() dto: CreateRecipeRequest,
   ): Promise<CreateRecipeResponse> {
-    const userId = req.user!.userId;
+    const userId = req.user.userId;
     const input = CreateRecipe.from(dto);
     const recipe = await this.recipesService.createRecipe(userId, input);
     return CreateRecipeResponse.from(recipe);

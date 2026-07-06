@@ -15,7 +15,7 @@ export class CreateRecipe {
       title: dto.title,
       description: dto.description,
       category: dto.category,
-      prepTime: dto.prep_time,
+      prepTime: dto.prepTime,
       servings: dto.servings,
       ingredients: dto.ingredients,
       steps: dto.steps,

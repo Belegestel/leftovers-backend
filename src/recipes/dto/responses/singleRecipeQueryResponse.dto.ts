@@ -1,18 +1,31 @@
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { SingleRecipeQueryResult } from "../singleRecipeQueryResult.dto";
 
 export class SingleRecipeQueryResponse {
+  @ApiProperty()
   id: number;
+  @ApiProperty()
   title: string;
+  @ApiPropertyOptional()
   description?: string;
+  @ApiPropertyOptional()
   prepTime?: number;
+  @ApiProperty()
   isPublic: boolean;
+  @ApiProperty()
   authorId: number;
+  @ApiProperty()
   createdAt: Date;
+  @ApiProperty()
   editedAt: Date;
+  @ApiProperty()
   rating: number;
+  @ApiPropertyOptional()
   category?: string;
-  ingredients: string;
-  steps: string;
+  @ApiProperty()
+  ingredients: string[];
+  @ApiProperty()
+  steps: string[];
 
   static from(result: SingleRecipeQueryResult): SingleRecipeQueryResponse {
     return {

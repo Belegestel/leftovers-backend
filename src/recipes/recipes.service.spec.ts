@@ -102,7 +102,7 @@ describe("RecipesService", () => {
         title: "Pizza",
         description: "TastyPizza",
         category: RecipeCategory.ITALIAN,
-        prep_time: 30,
+        prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
