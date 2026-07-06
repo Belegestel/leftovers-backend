@@ -5,6 +5,9 @@ import {
   Req,
   Query,
   HttpStatus,
+  Post,
+  HttpCode,
+  Body,
   Param,
   ParseIntPipe,
 } from "@nestjs/common";
@@ -13,6 +16,9 @@ import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -20,9 +26,14 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import type { AuthenticatedRequest } from "../types/authenticated-request.interface";
 import { RecipeQueryResponse } from "./dto/responses/recipeQueryResponse.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { CreateRecipeRequest } from "./dto/requests/createRecipeRequest.dto";
+import { CreateRecipeResponse } from "./dto/responses/createRecipeResponse.dto";
+import { CreateRecipe } from "./dto/createRecipe.dto";
 import { SingleRecipeQueryResponse } from "./dto/responses/singleRecipeQueryResponse.dto";
 
 @ApiTags("Recipes")
@@ -77,6 +88,54 @@ export class RecipesController {
     const recipes = await this.recipesService.findAll(userId, filters);
     const isDetails = filters.details === true;
     return RecipeQueryResponse.from(recipes, isDetails);
+  }
+
+  @ApiOperation({
+    summary: "Create a new recipe",
+    description:
+      "Creates a new recipe owned by the authenticated user. Ingredients and steps must contain at least one item each.",
+  })
+  @ApiBearerAuth()
+  @ApiBody({
+    type: CreateRecipeRequest,
+  })
+  @ApiCreatedResponse({
+    description: "Recipe created succesfully",
+    type: CreateRecipeResponse,
+  })
+  @ApiBadRequestResponse({
+    description: "Bad request data",
+    schema: {
+      example: {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: [
+          "title must be shorter than or equal to 100 characters",
+          "prepTime must not be less than 3",
+        ],
+        error: "Bad Request",
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: "Missing or invalid JWT token",
+    schema: {
+      example: {
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: "Unauthorized",
+      },
+    },
+  })
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async createRecipe(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreateRecipeRequest,
+  ): Promise<CreateRecipeResponse> {
+    const userId = req.user.userId;
+    const input = CreateRecipe.from(dto);
+    const recipe = await this.recipesService.createRecipe(userId, input);
+    return CreateRecipeResponse.from(recipe);
   }
 
   @ApiOperation({

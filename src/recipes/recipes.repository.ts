@@ -3,6 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { RecipeWhereInput } from "src/generated/prisma/models";
 import { Recipe } from "./recipes.model";
+import { RecipeCategory, prismaFromCategory } from "./recipe-categories.enum";
 
 @Injectable()
 export class RecipesRepository {
@@ -13,7 +14,9 @@ export class RecipesRepository {
     recipeQuery?: RecipeQueryRequest,
   ): Promise<Recipe[]> {
     const categoryList = recipeQuery?.category
-      ? recipeQuery?.category?.split(",").map((c) => c.trim())
+      ? recipeQuery?.category
+          ?.split(",")
+          .map((c) => c.trim().toUpperCase() as RecipeCategory)
       : undefined;
 
     const searchConditions: RecipeWhereInput[] = [];
@@ -29,12 +32,12 @@ export class RecipesRepository {
     }
     if (recipeQuery?.ingredients) {
       searchConditions.push({
-        ingredients: { contains: recipeQuery.ingredients, mode: "insensitive" },
+        ingredients: { hasSome: recipeQuery.ingredients.split(",") },
       });
     }
     if (recipeQuery?.steps) {
       searchConditions.push({
-        steps: { contains: recipeQuery.steps, mode: "insensitive" },
+        steps: { hasSome: recipeQuery.steps.split(",") },
       });
     }
 
@@ -66,6 +69,32 @@ export class RecipesRepository {
       orderBy: { createdAt: "desc" },
     });
     return result.map(Recipe.fromPrisma);
+  }
+
+  async create(
+    title: string,
+    description: string,
+    category: RecipeCategory,
+    prepTime: number,
+    servings: number,
+    ingredients: string[],
+    steps: string[],
+    userId: number,
+  ): Promise<Recipe> {
+    const recipe = await this.prisma.recipe.create({
+      data: {
+        title,
+        description,
+        category: prismaFromCategory(category),
+        prepTime,
+        servings,
+        ingredients,
+        steps,
+        authorId: userId,
+      },
+    });
+
+    return Recipe.fromPrisma(recipe);
   }
 
   async findById(id: number): Promise<Recipe | null> {

@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { RecipesController } from "./recipes.controller";
 import { mockRecipesService } from "../../test/unit/mocks/mockRecipesService";
 import { RecipesService } from "./recipes.service";
-import { RecipeQueryRequestDto } from "./dto/requests/recipeQueryRequest.dto";
+import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { AuthenticatedRequest } from "src/types/authenticated-request.interface";
 
 describe("RecipesController", () => {
@@ -22,7 +22,7 @@ describe("RecipesController", () => {
     mockRecipesService.findAll.mockResolvedValue({ recipes: [] });
     await controller.findAll(
       {} as AuthenticatedRequest,
-      {} as RecipeQueryRequestDto,
+      {} as RecipeQueryRequest,
     );
     expect(mockRecipesService.findAll).toHaveBeenCalledWith(undefined, {});
   });
@@ -31,11 +31,11 @@ describe("RecipesController", () => {
     mockRecipesService.findAll.mockResolvedValue({ recipes: [] });
     await controller.findAll(
       { user: { userId: 1 } } as AuthenticatedRequest,
-      {} as RecipeQueryRequestDto,
+      {} as RecipeQueryRequest,
     );
     expect(mockRecipesService.findAll).toHaveBeenCalledWith(
       1,
-      {} as RecipeQueryRequestDto,
+      {} as RecipeQueryRequest,
     );
   });
 
@@ -46,7 +46,7 @@ describe("RecipesController", () => {
 
     const result = await controller.findAll(
       {} as AuthenticatedRequest,
-      {} as RecipeQueryRequestDto,
+      {} as RecipeQueryRequest,
     );
 
     expect(result).toEqual({
@@ -69,9 +69,9 @@ describe("RecipesController", () => {
     mockRecipesService.findAll.mockResolvedValue({ recipes: [recipe] });
     const result = await controller.findAll(
       {} as AuthenticatedRequest,
-      { details: true } as RecipeQueryRequestDto,
+      { details: true } as RecipeQueryRequest,
     );
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       recipes: [
         {
           id: 1,

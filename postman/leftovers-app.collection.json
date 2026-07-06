@@ -145,6 +145,23 @@
       }
     },
     {
+      "name": "Create new recipe",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Pizza\",\"description\": \"Tasty pizza\",\"category\": \"ITALIAN\",\"prep_time\": 30,\"servings\": 2,\"ingredients\": [\"flour\", \"water\"],\"steps\": [\"mix\", \"bake\"]}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/recipes",
+          "host": ["{{baseUrl}}"],
+          "path": ["recipes"]
+        }
+      },
+      "description": "Creates a new recipe for an authenticated user"
+    },
+    {
       "name": "Recipes - get by ID (public or private owned)",
       "request": {
         "method": "GET",

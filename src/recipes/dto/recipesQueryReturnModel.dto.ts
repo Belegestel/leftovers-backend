@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Recipe } from "../recipes.model";
+import { RecipeCategory } from "../recipe-categories.enum";
 
 export class RecipesQueryReturnModel {
   @ApiProperty()
@@ -21,11 +22,11 @@ export class RecipesQueryReturnModel {
   @ApiPropertyOptional()
   rating?: number;
   @ApiPropertyOptional()
-  category?: string;
+  category?: RecipeCategory;
   @ApiPropertyOptional()
-  ingredients?: string;
+  ingredients?: string[];
   @ApiPropertyOptional()
-  steps?: string;
+  steps?: string[];
 
   static from(recipe: Recipe, detailed: boolean): RecipesQueryReturnModel {
     if (!detailed) {
