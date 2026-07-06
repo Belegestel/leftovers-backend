@@ -4,9 +4,9 @@ import { AuthService } from "./auth.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { mockAuthService } from "../../test/unit/mocks/mockAuthService";
-import { LoginResultDto } from "./dto/response/loginResult.dto";
-import { RegisterResponseDto } from "./dto/response/registerResponse.dto";
-import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
+import { LoginResult } from "./dto/loginResult.dto";
+import { RegisterResponse } from "./dto/response";
+import { RegisterUser } from "./dto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
@@ -33,13 +33,13 @@ describe("AuthController", () => {
   });
 
   it("should initiate registration and call auth service", async () => {
-    const dto: RegisterAttemptDto = {
+    const dto: RegisterUser = {
       email: "john.doe@email.com",
       password: "password123",
       name: "John Doe",
     };
 
-    const expectedResult: RegisterResponseDto = {
+    const expectedResult: RegisterResponse = {
       message: "Confirmation email sent.",
     };
     mockAuthService.register.mockResolvedValue(expectedResult);
@@ -66,7 +66,7 @@ describe("AuthController", () => {
       email: "john.doe@email.com",
       password: "password",
     };
-    const expectedResult: LoginResultDto = { accessToken: "jwt-token" };
+    const expectedResult: LoginResult = { accessToken: "jwt-token" };
 
     mockAuthService.login.mockResolvedValue(expectedResult);
 

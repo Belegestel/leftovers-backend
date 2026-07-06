@@ -12,11 +12,18 @@ import { SignupRequestsRepository } from "./signup-requests.repository";
 import { mockSignupRequestsRepository } from "../../test/unit/mocks/mockSignupRequestsRepository";
 import { mockEmailService } from "../../test/unit/mocks/mockEmailService";
 import { EmailService } from "../email/email.service";
-import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
+import { RegisterUser } from "./dto";
+import { PasswordResetRepository } from "./password-reset.repository";
+import { mockPasswordResetRepository } from "../../test/unit/mocks/mockPasswordResetRepository";
+import * as crypto from "crypto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
   compare: jest.fn(),
+}));
+jest.mock("crypto", () => ({
+  randomBytes: jest.fn(() => ({ toString: () => "raw-token" })),
+  createHash: jest.fn(),
 }));
 
 describe("AuthService", () => {
@@ -38,6 +45,10 @@ describe("AuthService", () => {
           useValue: mockSignupRequestsRepository,
         },
         { provide: EmailService, useValue: mockEmailService },
+        {
+          provide: PasswordResetRepository,
+          useValue: mockPasswordResetRepository,
+        },
       ],
       imports: [
         ConfigModule.forRoot({
@@ -56,7 +67,7 @@ describe("AuthService", () => {
 
   describe("register", () => {
     it("should create a signup request and send email", async () => {
-      const dto: RegisterAttemptDto = {
+      const dto: RegisterUser = {
         email: "john.doe@email.com",
         name: "John Doe",
         password: "password123",
@@ -85,12 +96,15 @@ describe("AuthService", () => {
     });
 
     it("should throw ConflictException if email already exists", async () => {
-      const dto: RegisterAttemptDto = {
+      const dto: RegisterUser = {
         email: "john.doe@email.com",
         name: "John Doe",
         password: "password123",
       };
 
+      (crypto.randomBytes as jest.Mock).mockReturnValue({
+        toString: () => "raw-token",
+      });
       mockUsersRepository.findByEmail.mockResolvedValue({ id: 1 });
       mockSignupRequestsRepository.findByEmail.mockResolvedValue(null);
 
@@ -197,6 +211,51 @@ describe("AuthService", () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe("reset-password", () => {
+    it("should create password reset and send email if user exists", async () => {
+      const dto = { email: "john.doe@email.com" };
+      mockUsersRepository.findByEmail.mockResolvedValue({
+        id: 1,
+        email: dto.email,
+      });
+      mockPasswordResetRepository.create.mockResolvedValue(undefined);
+
+      (crypto.randomBytes as jest.Mock).mockReturnValue({
+        toString: () => "raw-token",
+      });
+      (crypto.createHash as jest.Mock).mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        digest: jest.fn().mockReturnValue("hashed-token"),
+      });
+
+      const result = await service.initiatePasswordReset(dto);
+
+      expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith(dto.email);
+      expect(mockPasswordResetRepository.create).toHaveBeenCalledWith({
+        email: dto.email,
+        tokenHash: "hashed-token",
+        expiresAt: expect.any(Date),
+      });
+      expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
+        dto.email,
+        "Reset your password",
+        "password-reset",
+        expect.objectContaining({
+          resetLink: expect.stringContaining("raw-token"),
+        }),
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it("should not create reset password request if user dowes not exist", async () => {
+      const dto = { email: "john.doe@email.com" };
+      mockUsersRepository.findByEmail.mockResolvedValue(null);
+      await service.initiatePasswordReset(dto);
+      expect(mockPasswordResetRepository.create).not.toHaveBeenCalled();
+      expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
     });
   });
 });

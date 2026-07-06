@@ -10,7 +10,7 @@ import { UsersRepository } from "../users/users.repository";
 import { SignupRequestsRepository } from "./signup-requests.repository";
 import { JwtService } from "@nestjs/jwt";
 import { EmailService } from "../email/email.service";
-import { randomBytes } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { ConfirmRegistration } from "./dto/confirmRegistration.dto";
 import { LoginUser } from "./dto/loginUser.dto";
 import { LoginResult } from "./dto/loginResult.dto";
@@ -166,7 +166,7 @@ export class AuthService {
     }
 
     const token = randomBytes(32).toString("hex");
-    const tokenHash = await bcrypt.hash(token, this.bcryptHashingRounds);
+    const tokenHash = createHash("sha256").update(token).digest("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await this.passwordResetRepository.create(
@@ -174,9 +174,14 @@ export class AuthService {
     );
 
     const link =
-      `${this.frontendUrl}?email=${encodeURIComponent(dto.email)}` +
+      `${this.frontendUrl}/reset-password?email=${encodeURIComponent(dto.email)}` +
       `&token=${encodeURIComponent(token)}`;
-    
-    await this.emailService.sendEmail(dto.email, "Reset your password", "password-reset", { resetLink: link })
+
+    await this.emailService.sendEmail(
+      dto.email,
+      "Reset your password",
+      "password-reset",
+      { resetLink: link },
+    );
   }
 }
