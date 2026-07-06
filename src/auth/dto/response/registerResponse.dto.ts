@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { RegisterResult } from "./registerResult.dto";
+import { RegisterResult } from "../registerResult.dto";
 
 export class RegisterResponse {
   @ApiProperty({

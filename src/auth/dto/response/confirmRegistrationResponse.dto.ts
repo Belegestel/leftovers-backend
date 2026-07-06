@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ConfirmRegistrationResult } from "./confirmRegistrationResult.dto";
+import { ConfirmRegistrationResult } from "../confirmRegistrationResult.dto";
 
 export class ConfirmRegistrationResponse {
   @ApiProperty({
