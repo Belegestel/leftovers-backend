@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { clearDatabase } from "./utils/clear-db";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createE2EApp } from "./utils/create-e2e-app";
+import { createUserAndLogin } from "./utils/create-user-and-login";
 
 describe("Auth E2E", () => {
   let app: INestApplication;
@@ -198,4 +199,38 @@ describe("Auth E2E", () => {
 
     expect(response.body).toHaveProperty("accessToken");
   });
+
+  it("/auth/reset-password POST should create reset request and return 200", async () => {
+    const email = `john.doe${randomUUID()}@email.com`;
+    const password = `password${randomUUID()}`;
+    await createUserAndLogin(app, prisma, email, password);
+    const response = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ email })
+      .expect(200);
+    expect(response.body).toEqual({
+      message: "If email exists, the message has been sent.",
+    });
+    const resetRequest = await prisma.passwordResetRequest.findFirst({
+      where: { email },
+    });
+    expect(resetRequest).not.toBeNull();
+    expect(resetRequest?.tokenHash).toBeTruthy();
+  });
+
+  it('/auth/reset-password POST should return 200 if user does not exist', async () => {
+    const email = `john.doe${randomUUID()}@email.com`
+    const password = `password${randomUUID()}`;
+    const response = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ email })
+      .expect(200);
+    expect(response.body).toEqual({
+      message: "If email exists, the message has been sent.",
+    });
+    const resetRequest = await prisma.passwordResetRequest.findFirst({
+      where: { email },
+    });
+    expect(resetRequest).toBeNull();
+  })
 });
