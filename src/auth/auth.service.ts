@@ -13,17 +13,21 @@ import { EmailService } from "../email/email.service";
 import { randomBytes } from "crypto";
 import { ConfirmRegistration } from "./dto/confirmRegistration.dto";
 import { LoginUser } from "./dto/loginUser.dto";
-import { LoginResult } from "./dto/response/loginResult.dto";
+import { LoginResult } from "./dto/loginResult.dto";
 import { SignupUser } from "./dto/signupUser.dto";
-import { SignupResult } from "./dto/response/signupResult.dto";
+import { SignupResult } from "./dto/signupResult.dto";
 import { RegisterUser } from "./dto/registerUser.dto";
-import { RegisterResult } from "./dto/response/registerResult.dto";
-import { ConfirmRegistrationResult } from "./dto/response/confirmRegistrationResult.dto";
+import { RegisterResult } from "./dto/registerResult.dto";
+import { ConfirmRegistrationResult } from "./dto/confirmRegistrationResult.dto";
 import { CreateSignupRequest } from "./dto/createSignupRequest.dto";
+import { PasswordResetRepository } from "./password-reset.repository";
+import { CreatePasswordReset } from "./dto/createPasswordReset.dto";
+import { CreatePasswordResetEntry } from "./dto/createPasswordResetEntry.dto";
 
 @Injectable()
 export class AuthService {
   private readonly bcryptHashingRounds: number;
+  private readonly frontendUrl: string;
 
   constructor(
     private readonly usersRepository: UsersRepository,
@@ -31,11 +35,14 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly passwordResetRepository: PasswordResetRepository,
   ) {
     this.bcryptHashingRounds = parseInt(
       this.config.get("BCRYPT_HASHING_ROUNDS") ?? "12",
       10,
     );
+    this.frontendUrl =
+      this.config.get<string>("FRONTEND_URL") || "http://localhost:3000";
   }
 
   async signup(dto: SignupUser): Promise<SignupResult> {
@@ -111,11 +118,8 @@ export class AuthService {
 
     await this.signupRequestsRepository.create(input);
 
-    const frontendUrl =
-      this.config.get<string>("FRONTEND_URL") || "http://localhost:3000";
-
     const confirmationLink =
-      `${frontendUrl}/confirm-registration` +
+      `${this.frontendUrl}/confirm-registration` +
       `?email=${encodeURIComponent(email)}` +
       `&token=${encodeURIComponent(token)}`;
 
@@ -152,5 +156,27 @@ export class AuthService {
     this.signupRequestsRepository.deleteById(req.id);
 
     return { id: user.id, email: user.email };
+  }
+
+  async initiatePasswordReset(dto: CreatePasswordReset): Promise<void> {
+    const user = await this.usersRepository.findByEmail(dto.email);
+
+    if (!user) {
+      return;
+    }
+
+    const token = randomBytes(32).toString("hex");
+    const tokenHash = await bcrypt.hash(token, this.bcryptHashingRounds);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await this.passwordResetRepository.create(
+      CreatePasswordResetEntry.from(dto.email, tokenHash, expiresAt),
+    );
+
+    const link =
+      `${this.frontendUrl}?email=${encodeURIComponent(dto.email)}` +
+      `&token=${encodeURIComponent(token)}`;
+    
+    await this.emailService.sendEmail(dto.email, "Reset your password", "password-reset", { resetLink: link })
   }
 }

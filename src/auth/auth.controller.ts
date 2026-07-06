@@ -22,6 +22,9 @@ import {
   RegisterRequest,
   ConfirmRegistrationRequest,
 } from "./dto/request";
+import { PasswordResetRequest } from "./dto/request/passwordResetRequest.dto";
+import { CreatePasswordReset } from "./dto/createPasswordReset.dto";
+import { PasswordResetResponse } from "./dto/response/passwordResetResponse.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -164,5 +167,35 @@ export class AuthController {
     const input = ConfirmRegistration.from(dto);
     const result = await this.authService.confirmRegistration(input);
     return ConfirmRegistrationResponse.from(result);
+  }
+
+  @ApiOperation({
+    description: "Initiate password reset",
+    summary: "Initiates the password reset, sends an email. Always returns 200 OK"
+  })
+  @ApiBody({
+    type: PasswordResetRequest,
+    description: "Email address of user",
+  })
+  @ApiOkResponse({
+    description: "Password reset process initiated. The user with the provided email might not exist.",
+    type: PasswordResetResponse
+  })
+  @ApiBadRequestResponse({
+    description: "Invalid input data - validation error",
+    schema: {
+      example: {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: ["email must be an email"],
+        error: "Bad request",
+      },
+    },
+  })
+  @Post("reset-password")
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() body: PasswordResetRequest): Promise<PasswordResetResponse> {
+    const input = CreatePasswordReset.from(body);
+    await this.authService.initiatePasswordReset(input);
+    return PasswordResetResponse.new();
   }
 }

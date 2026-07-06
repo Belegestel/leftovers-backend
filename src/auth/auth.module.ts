@@ -9,6 +9,7 @@ import { PrismaModule } from "../prisma/prisma.module";
 import { EmailModule } from "../email/email.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./jwt.strategy";
+import { PasswordResetRepository } from "./password-reset.repository";
 
 @Module({
   imports: [
@@ -25,6 +26,6 @@ import { JwtStrategy } from "./jwt.strategy";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, SignupRequestsRepository, JwtStrategy],
+  providers: [AuthService, SignupRequestsRepository, JwtStrategy, PasswordResetRepository],
 })
 export class AuthModule {}
