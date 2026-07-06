@@ -196,6 +196,23 @@
           "path": ["auth", "reset-password"]
         }
       }
+    },
+    {
+      "name": "Auth - complete reset password request",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\"token\":\"{{token}}\",\"newPassword\":\"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/reset-password/confirm",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "reset-password", "confirm"]
+        }
+      },
+      "description": "Complete the reset password request"
     }
   ],
   "variable": [
