@@ -15,6 +15,7 @@ export class Recipe {
   category?: RecipeCategory;
   ingredients: string[];
   steps: string[];
+  imageKey: string;
 
   static fromPrisma(recipe: PrismaRecipe): Recipe {
     return {
@@ -31,6 +32,7 @@ export class Recipe {
       category: categoryFromPrisma(recipe.category),
       ingredients: recipe.ingredients,
       steps: recipe.steps,
+      imageKey: recipe.imageKey,
     };
   }
 }

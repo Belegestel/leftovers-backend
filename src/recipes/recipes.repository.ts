@@ -80,6 +80,7 @@ export class RecipesRepository {
     ingredients: string[],
     steps: string[],
     userId: number,
+    imageKey: string,
   ): Promise<Recipe> {
     const recipe = await this.prisma.recipe.create({
       data: {
@@ -91,6 +92,7 @@ export class RecipesRepository {
         ingredients,
         steps,
         authorId: userId,
+        imageKey,
       },
     });
 

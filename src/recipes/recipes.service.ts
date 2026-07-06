@@ -10,10 +10,14 @@ import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { CreateRecipe } from "./dto/createRecipe.dto";
 import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { SingleRecipeQueryResult } from "./dto/singleRecipeQueryResult.dto";
+import { FilesService } from "../files/files.service";
 
 @Injectable()
 export class RecipesService {
-  constructor(private recipesRepository: RecipesRepository) {}
+  constructor(
+    private recipesRepository: RecipesRepository,
+    private filesService: FilesService,
+  ) {}
 
   async findAll(
     userId?: number,
@@ -21,7 +25,13 @@ export class RecipesService {
   ): Promise<RecipeQueryResult> {
     const input = RecipeQueryFilters.from(userId, filters);
     const result = await this.recipesRepository.findAll(userId, input);
-    return RecipeQueryResult.from(result);
+    const links = await Promise.all(
+      result.map(
+        async (value) =>
+          await this.filesService.createPresignedGetUrl(value.imageKey),
+      ),
+    );
+    return RecipeQueryResult.from(result, links);
   }
 
   async createRecipe(
@@ -37,10 +47,17 @@ export class RecipesService {
       dto.ingredients,
       dto.steps,
       userId,
+      dto.imageKey,
     );
-    return CreateRecipeResult.from(recipe);
+    const imageLink = await this.filesService.createPresignedGetUrl(
+      recipe.imageKey,
+    );
+    return CreateRecipeResult.from(recipe, imageLink);
   }
-  async findById(id: number, userId?: number): Promise<SingleRecipeQueryResult> {
+  async findById(
+    id: number,
+    userId?: number,
+  ): Promise<SingleRecipeQueryResult> {
     const recipe = await this.recipesRepository.findById(id);
     if (!recipe) {
       throw new NotFoundException("Recipe not found");
@@ -52,6 +69,9 @@ export class RecipesService {
       throw new ForbiddenException("You do not have access to this recipe");
     }
 
-    return SingleRecipeQueryResult.from(recipe);
+    const imageLink = await this.filesService.createPresignedGetUrl(
+      recipe.imageKey,
+    );
+    return SingleRecipeQueryResult.from(recipe, imageLink);
   }
 }

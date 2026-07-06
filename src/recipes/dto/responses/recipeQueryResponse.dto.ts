@@ -1,6 +1,5 @@
 import { RecipesQueryReturnModel } from "../recipesQueryReturnModel.dto";
 import { RecipeQueryResult } from "../recipeQueryResultDto";
-import { Recipe } from "src/recipes/recipes.model";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class RecipeQueryResponse {
@@ -9,10 +8,17 @@ export class RecipeQueryResponse {
   })
   recipes: RecipesQueryReturnModel[];
 
-  static from(recipes: RecipeQueryResult, isDetail: boolean) {
+  static from(
+    recipes: RecipeQueryResult,
+    isDetail: boolean,
+  ): RecipeQueryResponse {
     return {
-      recipes: recipes.recipes.map((value: Recipe) =>
-        RecipesQueryReturnModel.from(value, isDetail),
+      recipes: recipes.recipes.map((recipe, index) =>
+        RecipesQueryReturnModel.from(
+          recipe,
+          isDetail,
+          recipes.imageLinks[index],
+        ),
       ),
     };
   }

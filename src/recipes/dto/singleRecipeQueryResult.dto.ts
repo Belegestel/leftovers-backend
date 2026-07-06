@@ -11,10 +11,11 @@ export class SingleRecipeQueryResult {
   editedAt: Date;
   rating: number;
   category?: string;
-  ingredients: string;
-  steps: string;
+  ingredients: string[];
+  steps: string[];
+  imageLink: string;
 
-  static from(recipe: Recipe): SingleRecipeQueryResult {
+  static from(recipe: Recipe, imageLink: string): SingleRecipeQueryResult {
     return {
       id: recipe.id,
       title: recipe.title,
@@ -28,6 +29,7 @@ export class SingleRecipeQueryResult {
       category: recipe.category,
       ingredients: recipe.ingredients,
       steps: recipe.steps,
-    }
+      imageLink,
+    };
   }
 }

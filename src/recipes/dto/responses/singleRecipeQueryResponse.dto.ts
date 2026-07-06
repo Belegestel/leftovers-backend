@@ -11,8 +11,9 @@ export class SingleRecipeQueryResponse {
   editedAt: Date;
   rating: number;
   category?: string;
-  ingredients: string;
-  steps: string;
+  ingredients: string[];
+  steps: string[];
+  imageLink: string;
 
   static from(result: SingleRecipeQueryResult): SingleRecipeQueryResponse {
     return {
@@ -28,6 +29,7 @@ export class SingleRecipeQueryResponse {
       category: result.category,
       ingredients: result.ingredients,
       steps: result.steps,
-    }
+      imageLink: result.imageLink,
+    };
   }
 }

@@ -48,4 +48,7 @@ export class CreateRecipeRequest {
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
   steps: string[];
+
+  @IsString()
+  imageKey: string;
 }
