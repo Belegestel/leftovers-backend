@@ -193,7 +193,7 @@ export class AuthService {
       FindPasswordResetToken.from(tokenHash),
     );
 
-    if (!req) {
+    if (!req || (req.usedAt && req.usedAt.getTime() < Date.now()) || req.expiresAt.getTime() < Date.now()) {
       throw new BadRequestException("Invalid data or expired token");
     }
 

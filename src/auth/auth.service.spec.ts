@@ -1,7 +1,11 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { UsersRepository } from "../users/users.repository";
-import { ConflictException, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
@@ -256,6 +260,82 @@ describe("AuthService", () => {
       await service.initiatePasswordReset(dto);
       expect(mockPasswordResetRepository.create).not.toHaveBeenCalled();
       expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
+    });
+
+    it("should reset password when the token is valid", async () => {
+      const dto = { token: "raw-token", newPassword: "password321" };
+      const hashedToken = "hashed-token";
+      const resetRequest = {
+        id: 1,
+        email: "john.doe@email.com",
+        tokenHash: "hashed-token",
+        expiresAt: new Date(Date.now() + 10000),
+        usedAt: null,
+      };
+      mockPasswordResetRepository.findValidByTokenHash.mockResolvedValue(
+        resetRequest,
+      );
+      mockUsersRepository.findByEmail.mockResolvedValue({
+        id: 1,
+        email: resetRequest.email,
+        password: "old-pwd",
+      });
+      (bcrypt.hash as jest.Mock).mockImplementation((value: string) => {
+        if (value === "password321") {
+          return Promise.resolve("new-hash");
+        }
+        return Promise.resolve("hashed-token");
+      });
+      mockUsersRepository.updatePassword.mockResolvedValue(undefined);
+      mockPasswordResetRepository.markAsUsed.mockResolvedValue(undefined);
+
+      const result = await service.confirmPasswordReset(dto as any);
+
+      expect(
+        mockPasswordResetRepository.findValidByTokenHash,
+      ).toHaveBeenCalledWith({ tokenHash: expect.any(String) });
+      expect(mockUsersRepository.updatePassword).toHaveBeenCalledWith(
+        1,
+        "new-hash",
+      );
+      expect(mockPasswordResetRepository.markAsUsed).toHaveBeenCalledWith(1);
+      expect(result).toBeUndefined();
+    });
+
+    it("should throw BadRequestException when the token is invalid", async () => {
+      const dto = { token: "raw-token", newPassword: "password321" };
+      mockPasswordResetRepository.findValidByTokenHash.mockResolvedValue(null);
+      await expect(service.confirmPasswordReset(dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("should throw BadRequestException when the token is expired", async () => {
+      const dto = { token: "raw-token", newPassword: "password321" };
+      mockPasswordResetRepository.findValidByTokenHash.mockResolvedValue({
+        id: 1,
+        email: "john.doe@email.com",
+        tokenHash: "hashed-token",
+        expiresAt: new Date(Date.now() - 10000),
+        usedAt: null,
+      });
+      await expect(service.confirmPasswordReset(dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("should throw BadRequestException when the token has already been used", async () => {
+      const dto = { token: "raw-token", newPassword: "password123" };
+      mockPasswordResetRepository.findValidByTokenHash.mockResolvedValue({
+        id: 1,
+        email: "john.doe@email.com",
+        tokenHash: "hashed-token",
+        expiresAt: new Date(Date.now() + 10000),
+        usedAt: new Date(Date.now() - 10000),
+      });
+      await expect(service.confirmPasswordReset(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });
