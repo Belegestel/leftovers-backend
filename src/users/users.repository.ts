@@ -30,7 +30,7 @@ export class UsersRepository {
   }
 
   async updatePassword(id: number, passwordHash: string): Promise<void> {
-    this.prisma.user.update({
+    await this.prisma.user.update({
       where: { id },
       data: { password: passwordHash },
     });
