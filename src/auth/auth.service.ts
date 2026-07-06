@@ -23,6 +23,8 @@ import { CreateSignupRequest } from "./dto/createSignupRequest.dto";
 import { PasswordResetRepository } from "./password-reset.repository";
 import { CreatePasswordReset } from "./dto/createPasswordReset.dto";
 import { CreatePasswordResetEntry } from "./dto/createPasswordResetEntry.dto";
+import { ConfirmPasswordReset } from "./dto/confirmPasswordReset.dto";
+import { FindPasswordResetToken } from "./dto/findPasswordResetToken.dto";
 
 @Injectable()
 export class AuthService {
@@ -183,5 +185,26 @@ export class AuthService {
       "password-reset",
       { resetLink: link },
     );
+  }
+
+  async confirmPasswordReset(dto: ConfirmPasswordReset): Promise<void> {
+    const tokenHash = createHash("sha256").update(dto.token).digest("hex");
+    const req = await this.passwordResetRepository.findValidByTokenHash(
+      FindPasswordResetToken.from(tokenHash),
+    );
+
+    if (!req) {
+      throw new BadRequestException("Invalid data or expired token");
+    }
+
+    const user = await this.usersRepository.findByEmail(req.email);
+
+    const hashedPassword = await bcrypt.hash(
+      dto.newPassword,
+      this.bcryptHashingRounds,
+    );
+
+    await this.usersRepository.updatePassword(user!.id, hashedPassword);
+    await this.passwordResetRepository.markAsUsed(req.id);
   }
 }

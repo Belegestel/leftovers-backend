@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { User, UserMapper } from '../users/users.model';
+import { User, UserMapper } from "../users/users.model";
 
 @Injectable()
 export class UsersRepository {
@@ -27,5 +27,12 @@ export class UsersRepository {
       data,
     });
     return UserMapper.toDto(user);
+  }
+
+  async updatePassword(id: number, passwordHash: string): Promise<void> {
+    this.prisma.user.update({
+      where: { id },
+      data: { password: passwordHash },
+    });
   }
 }
