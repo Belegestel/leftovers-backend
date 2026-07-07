@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  InternalServerErrorException,
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { ConfigService } from "@nestjs/config";
@@ -193,7 +194,11 @@ export class AuthService {
       FindPasswordResetToken.from(tokenHash),
     );
 
-    if (!req || (req.usedAt && req.usedAt.getTime() < Date.now()) || req.expiresAt.getTime() < Date.now()) {
+    if (
+      !req ||
+      (req.usedAt && req.usedAt.getTime() < Date.now()) ||
+      req.expiresAt.getTime() < Date.now()
+    ) {
       throw new BadRequestException("Invalid data or expired token");
     }
 
@@ -204,7 +209,10 @@ export class AuthService {
       this.bcryptHashingRounds,
     );
 
-    await this.usersRepository.updatePassword(user!.id, hashedPassword);
+    if (!user) {
+      throw new InternalServerErrorException("Database error");
+    }
+    await this.usersRepository.updatePassword(user.id, hashedPassword);
     await this.passwordResetRepository.markAsUsed(req.id);
   }
 }
