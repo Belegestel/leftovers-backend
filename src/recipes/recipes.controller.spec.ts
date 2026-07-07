@@ -42,6 +42,7 @@ describe("RecipesController", () => {
   it("returns list DTOs by default", async () => {
     mockRecipesService.findAll.mockResolvedValue({
       recipes: [{ id: 1, title: "Pizza", prepTime: 30 }],
+      imageLinks: [undefined],
     });
 
     const result = await controller.findAll(
@@ -66,7 +67,10 @@ describe("RecipesController", () => {
       authorId: 1,
     };
 
-    mockRecipesService.findAll.mockResolvedValue({ recipes: [recipe] });
+    mockRecipesService.findAll.mockResolvedValue({
+      recipes: [recipe],
+      imageLinks: [undefined],
+    });
     const result = await controller.findAll(
       {} as AuthenticatedRequest,
       { details: true } as RecipeQueryRequest,

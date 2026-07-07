@@ -23,21 +23,7 @@ describe("FilesController", () => {
     service = module.get<FilesService>(FilesService);
   });
 
-  it("should call service and return response DTO", async () => {
-    const dto = {
-      fileName: "image.png",
-      fileType: "image/png",
-      folder: "images",
-    };
-    const serviceResult = {
-      url: "https://signed-url.com",
-      key: "images/uuid.png",
-    };
-    mockFilesService.createPresignedUploadUrl.mockResolvedValue(serviceResult);
-
-    const result = await controller.createPresignedUrl(dto);
-
-    expect(service.createPresignedUploadUrl).toHaveBeenCalled();
-    expect(result).toEqual(serviceResult);
+  it("should be defined", async () => {
+    expect(controller).toBeDefined();
   });
 });

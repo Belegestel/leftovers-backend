@@ -31,16 +31,13 @@ describe("FilesService", () => {
   });
 
   it("should generate a presigned URL", async () => {
-    const dto = {
-      fileName: "img.png",
-      fileType: "image/png",
-      folder: "images",
-    };
+    const key = `folder/images/${randomUUID()}.png`;
+    const fileType = "image/png";
 
-    const result = await service.createPresignedUploadUrl(dto);
+    const result = await service.createPresignedUploadUrl(key, fileType);
 
     expect(result.url).toBe("https://signed-url.com");
-    expect(result.key).toBe("images/uuid-123.png");
+    expect(result.key).toBe("folder/images/uuid-123.png");
     expect(randomUUID).toHaveBeenCalled();
     expect(getSignedUrl).toHaveBeenCalledTimes(1);
     expect((getSignedUrl as jest.Mock).mock.calls[0][1]).toBeInstanceOf(

@@ -201,7 +201,6 @@ describe("RecipesService", () => {
         servings: 2,
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
-        imageKey: undefined,
       };
       const repoResult: Recipe = {
         id: 123,
@@ -231,7 +230,6 @@ describe("RecipesService", () => {
         ["Flour", "Water"],
         ["mix", "bake"],
         1,
-        undefined,
       );
       expect(result).toEqual(CreateRecipeResult.from(repoResult));
     });
