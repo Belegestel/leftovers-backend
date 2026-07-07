@@ -1,9 +1,11 @@
-import { INestApplication } from "@nestjs/common";
+import { HttpStatus, INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { randomUUID } from "node:crypto";
 import { clearDatabase } from "./utils/clear-db";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createE2EApp } from "./utils/create-e2e-app";
+import { createUserAndLogin } from "./utils/create-user-and-login";
+import { mockEmailService } from "./unit/mocks/mockEmailService";
 
 describe("Auth E2E", () => {
   let app: INestApplication;
@@ -32,7 +34,7 @@ describe("Auth E2E", () => {
         password: "password",
         name: "John Doe",
       })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("/auth/register/ should return 400 if the name is missing", async () => {
@@ -42,7 +44,7 @@ describe("Auth E2E", () => {
         email: `john.doe${randomUUID()}@email.com`,
         password: "password",
       })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("/auth/login POST should return 401 for wrong password", async () => {
@@ -52,7 +54,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password, name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
@@ -61,7 +63,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: signupRequest!.token })
-      .expect(201);
+      .expect(HttpStatus.CREATED);
 
     await request(app.getHttpServer())
       .post("/auth/login")
@@ -76,7 +78,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password, name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
@@ -85,7 +87,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: signupRequest!.token })
-      .expect(201);
+      .expect(HttpStatus.CREATED);
 
     await request(app.getHttpServer())
       .post("/auth/login")
@@ -97,7 +99,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/login")
       .send({ email: "john.doe[not]email.com" })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("/auth/register POST should create a signup request", async () => {
@@ -109,7 +111,7 @@ describe("Auth E2E", () => {
         password: "password",
         name: "John Doe",
       })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     expect(response.body).toEqual({ message: "Confirmation email sent." });
     const signupRequest = await prisma.signupRequest.findUnique({
@@ -127,7 +129,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password", name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password", name: "John Doe" })
@@ -139,7 +141,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password", name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
@@ -150,7 +152,7 @@ describe("Auth E2E", () => {
     const response = await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: signupRequest!.token })
-      .expect(201);
+      .expect(HttpStatus.CREATED);
 
     expect(response).not.toBeNull();
     expect(response.body.email).toBe(email);
@@ -165,12 +167,12 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password", name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: "invalid-token" })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("/auth/register, /auth/confirm-registration, /auth/login should register the user and log them in", async () => {
@@ -180,7 +182,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password, name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
@@ -189,13 +191,100 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: signupRequest!.token })
-      .expect(201);
+      .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .post("/auth/login")
       .send({ email, password })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     expect(response.body).toHaveProperty("accessToken");
+  });
+
+  it("/auth/reset-password POST should create reset request and return 200", async () => {
+    const email = `john.doe${randomUUID()}@email.com`;
+    const password = `password${randomUUID()}`;
+    await createUserAndLogin(app, prisma, email, password);
+    const response = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ email })
+      .expect(HttpStatus.OK);
+    expect(response.body).toEqual({
+      message: "If email exists, the message has been sent.",
+    });
+    const resetRequest = await prisma.passwordResetRequest.findFirst({
+      where: { email },
+    });
+    expect(resetRequest).not.toBeNull();
+    expect(resetRequest?.tokenHash).toBeTruthy();
+  });
+
+  it("/auth/reset-password POST should return 200 if user does not exist", async () => {
+    const email = `john.doe${randomUUID()}@email.com`;
+    const response = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ email })
+      .expect(HttpStatus.OK);
+    expect(response.body).toEqual({
+      message: "If email exists, the message has been sent.",
+    });
+    const resetRequest = await prisma.passwordResetRequest.findFirst({
+      where: { email },
+    });
+    expect(resetRequest).toBeNull();
+  });
+
+  it("/auth/reset-password/confirm POST should reset the user's password", async () => {
+    const email = `john.doe${randomUUID()}@email.com`;
+    const password = "password123";
+    const newPassword = "password321";
+    await createUserAndLogin(app, prisma, email, password);
+
+    await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ email })
+      .expect(HttpStatus.OK);
+
+    const resetRequest = await prisma.passwordResetRequest.findFirst({
+      where: { email },
+    });
+
+    expect(resetRequest).not.toBeNull();
+
+    expect(mockEmailService.sendEmail).toHaveBeenCalledTimes(2);
+
+    const [, , , context] = mockEmailService.sendEmail.mock.calls[1];
+    const resetLink = context.resetLink as string;
+
+    const token = new URL(resetLink).searchParams.get("token");
+    expect(token).toBeTruthy();
+
+    await request(app.getHttpServer())
+      .post("/auth/reset-password/confirm")
+      .send({ token, newPassword })
+      .expect(HttpStatus.OK);
+
+    await request(app.getHttpServer())
+      .post("/auth/login")
+      .send({ email, password: newPassword })
+      .expect(HttpStatus.OK);
+    await request(app.getHttpServer())
+      .post("/auth/login")
+      .send({ email, password: password })
+      .expect(401);
+  });
+
+  it("/auth/reset-password/confirm POST should reject an invalid token", async () => {
+    await request(app.getHttpServer())
+      .post("/auth/reset-password/confirm")
+      .send({ token: "invalid-token", newPassword: "password321" })
+      .expect(HttpStatus.BAD_REQUEST);
+  });
+
+  it("POST /auth/reset-password/confirm POSt should return 400 for an invalid password", async () => {
+    await request(app.getHttpServer())
+      .post("/auth/reset-password/confirm")
+      .send({ token: "invalid-token", newPassword: "321" })
+      .expect(HttpStatus.BAD_REQUEST);
   });
 });

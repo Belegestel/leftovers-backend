@@ -4,9 +4,8 @@ import { AuthService } from "./auth.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { mockAuthService } from "../../test/unit/mocks/mockAuthService";
-import { LoginResultDto } from "./dto/response/loginResult.dto";
-import { RegisterResponseDto } from "./dto/response/registerResponse.dto";
-import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
+import { RegisterResponse } from "./dto/response";
+import { RegisterUser, LoginResult } from "./dto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
@@ -33,13 +32,13 @@ describe("AuthController", () => {
   });
 
   it("should initiate registration and call auth service", async () => {
-    const dto: RegisterAttemptDto = {
+    const dto: RegisterUser = {
       email: "john.doe@email.com",
       password: "password123",
       name: "John Doe",
     };
 
-    const expectedResult: RegisterResponseDto = {
+    const expectedResult: RegisterResponse = {
       message: "Confirmation email sent.",
     };
     mockAuthService.register.mockResolvedValue(expectedResult);
@@ -66,12 +65,48 @@ describe("AuthController", () => {
       email: "john.doe@email.com",
       password: "password",
     };
-    const expectedResult: LoginResultDto = { accessToken: "jwt-token" };
+    const expectedResult: LoginResult = { accessToken: "jwt-token" };
 
     mockAuthService.login.mockResolvedValue(expectedResult);
 
     const result = await controller.login(dto);
     expect(result).toEqual(expectedResult);
     expect(mockAuthService.login).toHaveBeenCalledWith(dto);
+  });
+
+  it("should initiate password reset and call auth service", async () => {
+    const dto = { email: "john.doe@email.com" };
+    mockAuthService.initiatePasswordReset.mockResolvedValue(undefined);
+
+    const res = await controller.resetPassword(dto);
+
+    expect(mockAuthService.initiatePasswordReset).toHaveBeenCalledWith(
+      expect.objectContaining({ email: dto.email }),
+    );
+    expect(res).toEqual({
+      message: "If email exists, the message has been sent.",
+    });
+  });
+
+  it("should confirm password reset and call auth service", async () => {
+    const dto = { token: "raw-token", newPassword: "password321" };
+    const expectedResult = { message: "Password reset successfully" };
+    mockAuthService.confirmPasswordReset.mockResolvedValue(expectedResult);
+    const res = await controller.confirmResetPassword(dto);
+
+    expect(res).toEqual(expectedResult);
+    expect(mockAuthService.confirmPasswordReset).toHaveBeenCalledWith(dto);
+  });
+
+  it("should propagate error when the reset token is invalid", async () => {
+    const dto = { token: "invalid-token", newPassword: "password321" };
+    mockAuthService.confirmPasswordReset.mockRejectedValue(
+      new Error("Invalid data or expired token"),
+    );
+
+    await expect(controller.confirmResetPassword(dto)).rejects.toThrow(
+      "Invalid data or expired token",
+    );
+    expect(mockAuthService.confirmPasswordReset).toHaveBeenCalledWith(dto);
   });
 });

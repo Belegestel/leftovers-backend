@@ -1,7 +1,11 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { UsersRepository } from "../users/users.repository";
-import { ConflictException, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
@@ -12,11 +16,18 @@ import { SignupRequestsRepository } from "./signup-requests.repository";
 import { mockSignupRequestsRepository } from "../../test/unit/mocks/mockSignupRequestsRepository";
 import { mockEmailService } from "../../test/unit/mocks/mockEmailService";
 import { EmailService } from "../email/email.service";
-import { RegisterAttemptDto } from "./dto/request/registerAttempt.dto";
+import { RegisterUser } from "./dto";
+import { PasswordResetRepository } from "./password-reset.repository";
+import { mockPasswordResetRepository } from "../../test/unit/mocks/mockPasswordResetRepository";
+import * as crypto from "crypto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
   compare: jest.fn(),
+}));
+jest.mock("crypto", () => ({
+  randomBytes: jest.fn(() => ({ toString: () => "raw-token" })),
+  createHash: jest.fn(),
 }));
 
 describe("AuthService", () => {
@@ -38,6 +49,10 @@ describe("AuthService", () => {
           useValue: mockSignupRequestsRepository,
         },
         { provide: EmailService, useValue: mockEmailService },
+        {
+          provide: PasswordResetRepository,
+          useValue: mockPasswordResetRepository,
+        },
       ],
       imports: [
         ConfigModule.forRoot({
@@ -56,7 +71,7 @@ describe("AuthService", () => {
 
   describe("register", () => {
     it("should create a signup request and send email", async () => {
-      const dto: RegisterAttemptDto = {
+      const dto: RegisterUser = {
         email: "john.doe@email.com",
         name: "John Doe",
         password: "password123",
@@ -85,12 +100,15 @@ describe("AuthService", () => {
     });
 
     it("should throw ConflictException if email already exists", async () => {
-      const dto: RegisterAttemptDto = {
+      const dto: RegisterUser = {
         email: "john.doe@email.com",
         name: "John Doe",
         password: "password123",
       };
 
+      (crypto.randomBytes as jest.Mock).mockReturnValue({
+        toString: () => "raw-token",
+      });
       mockUsersRepository.findByEmail.mockResolvedValue({ id: 1 });
       mockSignupRequestsRepository.findByEmail.mockResolvedValue(null);
 
@@ -197,6 +215,127 @@ describe("AuthService", () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe("reset-password", () => {
+    it("should create password reset and send email if user exists", async () => {
+      const dto = { email: "john.doe@email.com" };
+      mockUsersRepository.findByEmail.mockResolvedValue({
+        id: 1,
+        email: dto.email,
+      });
+      mockPasswordResetRepository.create.mockResolvedValue(undefined);
+
+      (crypto.randomBytes as jest.Mock).mockReturnValue({
+        toString: () => "raw-token",
+      });
+      (crypto.createHash as jest.Mock).mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        digest: jest.fn().mockReturnValue("hashed-token"),
+      });
+
+      const result = await service.initiatePasswordReset(dto);
+
+      expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith(dto.email);
+      expect(mockPasswordResetRepository.create).toHaveBeenCalledWith({
+        email: dto.email,
+        tokenHash: "hashed-token",
+        expiresAt: expect.any(Date),
+      });
+      expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
+        dto.email,
+        "Reset your password",
+        "password-reset",
+        expect.objectContaining({
+          resetLink: expect.stringContaining("raw-token"),
+        }),
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it("should not create reset password request if user dowes not exist", async () => {
+      const dto = { email: "john.doe@email.com" };
+      mockUsersRepository.findByEmail.mockResolvedValue(null);
+      await service.initiatePasswordReset(dto);
+      expect(mockPasswordResetRepository.create).not.toHaveBeenCalled();
+      expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
+    });
+
+    it("should reset password when the token is valid", async () => {
+      const dto = { token: "raw-token", newPassword: "password321" };
+      const resetRequest = {
+        id: 1,
+        email: "john.doe@email.com",
+        tokenHash: "hashed-token",
+        expiresAt: new Date(Date.now() + 10000),
+        usedAt: null,
+      };
+      mockPasswordResetRepository.findValidByTokenHash.mockResolvedValue(
+        resetRequest,
+      );
+      mockUsersRepository.findByEmail.mockResolvedValue({
+        id: 1,
+        email: resetRequest.email,
+        password: "old-pwd",
+      });
+      (bcrypt.hash as jest.Mock).mockImplementation((value: string) => {
+        if (value === "password321") {
+          return Promise.resolve("new-hash");
+        }
+        return Promise.resolve("hashed-token");
+      });
+      mockUsersRepository.updatePassword.mockResolvedValue(undefined);
+      mockPasswordResetRepository.markAsUsed.mockResolvedValue(undefined);
+
+      const result = await service.confirmPasswordReset(dto);
+
+      expect(
+        mockPasswordResetRepository.findValidByTokenHash,
+      ).toHaveBeenCalledWith({ tokenHash: expect.any(String) });
+      expect(mockPasswordResetRepository.resetPassword).toHaveBeenCalledWith(
+        expect.objectContaining({ create: expect.anything() }),
+        1,
+        1,
+        "new-hash",
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it("should throw BadRequestException when the token is invalid", async () => {
+      const dto = { token: "raw-token", newPassword: "password321" };
+      mockPasswordResetRepository.findValidByTokenHash.mockResolvedValue(null);
+      await expect(service.confirmPasswordReset(dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("should throw BadRequestException when the token is expired", async () => {
+      const dto = { token: "raw-token", newPassword: "password321" };
+      mockPasswordResetRepository.findValidByTokenHash.mockResolvedValue({
+        id: 1,
+        email: "john.doe@email.com",
+        tokenHash: "hashed-token",
+        expiresAt: new Date(Date.now() - 10000),
+        usedAt: null,
+      });
+      await expect(service.confirmPasswordReset(dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("should throw BadRequestException when the token has already been used", async () => {
+      const dto = { token: "raw-token", newPassword: "password123" };
+      mockPasswordResetRepository.findValidByTokenHash.mockResolvedValue({
+        id: 1,
+        email: "john.doe@email.com",
+        tokenHash: "hashed-token",
+        expiresAt: new Date(Date.now() + 10000),
+        usedAt: new Date(Date.now() - 10000),
+      });
+      await expect(service.confirmPasswordReset(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

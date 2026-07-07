@@ -1,6 +1,6 @@
 import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { LoginResult } from "./loginResult.dto";
+import { LoginResult } from "../loginResult.dto";
 
 export class LoginResponse {
   @ApiProperty({

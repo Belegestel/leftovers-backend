@@ -100,7 +100,7 @@ export class RecipesController {
     type: CreateRecipeRequest,
   })
   @ApiCreatedResponse({
-    description: "Recipe created succesfully",
+    description: "Recipe created successfully",
     type: CreateRecipeResponse,
   })
   @ApiBadRequestResponse({

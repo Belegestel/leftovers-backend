@@ -22,6 +22,12 @@ import {
   RegisterRequest,
   ConfirmRegistrationRequest,
 } from "./dto/request";
+import { PasswordResetRequest } from "./dto/request/passwordResetRequest.dto";
+import { CreatePasswordReset } from "./dto/createPasswordReset.dto";
+import { PasswordResetResponse } from "./dto/response/passwordResetResponse.dto";
+import { ConfirmPasswordResetRequest } from "./dto/request/confirmPasswordResetRequest.dto";
+import { ConfirmPasswordResetResponse } from "./dto/response/confirmPasswordResetResponse.dto";
+import { ConfirmPasswordReset } from "./dto/confirmPasswordReset.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -164,5 +170,72 @@ export class AuthController {
     const input = ConfirmRegistration.from(dto);
     const result = await this.authService.confirmRegistration(input);
     return ConfirmRegistrationResponse.from(result);
+  }
+
+  @ApiOperation({
+    description: "Initiate password reset",
+    summary:
+      "Initiates the password reset, sends an email. Always returns 200 OK",
+  })
+  @ApiBody({
+    type: PasswordResetRequest,
+    description: "Email address of user",
+  })
+  @ApiOkResponse({
+    description:
+      "Password reset process initiated. The user with the provided email might not exist.",
+    type: PasswordResetResponse,
+  })
+  @ApiBadRequestResponse({
+    description: "Invalid input data - validation error",
+    schema: {
+      example: {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: ["email must be an email"],
+        error: "Bad request",
+      },
+    },
+  })
+  @Post("reset-password")
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Body() body: PasswordResetRequest,
+  ): Promise<PasswordResetResponse> {
+    const input = CreatePasswordReset.from(body);
+    await this.authService.initiatePasswordReset(input);
+    return PasswordResetResponse.new();
+  }
+
+  @ApiOperation({
+    description: "Finalize password reset",
+    summary:
+      "Confirms the user attempt to change the password, changes the password",
+  })
+  @ApiBody({
+    type: ConfirmPasswordResetRequest,
+    description: "Reset token and new password",
+  })
+  @ApiOkResponse({
+    description: "The password has been changed successfully",
+    schema: { example: { message: "Password reset successfully" } },
+  })
+  @ApiBadRequestResponse({
+    description: "Invalid input data - validation error",
+    schema: {
+      example: {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: ["password must be longer than or equal to 8 characters"],
+        error: "Bad request",
+      },
+    },
+  })
+  @Post("reset-password/confirm")
+  @HttpCode(HttpStatus.OK)
+  async confirmResetPassword(
+    @Body() dto: ConfirmPasswordResetRequest,
+  ): Promise<ConfirmPasswordResetResponse> {
+    const input = ConfirmPasswordReset.from(dto);
+    await this.authService.confirmPasswordReset(input);
+    return ConfirmPasswordResetResponse.new();
   }
 }
