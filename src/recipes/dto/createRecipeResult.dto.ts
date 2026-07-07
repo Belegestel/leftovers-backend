@@ -33,7 +33,7 @@ export class CreateRecipeResult {
   ) {
     this.id = id;
     this.title = title;
-    if (description) {
+    if (description !== undefined) {
       this.description = description;
     }
     this.servings = servings;

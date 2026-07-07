@@ -33,7 +33,7 @@ export class SingleRecipeQueryResult {
   ) {
     this.id = id;
     this.title = title;
-    if (description) {
+    if (description !== undefined) {
       this.description = description;
     }
     if (prepTime !== undefined) {

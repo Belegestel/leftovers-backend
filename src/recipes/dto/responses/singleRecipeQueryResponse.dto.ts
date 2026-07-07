@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { SingleRecipeQueryResult } from "../singleRecipeQueryResult.dto";
-import { RecipeCategory } from "../../../recipes/recipe-categories.enum";
+import {
+  categoryFromString,
+  RecipeCategory,
+} from "../../../recipes/recipe-categories.enum";
 
 export class SingleRecipeQueryResponse {
   @ApiProperty()
@@ -40,14 +43,14 @@ export class SingleRecipeQueryResponse {
     createdAt: Date,
     editedAt: Date,
     rating: number,
-    category: RecipeCategory | undefined,
+    category: string | undefined,
     ingredients: string[],
     steps: string[],
     imageLink: string | undefined,
   ) {
     this.id = id;
     this.title = title;
-    if (description) {
+    if (description !== undefined) {
       this.description = description;
     }
     if (prepTime) {
@@ -59,7 +62,7 @@ export class SingleRecipeQueryResponse {
     this.editedAt = editedAt;
     this.rating = rating;
     if (category) {
-      this.category = category;
+      this.category = categoryFromString(category);
     }
     this.ingredients = ingredients;
     this.steps = steps;
