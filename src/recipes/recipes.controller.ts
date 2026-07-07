@@ -195,7 +195,7 @@ export class RecipesController {
     @Req() req: AuthenticatedRequest,
     @Body() body: RecipeImageUploadRequest,
   ): Promise<RecipeImageUploadResponse> {
-    const userId = req.user.userId;
+    const userId = req.user.userId; 
     const input = CreateRecipeImageUploadUrl.from(id, body, userId);
     const res = await this.recipesService.createRecipeImageUploadUrl(input);
     return RecipeImageUploadResponse.from(res);
@@ -214,6 +214,6 @@ export class RecipesController {
       userId,
       dto.key,
     );
-    console.log('TODO DTO')
+    console.log("TODO DTO");
   }
 }

@@ -9,7 +9,6 @@ export class CreateRecipe {
   servings: number;
   ingredients: string[];
   steps: string[];
-  imageKey: string;
 
   static from(dto: CreateRecipeRequest): CreateRecipe {
     return {
@@ -20,7 +19,6 @@ export class CreateRecipe {
       servings: dto.servings,
       ingredients: dto.ingredients,
       steps: dto.steps,
-      imageKey: dto.imageKey,
     };
   }
 }

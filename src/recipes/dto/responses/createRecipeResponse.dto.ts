@@ -32,7 +32,7 @@ export class CreateRecipeResponse {
       category: result.category,
       ingredients: result.ingredients,
       steps: result.steps,
-      imageLink: result.imageLink,
+      imageLink: undefined,
     };
   }
 }

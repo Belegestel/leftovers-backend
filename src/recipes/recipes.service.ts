@@ -33,7 +33,9 @@ export class RecipesService {
     const links = await Promise.all(
       result.map(
         async (value) =>
-          await (value.imageKey ? this.filesService.createPresignedGetUrl(value.imageKey) : undefined),
+          await (value.imageKey
+            ? this.filesService.createPresignedGetUrl(value.imageKey)
+            : undefined),
       ),
     );
     return RecipeQueryResult.from(result, links);
@@ -52,12 +54,8 @@ export class RecipesService {
       dto.ingredients,
       dto.steps,
       userId,
-      undefined
     );
-    const imageLink = recipe.imageKey ? await this.filesService.createPresignedGetUrl(
-      recipe.imageKey,
-    ) : undefined;
-    return CreateRecipeResult.from(recipe, imageLink);
+    return CreateRecipeResult.from(recipe);
   }
   async findById(
     id: number,
@@ -74,9 +72,9 @@ export class RecipesService {
       throw new ForbiddenException("You do not have access to this recipe");
     }
 
-    const imageLink = recipe.imageKey ? await this.filesService.createPresignedGetUrl(
-      recipe.imageKey,
-    ) : undefined;
+    const imageLink = recipe.imageKey
+      ? await this.filesService.createPresignedGetUrl(recipe.imageKey)
+      : undefined;
     return SingleRecipeQueryResult.from(recipe, imageLink);
   }
 
@@ -100,7 +98,11 @@ export class RecipesService {
     return RecipeImageUploadUrl.from(uploadUrl);
   }
 
-  async confirmReceivedImageUpload(id: number, userId: number, key: string): Promise<string> {
+  async confirmReceivedImageUpload(
+    id: number,
+    userId: number,
+    key: string,
+  ): Promise<string> {
     const recipe = await this.recipesRepository.findById(id);
     if (!recipe) {
       throw new NotFoundException("The recipe does not exist");
@@ -113,6 +115,6 @@ export class RecipesService {
     }
     await this.recipesRepository.updateImageKey(id, key);
     const imageUrl = await this.filesService.createPresignedGetUrl(key);
-    return imageUrl
+    return imageUrl;
   }
 }

@@ -199,7 +199,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\"title\": \"Pizza\",\"description\": \"Tasty pizza\",\"category\": \"ITALIAN\",\"prep_time\": 30,\"servings\": 2,\"ingredients\": [\"flour\", \"water\"],\"steps\": [\"mix\", \"bake\"]}"
+          "raw": "{\"title\": \"Pizza\",\"description\": \"Tasty pizza\",\"category\": \"ITALIAN\",\"prepTime\": 30,\"servings\": 2,\"ingredients\": [\"flour\", \"water\"],\"steps\": [\"mix\", \"bake\"]}"
         },
         "url": {
           "raw": "{{baseUrl}}/recipes",

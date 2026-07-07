@@ -10,12 +10,12 @@ import { randomUUID } from "crypto";
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Post("presigned-url")
+  // @UseGuards(JwtAuthGuard)
+  // @Post("presigned-url")
   async createPresignedUrl(
     @Body() dto: PresignedUrlRequest,
   ): Promise<PresignedUrlResponse> {
-    // const input = CreatePresignedUrl.from(dto);
+    // const input = CreatePresignedUrl.from(dto); // TODO to remove
     const result = await this.filesService.createPresignedUploadUrl(
       `${randomUUID()}-${dto.fileName}`,
       dto.fileType,

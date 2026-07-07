@@ -15,9 +15,8 @@ export class CreateRecipeResult {
   category?: RecipeCategory;
   ingredients: string[];
   steps: string[];
-  imageLink: string | undefined;
 
-  static from(recipe: Recipe, imageLink: string | undefined): CreateRecipeResult {
+  static from(recipe: Recipe): CreateRecipeResult {
     return {
       id: recipe.id,
       title: recipe.title,
@@ -32,7 +31,6 @@ export class CreateRecipeResult {
       category: recipe.category,
       ingredients: recipe.ingredients,
       steps: recipe.steps,
-      imageLink: imageLink,
     };
   }
 }
