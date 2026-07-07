@@ -20,11 +20,17 @@ export class RegisterUser {
   })
   name: string;
 
+  private constructor(email: string, password: string, name: string) {
+    this.email = email;
+    this.password = password;
+    this.name = name;
+  }
+
   static from(registerRequest: RegisterRequest): RegisterUser {
-    return {
-      email: registerRequest.email,
-      password: registerRequest.password,
-      name: registerRequest.name,
-    };
+    return new RegisterUser(
+      registerRequest.email,
+      registerRequest.password,
+      registerRequest.name,
+    );
   }
 }

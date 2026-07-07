@@ -12,12 +12,17 @@ export class ConfirmRegistration {
   })
   token: string;
 
+  private constructor(email: string, token: string) {
+    this.email = email;
+    this.token = token;
+  }
+
   static from(
     confirmRegistrationRequest: ConfirmRegistrationRequest,
   ): ConfirmRegistration {
-    return {
-      email: confirmRegistrationRequest.email,
-      token: confirmRegistrationRequest.token,
-    };
+    return new ConfirmRegistration(
+      confirmRegistrationRequest.email,
+      confirmRegistrationRequest.token,
+    );
   }
 }

@@ -7,10 +7,15 @@ export class RecipeQueryResult {
   @ApiProperty()
   imageLinks: (string | undefined)[];
 
-  static from(recipes: Recipe[], imageLinks: (string | undefined)[]): RecipeQueryResult {
-    return {
-      recipes,
-      imageLinks,
-    };
+  private constructor(recipes: Recipe[], imageLinks: (string | undefined)[]) {
+    this.recipes = recipes;
+    this.imageLinks = imageLinks;
+  }
+
+  static from(
+    recipes: Recipe[],
+    imageLinks: (string | undefined)[],
+  ): RecipeQueryResult {
+    return new RecipeQueryResult(recipes, imageLinks);
   }
 }

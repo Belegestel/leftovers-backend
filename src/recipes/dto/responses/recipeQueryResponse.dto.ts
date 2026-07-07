@@ -8,18 +8,16 @@ export class RecipeQueryResponse {
   })
   recipes: RecipesQueryReturnModel[];
 
+  private constructor(recipes: RecipeQueryResult, isDetail: boolean) {
+    this.recipes = recipes.recipes.map((recipe, index) =>
+      RecipesQueryReturnModel.from(recipe, isDetail, recipes.imageLinks[index]),
+    );
+  }
+
   static from(
     recipes: RecipeQueryResult,
     isDetail: boolean,
   ): RecipeQueryResponse {
-    return {
-      recipes: recipes.recipes.map((recipe, index) =>
-        RecipesQueryReturnModel.from(
-          recipe,
-          isDetail,
-          recipes.imageLinks[index],
-        ),
-      ),
-    };
+    return new RecipeQueryResponse(recipes, isDetail);
   }
 }

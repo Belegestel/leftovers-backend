@@ -6,15 +6,16 @@ import {
   IsInt,
   Min,
   Max,
-  IsBoolean
+  IsBoolean,
 } from "class-validator";
+import { RecipeCategory } from "src/recipes/recipe-categories.enum";
 
 export class RecipeQueryRequest {
   // Filter
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  category?: string;
+  category?: RecipeCategory;
 
   @ApiPropertyOptional()
   @IsOptional()

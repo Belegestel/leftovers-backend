@@ -25,11 +25,17 @@ export class SignupUser {
   @IsString()
   name: string;
 
+  private constructor(email: string, password: string, name: string) {
+    this.email = email;
+    this.password = password;
+    this.name = name;
+  }
+
   static from(signupRequest: SignupRequest): SignupUser {
-    return {
-      email: signupRequest.email,
-      password: signupRequest.password,
-      name: signupRequest.name,
-    };
+    return new SignupUser(
+      signupRequest.email,
+      signupRequest.password,
+      signupRequest.name,
+    );
   }
 }

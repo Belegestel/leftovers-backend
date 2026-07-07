@@ -14,12 +14,17 @@ export class ConfirmRegistrationResponse {
   })
   email: string;
 
+  private constructor(id: number, email: string) {
+    this.id = id;
+    this.email = email;
+  }
+
   static from(
     confirmRegistrationResult: ConfirmRegistrationResult,
-  ): ConfirmRegistrationResult {
-    return {
-      id: confirmRegistrationResult.id,
-      email: confirmRegistrationResult.email,
-    };
+  ): ConfirmRegistrationResponse {
+    return new ConfirmRegistrationResponse(
+      confirmRegistrationResult.id,
+      confirmRegistrationResult.email,
+    );
   }
 }

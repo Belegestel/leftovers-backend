@@ -8,7 +8,11 @@ export class RegisterResponse {
   })
   message: string;
 
+  private constructor(message: string) {
+    this.message = message;
+  }
+
   static from(registerResult: RegisterResult): RegisterResponse {
-    return { message: registerResult.message };
+    return new RegisterResponse(registerResult.message);
   }
 }

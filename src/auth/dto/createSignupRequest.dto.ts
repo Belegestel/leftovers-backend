@@ -36,6 +36,20 @@ export class CreateSignupRequest {
   })
   expiresAt: Date;
 
+  private constructor(
+    email: string,
+    name: string,
+    passwordHash: string,
+    token: string,
+    expiresAt: Date,
+  ) {
+    this.email = email;
+    this.name = name;
+    this.passwordHash = passwordHash;
+    this.token = token;
+    this.expiresAt = expiresAt;
+  }
+
   static from(
     email: string,
     name: string,
@@ -43,12 +57,12 @@ export class CreateSignupRequest {
     token: string,
     expiresAt: Date,
   ): CreateSignupRequest {
-    return {
+    return new CreateSignupRequest(
       email,
       name,
-      passwordHash: hashedPassword,
+      hashedPassword,
       token,
       expiresAt,
-    };
+    );
   }
 }

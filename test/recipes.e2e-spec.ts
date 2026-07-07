@@ -411,8 +411,6 @@ describe("Recipes E2E", () => {
       .post(`/recipes/${recipe.id}/image-confirm`)
       .set("Authorization", `Bearer ${user.token}`)
       .send({ key });
-    console.log(response.status, response.body);
-    console.log({recipeId: recipe.id, key})
     expect(response.status).toBe(201);
 
     expect(response.body).toMatchObject({

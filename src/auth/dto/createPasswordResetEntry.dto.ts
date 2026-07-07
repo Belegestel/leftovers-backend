@@ -3,11 +3,13 @@ export class CreatePasswordResetEntry {
   tokenHash: string;
   expiresAt: Date;
 
-  static from(email: string, tokenHash: string, expiresAt: Date) {
-    return {
-      email,
-      tokenHash,
-      expiresAt,
-    };
+  private constructor(email: string, tokenHash: string, expiresAt: Date) {
+    this.email = email;
+    this.tokenHash = tokenHash;
+    this.expiresAt = expiresAt;
+  }
+
+  static from(email: string, tokenHash: string, expiresAt: Date): CreatePasswordResetEntry {
+    return new CreatePasswordResetEntry(email, tokenHash, expiresAt);
   }
 }

@@ -4,7 +4,12 @@ export class RecipeImageUploadUrl {
   url: string;
   key: string;
 
+  private constructor(url: string, key: string) {
+    this.url = url;
+    this.key = key;
+  }
+
   static from(dto: PresignedUrlResult): RecipeImageUploadUrl {
-    return { url: dto.url, key: dto.key };
+    return new RecipeImageUploadUrl(dto.url, dto.key);
   }
 }

@@ -10,7 +10,11 @@ export class LoginResponse {
   @IsString()
   accessToken: string;
 
+  private constructor(accessToken: string) {
+    this.accessToken = accessToken;
+  }
+
   static from(loginResult: LoginResult): LoginResponse {
-    return { accessToken: loginResult.accessToken };
+    return new LoginResponse(loginResult.accessToken);
   }
 }

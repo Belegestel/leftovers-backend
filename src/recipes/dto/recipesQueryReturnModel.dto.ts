@@ -30,35 +30,39 @@ export class RecipesQueryReturnModel {
   @ApiProperty()
   imageLink: string | undefined;
 
+  private constructor(
+    recipe: Recipe,
+    detailed: boolean,
+    imageLink: string | undefined,
+  ) {
+    if (!detailed) {
+      this.id = recipe.id;
+      this.title = recipe.title;
+      this.prepTime = recipe.prepTime;
+      this.rating = recipe.rating;
+      this.imageLink = imageLink;
+    } else {
+      this.id = recipe.id;
+      this.title = recipe.title;
+      this.description = recipe.description;
+      this.prepTime = recipe.prepTime;
+      this.isPublic = recipe.isPublic;
+      this.authorId = recipe.authorId;
+      this.createdAt = recipe.createdAt;
+      this.editedAt = recipe.editedAt;
+      this.rating = recipe.rating;
+      this.category = recipe.category;
+      this.ingredients = recipe.ingredients;
+      this.steps = recipe.steps;
+      this.imageLink = imageLink;
+    }
+  }
+
   static from(
     recipe: Recipe,
     detailed: boolean,
     imageLink: string | undefined,
   ): RecipesQueryReturnModel {
-    if (!detailed) {
-      return {
-        id: recipe.id,
-        title: recipe.title,
-        prepTime: recipe.prepTime,
-        rating: recipe.rating,
-        imageLink,
-      };
-    } else {
-      return {
-        id: recipe.id,
-        title: recipe.title,
-        description: recipe.description,
-        prepTime: recipe.prepTime,
-        isPublic: recipe.isPublic,
-        authorId: recipe.authorId,
-        createdAt: recipe.createdAt,
-        editedAt: recipe.editedAt,
-        rating: recipe.rating,
-        category: recipe.category,
-        ingredients: recipe.ingredients,
-        steps: recipe.steps,
-        imageLink,
-      };
-    }
+    return new RecipesQueryReturnModel(recipe, detailed, imageLink);
   }
 }
