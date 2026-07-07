@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { RecipeQueryRequest } from "./requests/recipeQueryRequest.dto";
-import { RecipeCategory } from "../recipe-categories.enum";
+import { categoryFromString, RecipeCategory } from "../recipe-categories.enum";
 
 export class RecipeQueryFilters {
   @ApiPropertyOptional()
@@ -36,7 +36,7 @@ export class RecipeQueryFilters {
 
   private constructor(
     userId?: number,
-    category?: RecipeCategory,
+    category?: string,
     rating?: number,
     startDate?: Date,
     endDate?: Date,
@@ -46,34 +46,34 @@ export class RecipeQueryFilters {
     steps?: string,
     details?: boolean,
   ) {
-    if (userId === undefined) {
+    if (userId !== undefined) {
       this.userId = userId;
     }
     if (category) {
-      this.category = category;
+      this.category = categoryFromString(category);
     }
-    if (rating === undefined) {
+    if (rating !== undefined) {
       this.rating = rating;
     }
-    if (startDate === undefined) {
+    if (startDate !== undefined) {
       this.startDate = startDate;
     }
-    if (endDate === undefined) {
+    if (endDate !== undefined) {
       this.endDate = endDate;
     }
-    if (title === undefined) {
+    if (title !== undefined) {
       this.title = title;
     }
-    if (description === undefined) {
+    if (description !== undefined) {
       this.description = description;
     }
-    if (ingredients === undefined) {
+    if (ingredients !== undefined) {
       this.ingredients = ingredients;
     }
-    if (steps === undefined) {
+    if (steps !== undefined) {
       this.steps = steps;
     }
-    if (details === undefined) {
+    if (details !== undefined) {
       this.details = details;
     }
   }

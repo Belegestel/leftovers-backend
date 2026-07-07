@@ -8,14 +8,14 @@ import {
   Max,
   IsBoolean,
 } from "class-validator";
-import { RecipeCategory } from "src/recipes/recipe-categories.enum";
+import { RecipeCategory } from "../../recipe-categories.enum";
 
 export class RecipeQueryRequest {
   // Filter
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  category?: RecipeCategory;
+  category?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
