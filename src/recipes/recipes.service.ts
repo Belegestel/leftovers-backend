@@ -13,8 +13,8 @@ import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { SingleRecipeQueryResult } from "./dto/singleRecipeQueryResult.dto";
 import { FilesService } from "../files/files.service";
 import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto";
-import path from "path";
-import { randomUUID } from "crypto";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
 import { RecipeImageUploadUrl } from "./dto/recipeImageUploadUrl.dto";
 
 @Injectable()
