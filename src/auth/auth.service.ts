@@ -26,6 +26,7 @@ import { CreatePasswordReset } from "./dto/createPasswordReset.dto";
 import { CreatePasswordResetEntry } from "./dto/createPasswordResetEntry.dto";
 import { ConfirmPasswordReset } from "./dto/confirmPasswordReset.dto";
 import { FindPasswordResetToken } from "./dto/findPasswordResetToken.dto";
+import { HOUR_IN_MS } from "../common/utils";
 
 @Injectable()
 export class AuthService {
@@ -109,7 +110,7 @@ export class AuthService {
     );
 
     const token = randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 24 * HOUR_IN_MS);
 
     const input = CreateSignupRequest.from(
       email,
@@ -170,7 +171,7 @@ export class AuthService {
 
     const token = randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(token).digest("hex");
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 24 * HOUR_IN_MS);
 
     await this.passwordResetRepository.create(
       CreatePasswordResetEntry.from(dto.email, tokenHash, expiresAt),

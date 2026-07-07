@@ -11,12 +11,18 @@ export class PasswordResetRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreatePasswordResetEntry) {
-    return this.prisma.passwordResetRequest.create({
-      data: {
-        email: dto.email,
-        tokenHash: dto.tokenHash,
-        expiresAt: dto.expiresAt,
-      },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.passwordResetRequest.updateMany({
+        where: { email: dto.email, usedAt: null },
+        data: { usedAt: new Date() },
+      });
+      await tx.passwordResetRequest.create({
+        data: {
+          email: dto.email,
+          tokenHash: dto.tokenHash,
+          expiresAt: dto.expiresAt,
+        },
+      });
     });
   }
 

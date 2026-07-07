@@ -1,4 +1,4 @@
-import { INestApplication } from "@nestjs/common";
+import { HttpStatus, INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { randomUUID } from "node:crypto";
 import { clearDatabase } from "./utils/clear-db";
@@ -34,7 +34,7 @@ describe("Auth E2E", () => {
         password: "password",
         name: "John Doe",
       })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("/auth/register/ should return 400 if the name is missing", async () => {
@@ -44,7 +44,7 @@ describe("Auth E2E", () => {
         email: `john.doe${randomUUID()}@email.com`,
         password: "password",
       })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("/auth/login POST should return 401 for wrong password", async () => {
@@ -54,7 +54,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password, name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
@@ -63,7 +63,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: signupRequest!.token })
-      .expect(201);
+      .expect(HttpStatus.CREATED);
 
     await request(app.getHttpServer())
       .post("/auth/login")
@@ -78,7 +78,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password, name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
@@ -87,7 +87,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: signupRequest!.token })
-      .expect(201);
+      .expect(HttpStatus.CREATED);
 
     await request(app.getHttpServer())
       .post("/auth/login")
@@ -99,7 +99,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/login")
       .send({ email: "john.doe[not]email.com" })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("/auth/register POST should create a signup request", async () => {
@@ -111,7 +111,7 @@ describe("Auth E2E", () => {
         password: "password",
         name: "John Doe",
       })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     expect(response.body).toEqual({ message: "Confirmation email sent." });
     const signupRequest = await prisma.signupRequest.findUnique({
@@ -129,7 +129,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password", name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password", name: "John Doe" })
@@ -141,7 +141,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password", name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
@@ -152,7 +152,7 @@ describe("Auth E2E", () => {
     const response = await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: signupRequest!.token })
-      .expect(201);
+      .expect(HttpStatus.CREATED);
 
     expect(response).not.toBeNull();
     expect(response.body.email).toBe(email);
@@ -167,12 +167,12 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password", name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: "invalid-token" })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("/auth/register, /auth/confirm-registration, /auth/login should register the user and log them in", async () => {
@@ -182,7 +182,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password, name: "John Doe" })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
       where: { email },
@@ -191,12 +191,12 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/confirm-registration")
       .send({ email, token: signupRequest!.token })
-      .expect(201);
+      .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .post("/auth/login")
       .send({ email, password })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     expect(response.body).toHaveProperty("accessToken");
   });
@@ -208,7 +208,7 @@ describe("Auth E2E", () => {
     const response = await request(app.getHttpServer())
       .post("/auth/reset-password")
       .send({ email })
-      .expect(200);
+      .expect(HttpStatus.OK);
     expect(response.body).toEqual({
       message: "If email exists, the message has been sent.",
     });
@@ -224,7 +224,7 @@ describe("Auth E2E", () => {
     const response = await request(app.getHttpServer())
       .post("/auth/reset-password")
       .send({ email })
-      .expect(200);
+      .expect(HttpStatus.OK);
     expect(response.body).toEqual({
       message: "If email exists, the message has been sent.",
     });
@@ -243,7 +243,7 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/reset-password")
       .send({ email })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const resetRequest = await prisma.passwordResetRequest.findFirst({
       where: { email },
@@ -262,12 +262,12 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/reset-password/confirm")
       .send({ token, newPassword })
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     await request(app.getHttpServer())
       .post("/auth/login")
       .send({ email, password: newPassword })
-      .expect(200);
+      .expect(HttpStatus.OK);
     await request(app.getHttpServer())
       .post("/auth/login")
       .send({ email, password: password })
@@ -278,13 +278,13 @@ describe("Auth E2E", () => {
     await request(app.getHttpServer())
       .post("/auth/reset-password/confirm")
       .send({ token: "invalid-token", newPassword: "password321" })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 
   it("POST /auth/reset-password/confirm POSt should return 400 for an invalid password", async () => {
     await request(app.getHttpServer())
       .post("/auth/reset-password/confirm")
       .send({ token: "invalid-token", newPassword: "321" })
-      .expect(400);
+      .expect(HttpStatus.BAD_REQUEST);
   });
 });

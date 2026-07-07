@@ -4,9 +4,8 @@ import { AuthService } from "./auth.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { mockAuthService } from "../../test/unit/mocks/mockAuthService";
-import { LoginResult } from "./dto/loginResult.dto";
 import { RegisterResponse } from "./dto/response";
-import { RegisterUser } from "./dto";
+import { RegisterUser, LoginResult } from "./dto";
 
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
@@ -79,7 +78,7 @@ describe("AuthController", () => {
     const dto = { email: "john.doe@email.com" };
     mockAuthService.initiatePasswordReset.mockResolvedValue(undefined);
 
-    const res = await controller.resetPassword(dto as any);
+    const res = await controller.resetPassword(dto);
 
     expect(mockAuthService.initiatePasswordReset).toHaveBeenCalledWith(
       expect.objectContaining({ email: dto.email }),
@@ -93,7 +92,7 @@ describe("AuthController", () => {
     const dto = { token: "raw-token", newPassword: "password321" };
     const expectedResult = { message: "Password reset successfully" };
     mockAuthService.confirmPasswordReset.mockResolvedValue(expectedResult);
-    const res = await controller.confirmResetPassword(dto as any);
+    const res = await controller.confirmResetPassword(dto);
 
     expect(res).toEqual(expectedResult);
     expect(mockAuthService.confirmPasswordReset).toHaveBeenCalledWith(dto);
@@ -105,7 +104,7 @@ describe("AuthController", () => {
       new Error("Invalid data or expired token"),
     );
 
-    await expect(controller.confirmResetPassword(dto as any)).rejects.toThrow(
+    await expect(controller.confirmResetPassword(dto)).rejects.toThrow(
       "Invalid data or expired token",
     );
     expect(mockAuthService.confirmPasswordReset).toHaveBeenCalledWith(dto);
