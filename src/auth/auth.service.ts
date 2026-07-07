@@ -212,7 +212,13 @@ export class AuthService {
     if (!user) {
       throw new InternalServerErrorException("Database error");
     }
-    await this.usersRepository.updatePassword(user.id, hashedPassword);
-    await this.passwordResetRepository.markAsUsed(req.id);
+    await this.passwordResetRepository.resetPassword(
+      this.usersRepository,
+      req.id,
+      user.id,
+      hashedPassword,
+    );
+    // await this.usersRepository.updatePassword(user.id, hashedPassword);
+    // await this.passwordResetRepository.markAsUsed(req.id);
   }
 }

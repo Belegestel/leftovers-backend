@@ -264,7 +264,6 @@ describe("AuthService", () => {
 
     it("should reset password when the token is valid", async () => {
       const dto = { token: "raw-token", newPassword: "password321" };
-      const hashedToken = "hashed-token";
       const resetRequest = {
         id: 1,
         email: "john.doe@email.com",
@@ -289,16 +288,17 @@ describe("AuthService", () => {
       mockUsersRepository.updatePassword.mockResolvedValue(undefined);
       mockPasswordResetRepository.markAsUsed.mockResolvedValue(undefined);
 
-      const result = await service.confirmPasswordReset(dto as any);
+      const result = await service.confirmPasswordReset(dto);
 
       expect(
         mockPasswordResetRepository.findValidByTokenHash,
       ).toHaveBeenCalledWith({ tokenHash: expect.any(String) });
-      expect(mockUsersRepository.updatePassword).toHaveBeenCalledWith(
+      expect(mockPasswordResetRepository.resetPassword).toHaveBeenCalledWith(
+        expect.objectContaining({ create: expect.anything() }),
+        1,
         1,
         "new-hash",
       );
-      expect(mockPasswordResetRepository.markAsUsed).toHaveBeenCalledWith(1);
       expect(result).toBeUndefined();
     });
 

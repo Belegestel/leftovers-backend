@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { User, UserMapper } from "../users/users.model";
+import { PrismaTransaction } from "../prisma/prisma.types";
 
 @Injectable()
 export class UsersRepository {
@@ -29,8 +30,14 @@ export class UsersRepository {
     return UserMapper.toDto(user);
   }
 
-  async updatePassword(id: number, passwordHash: string): Promise<void> {
-    await this.prisma.user.update({
+  async updatePassword(
+    id: number,
+    passwordHash: string,
+    tx?: PrismaTransaction,
+  ): Promise<void> {
+    const db = tx ?? this.prisma;
+
+    await db.user.update({
       where: { id },
       data: { password: passwordHash },
     });
