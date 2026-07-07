@@ -3,11 +3,14 @@ import { Recipe } from "../recipes.model";
 
 export class RecipeQueryResult {
   @ApiProperty()
-  recipes: Recipe[]
-  
-  static from(recipes: Recipe[]): RecipeQueryResult {
+  recipes: Recipe[];
+  @ApiProperty()
+  imageLinks: (string | undefined)[];
+
+  static from(recipes: Recipe[], imageLinks: (string | undefined)[]): RecipeQueryResult {
     return {
-      recipes
-    }
+      recipes,
+      imageLinks,
+    };
   }
 }

@@ -26,6 +26,8 @@ export class SingleRecipeQueryResponse {
   ingredients: string[];
   @ApiProperty()
   steps: string[];
+  @ApiProperty()
+  imageLink: string | undefined;
 
   static from(result: SingleRecipeQueryResult): SingleRecipeQueryResponse {
     return {
@@ -41,6 +43,7 @@ export class SingleRecipeQueryResponse {
       category: result.category,
       ingredients: result.ingredients,
       steps: result.steps,
-    }
+      imageLink: result.imageLink,
+    };
   }
 }

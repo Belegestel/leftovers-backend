@@ -35,6 +35,11 @@ import { CreateRecipeRequest } from "./dto/requests/createRecipeRequest.dto";
 import { CreateRecipeResponse } from "./dto/responses/createRecipeResponse.dto";
 import { CreateRecipe } from "./dto/createRecipe.dto";
 import { SingleRecipeQueryResponse } from "./dto/responses/singleRecipeQueryResponse.dto";
+import { RecipeImageUploadRequest } from "./dto/requests/recipeImageUploadRequest.dto";
+import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto";
+import { ConfirmReceivedImageRequest } from "./dto/confirmReceivedImageRequest.dto";
+import { RecipeImageUploadResponse } from "./dto/responses/recipeImageUploadResponse.dto";
+import { ConfirmImageResponse } from "./dto/responses/imageConfirmResponse.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -182,5 +187,64 @@ export class RecipesController {
     const userId = req.user?.userId;
     const recipe = await this.recipesService.findById(id, userId);
     return SingleRecipeQueryResponse.from(recipe);
+  }
+
+  @ApiOperation({
+    summary: "Request new image upload URL",
+    description:
+      "Generates a presigned URL to allow for image upload for the recipe",
+  })
+  @ApiBody({
+    type: RecipeImageUploadRequest,
+  })
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description: "Presigned URL has been generated",
+    type: CreateRecipeResponse,
+  })
+  @ApiBadRequestResponse({
+    description: "Bad request data",
+    schema: {
+      example: {
+        statusCode: HttpStatus.BAD_REQUEST,
+        error: "Bad Request",
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: "The recipe does not exist",
+  })
+  @ApiForbiddenResponse({
+    description: "The user cannot edit the recipe",
+  })
+  @ApiOkResponse()
+  @Post(":id/image-upload-url")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async getRecipeImageUploadUrl(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+    @Body() body: RecipeImageUploadRequest,
+  ): Promise<RecipeImageUploadResponse> {
+    const userId = req.user.userId;
+    const input = CreateRecipeImageUploadUrl.from(id, body, userId);
+    const res = await this.recipesService.createRecipeImageUploadUrl(input);
+    return RecipeImageUploadResponse.from(res);
+  }
+
+  @Post(":id/image-confirm")
+  @UseGuards(JwtAuthGuard)
+  async confirmReceivedImageUpload(
+    @Param("id") id: number,
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: ConfirmReceivedImageRequest,
+  ): Promise<ConfirmImageResponse> {
+    const userId = req.user.userId;
+    const res = await this.recipesService.confirmReceivedImageUpload(
+      id,
+      userId,
+      dto.key,
+    );
+    return ConfirmImageResponse.from(res);
   }
 }

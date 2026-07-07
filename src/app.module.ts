@@ -6,6 +6,7 @@ import { UsersModule } from "./users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { EmailModule } from './email/email.module';
 import { RecipesModule } from './recipes/recipes.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RecipesModule } from './recipes/recipes.module';
     AuthModule,
     EmailModule,
     RecipesModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

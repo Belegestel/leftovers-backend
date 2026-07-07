@@ -27,14 +27,21 @@ export class RecipesQueryReturnModel {
   ingredients?: string[];
   @ApiPropertyOptional()
   steps?: string[];
+  @ApiProperty()
+  imageLink: string | undefined;
 
-  static from(recipe: Recipe, detailed: boolean): RecipesQueryReturnModel {
+  static from(
+    recipe: Recipe,
+    detailed: boolean,
+    imageLink: string | undefined,
+  ): RecipesQueryReturnModel {
     if (!detailed) {
       return {
         id: recipe.id,
         title: recipe.title,
         prepTime: recipe.prepTime,
-        rating: recipe.rating
+        rating: recipe.rating,
+        imageLink,
       };
     } else {
       return {
@@ -50,6 +57,7 @@ export class RecipesQueryReturnModel {
         category: recipe.category,
         ingredients: recipe.ingredients,
         steps: recipe.steps,
+        imageLink,
       };
     }
   }

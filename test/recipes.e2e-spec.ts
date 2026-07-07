@@ -258,7 +258,16 @@ describe("Recipes E2E", () => {
       .set("Authorization", `Bearer ${user.token}`)
       .send(payload)
       .expect(201);
-    expect(response.body).toMatchObject({ recipe: { id: 1 } });
+    expect(response.body).toMatchObject({
+      id: 1,
+      title: "Pizza",
+      description: "Tasty pizza",
+      category: RecipeCategory.ITALIAN,
+      prepTime: 30,
+      servings: 2,
+      ingredients: ["flour", "water"],
+      steps: ["mix", "bake"],
+    });
     const recipe = await prisma.recipe.findFirst({ where: { title: "Pizza" } });
     expect(recipe).not.toBeNull();
     expect(recipe?.authorId).toBe(user.user.id);
@@ -295,5 +304,150 @@ describe("Recipes E2E", () => {
       id: recipe.id,
       title: "Public recipe",
     });
+  });
+
+  it("POST /recipes/:id/image-upload-url should return a presigned upload URL for the recipe owner", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+    const recipe = await prisma.recipe.create({
+      data: {
+        title: "Pizza",
+        ingredients: ["flour"],
+        steps: ["mix"],
+        rating: 2,
+        isPublic: true,
+        servings: 2,
+        category: RecipeCategory.ITALIAN,
+        authorId: user.user.id,
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .post(`/recipes/${recipe.id}/image-upload-url`)
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({ fileName: "pizza.jpg", fileType: "image/jpeg" })
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      url: expect.any(String),
+      key: expect.stringContaining(`recipes/${recipe.id}/`),
+    });
+  });
+
+  it("POST /recipes:id/image-upload-url should reject another user's recipe", async () => {
+    const owner = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+    const otherUser = await createUserAndLogin(
+      app,
+      prisma,
+      `john.dont${randomUUID()}@email.com`,
+      "password123",
+    );
+    const recipe = await prisma.recipe.create({
+      data: {
+        title: "Pizza",
+        ingredients: ["flour"],
+        steps: ["mix"],
+        rating: 2,
+        isPublic: true,
+        servings: 2,
+        category: RecipeCategory.ITALIAN,
+        authorId: owner.user.id,
+      },
+    });
+    const response = await request(app.getHttpServer())
+      .post(`/recipes/${recipe.id}/image-upload-url`)
+      .set("Authorization", `Bearer ${otherUser.token}`)
+      .send({ fileName: "pizza.jpg", fileType: "image/jpeg" })
+      .expect(403);
+    expect(response.body.message).toBe("You cannot modify this recipe");
+  });
+
+  it("POST /recipes:id/image-upload-url should reject missing recipe", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+    await request(app.getHttpServer())
+      .post(`/recipes/123/image-upload-url`)
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({ fileName: "pizza.jpg", fileType: "image/jpeg" })
+      .expect(404);
+  });
+
+  it("POST /recipes/:id/image-confirm should confirm image upload and save image key", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+    const recipe = await prisma.recipe.create({
+      data: {
+        title: "Pizza",
+        ingredients: ["flour"],
+        steps: ["mix"],
+        rating: 2,
+        isPublic: true,
+        servings: 2,
+        category: RecipeCategory.ITALIAN,
+        authorId: user.user.id,
+      },
+    });
+
+    const key = `recipes/${recipe.id}/image.jpg`;
+
+    const response = await request(app.getHttpServer())
+      .post(`/recipes/${recipe.id}/image-confirm`)
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({ key });
+    console.log(response.status, response.body);
+    console.log({recipeId: recipe.id, key})
+    expect(response.status).toBe(201);
+
+    expect(response.body).toMatchObject({
+      imageUrl: expect.any(String),
+    });
+
+    const updatedRecipe = await prisma.recipe.findUnique({
+      where: { id: recipe.id },
+    });
+    expect(updatedRecipe?.imageKey).toBe(key);
+  });
+
+  it("POST /recipes/:id/image-confirm should reject on invalid image key", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `john.doe${randomUUID()}@email.com`,
+      "password123",
+    );
+    const recipe = await prisma.recipe.create({
+      data: {
+        title: "Pizza",
+        ingredients: ["flour"],
+        steps: ["mix"],
+        rating: 2,
+        isPublic: true,
+        servings: 2,
+        category: RecipeCategory.ITALIAN,
+        authorId: user.user.id,
+      },
+    });
+    await request(app.getHttpServer())
+      .post(`/recipes/${recipe.id}/image-confirm`)
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({ key: "imvalid/path/imgg.jpg" })
+      .expect(400);
   });
 });

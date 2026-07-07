@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
-import { RecipeWhereInput } from "src/generated/prisma/models";
+import { RecipeWhereInput } from "../generated/prisma/models";
 import { Recipe } from "./recipes.model";
 import { RecipeCategory, prismaFromCategory } from "./recipe-categories.enum";
 
@@ -91,6 +91,7 @@ export class RecipesRepository {
         ingredients,
         steps,
         authorId: userId,
+        imageKey: undefined,
       },
     });
 
@@ -99,6 +100,14 @@ export class RecipesRepository {
 
   async findById(id: number): Promise<Recipe | null> {
     const recipe = await this.prisma.recipe.findUnique({ where: { id } });
+    return recipe ? Recipe.fromPrisma(recipe) : null;
+  }
+
+  async updateImageKey(recipeId: number, key: string) {
+    const recipe = await this.prisma.recipe.update({
+      where: { id: recipeId },
+      data: { imageKey: key },
+    });
     return recipe ? Recipe.fromPrisma(recipe) : null;
   }
 }
