@@ -16,6 +16,7 @@ import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { RecipeImageUploadUrl } from "./dto/recipeImageUploadUrl.dto";
+import { allRecipeCategories } from "./recipe-categories.enum";
 
 @Injectable()
 export class RecipesService {
@@ -116,5 +117,9 @@ export class RecipesService {
     await this.recipesRepository.updateImageKey(id, key);
     const imageUrl = await this.filesService.createPresignedGetUrl(key);
     return imageUrl;
+  }
+
+  async getRecipeCategories(): Promise<string[]> {
+    return allRecipeCategories;
   }
 }

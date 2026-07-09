@@ -14,6 +14,12 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.enableCors({
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:5174'
+    ]
+  })
 
   const config = new DocumentBuilder()
     .setTitle("Leftovers app")

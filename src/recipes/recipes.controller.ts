@@ -40,6 +40,7 @@ import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto
 import { ConfirmReceivedImageRequest } from "./dto/requests/confirmReceivedImageRequest.dto";
 import { RecipeImageUploadResponse } from "./dto/responses/recipeImageUploadResponse.dto";
 import { ConfirmImageResponse } from "./dto/responses/imageConfirmResponse.dto";
+import { CategoriesResponse } from "./dto/responses/categoriesResponse.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -143,6 +144,17 @@ export class RecipesController {
     return CreateRecipeResponse.from(recipe);
   }
 
+  @ApiOperation({ summary: "Returns a list of recipe categories" })
+  @ApiOkResponse({
+    description: "List has been returned",
+    type: CategoriesResponse,
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get("/categories")
+  async getCategories(): Promise<CategoriesResponse> {
+    const categories = await this.recipesService.getRecipeCategories();
+    return CategoriesResponse.from(categories);
+  }
   @ApiOperation({
     summary: "Get a single recipe by id",
     description:
