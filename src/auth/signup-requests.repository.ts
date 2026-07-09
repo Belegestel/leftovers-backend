@@ -22,7 +22,6 @@ export class SignupRequestsRepository {
     return this.prisma.signupRequest.create({
       data: {
         email: data.email,
-        name: data.name,
         password_hash: data.passwordHash,
         token: data.token,
         expires_at: data.expiresAt,

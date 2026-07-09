@@ -14,23 +14,15 @@ export class RegisterUser {
   })
   password: string;
 
-  @ApiProperty({
-    example: "John Doe",
-    description: "User name.",
-  })
-  name: string;
-
-  private constructor(email: string, password: string, name: string) {
+  private constructor(email: string, password: string) {
     this.email = email;
     this.password = password;
-    this.name = name;
   }
 
   static from(registerRequest: RegisterRequest): RegisterUser {
     return new RegisterUser(
       registerRequest.email,
       registerRequest.password,
-      registerRequest.name,
     );
   }
 }

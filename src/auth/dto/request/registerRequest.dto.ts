@@ -18,11 +18,4 @@ export class RegisterRequest {
   @IsString()
   @MinLength(8)
   password: string;
-
-  @ApiProperty({
-    example: "John Doe",
-    description: "User name.",
-  })
-  @IsString()
-  name: string;
 }
