@@ -133,6 +133,17 @@ export class RecipesController {
     return CreateRecipeResponse.from(recipe);
   }
 
+  @ApiOperation({ summary: "Returns a list of recipe categories" })
+  @ApiOkResponse({
+    description: "List has been returned",
+    type: CategoriesResponse,
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get("/categories")
+  async getCategories(): Promise<CategoriesResponse> {
+    const categories = await this.recipesService.getRecipeCategories();
+    return CategoriesResponse.from(categories);
+  }
   @ApiOperation({
     summary: "Get a single recipe by id",
     description:

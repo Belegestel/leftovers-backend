@@ -73,3 +73,13 @@ export function prismaFromCategory(category: RecipeCategory): PrismaCategory {
       return PrismaCategory.SALADS;
   }
 }
+export const allRecipeCategories = [
+  "🥪 breakfasts",
+  "🍲 soups",
+  "🍔 lunch",
+  "🥐 baking",
+  "🧁 desserts",
+  "🍹 drinks",
+  "🍿 snacks",
+  "🥗 salads",
+];
