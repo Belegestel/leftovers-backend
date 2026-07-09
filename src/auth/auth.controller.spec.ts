@@ -35,7 +35,6 @@ describe("AuthController", () => {
     const dto: RegisterUser = {
       email: "john.doe@email.com",
       password: "password123",
-      name: "John Doe",
     };
 
     const expectedResult: RegisterResponse = {

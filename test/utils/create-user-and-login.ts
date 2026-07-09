@@ -10,7 +10,7 @@ export async function createUserAndLogin(
 ) {
   await request(app.getHttpServer())
     .post("/auth/register")
-    .send({ email, password, name: "test name" })
+    .send({ email, password })
     .expect(200);
 
   const signupRequest = await prisma.signupRequest.findUnique({

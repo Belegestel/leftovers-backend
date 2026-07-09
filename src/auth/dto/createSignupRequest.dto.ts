@@ -11,13 +11,6 @@ export class CreateSignupRequest {
   email: string;
 
   @ApiProperty({
-    description: "User name",
-    example: "John Doe",
-  })
-  @IsString()
-  name: string;
-
-  @ApiProperty({
     description: "Password hash",
     example: "grfdgHJhGFdrty",
   })
@@ -38,13 +31,11 @@ export class CreateSignupRequest {
 
   private constructor(
     email: string,
-    name: string,
     passwordHash: string,
     token: string,
     expiresAt: Date,
   ) {
     this.email = email;
-    this.name = name;
     this.passwordHash = passwordHash;
     this.token = token;
     this.expiresAt = expiresAt;
@@ -52,14 +43,12 @@ export class CreateSignupRequest {
 
   static from(
     email: string,
-    name: string,
     hashedPassword: string,
     token: string,
     expiresAt: Date,
   ): CreateSignupRequest {
     return new CreateSignupRequest(
       email,
-      name,
       hashedPassword,
       token,
       expiresAt,

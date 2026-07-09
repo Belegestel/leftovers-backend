@@ -32,7 +32,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -58,7 +58,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -84,7 +84,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -98,12 +98,12 @@ describe("RecipesService", () => {
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
-        category: "Asian",
+        category: "Lunch",
       } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
-        expect.objectContaining({ category: "ASIAN" }),
+        expect.objectContaining({ category: "LUNCH" }),
       );
     });
 
@@ -112,7 +112,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -140,7 +140,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -168,7 +168,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -196,7 +196,7 @@ describe("RecipesService", () => {
       const dto: CreateRecipe = {
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -206,7 +206,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -224,7 +224,7 @@ describe("RecipesService", () => {
       expect(mockRecipesRepository.create).toHaveBeenCalledWith(
         "Pizza",
         "TastyPizza",
-        RecipeCategory.ITALIAN,
+        RecipeCategory.LUNCH,
         30,
         2,
         ["Flour", "Water"],

@@ -16,7 +16,7 @@ import {
   RegisterResponse,
   ConfirmRegistrationResponse,
 } from "./dto/response";
-import { SignupUser, LoginUser, ConfirmRegistration } from "./dto";
+import { SignupUser, LoginUser, ConfirmRegistration, RegisterUser } from "./dto";
 import {
   LoginRequest,
   RegisterRequest,
@@ -137,7 +137,7 @@ export class AuthController {
   @Post("register")
   @HttpCode(HttpStatus.OK)
   async register(@Body() dto: RegisterRequest): Promise<RegisterResponse> {
-    const input = SignupUser.from(dto);
+    const input = RegisterUser.from(dto);
     const result = await this.authService.register(input);
     return RegisterResponse.from(result);
   }

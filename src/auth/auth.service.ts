@@ -61,7 +61,6 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(dto.password, salt);
     const user = await this.usersRepository.create({
       email,
-      name: dto.name,
       password: hashedPassword,
     });
 
@@ -111,7 +110,6 @@ export class AuthService {
 
     const input = CreateSignupRequest.from(
       email,
-      dto.name,
       hashedPassword,
       token,
       expiresAt,
@@ -128,7 +126,7 @@ export class AuthService {
       email,
       "Confirm your registration",
       "registration-confirmation",
-      { name: dto.name, confirmationLink },
+      { name: 'User', confirmationLink },
     );
     return RegisterResult.from("Confirmation email sent.");
   }
@@ -150,7 +148,6 @@ export class AuthService {
 
     const user = await this.usersRepository.create({
       email: req.email,
-      name: req.name,
       password: req.password_hash,
     });
 
