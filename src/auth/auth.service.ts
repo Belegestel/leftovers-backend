@@ -122,11 +122,13 @@ export class AuthService {
       `?email=${encodeURIComponent(email)}` +
       `&token=${encodeURIComponent(token)}`;
 
+    const frontendUrl = this.frontendUrl;
+
     await this.emailService.sendEmail(
       email,
       "Confirm your registration",
       "registration-confirmation",
-      { name: 'User', confirmationLink },
+      { confirmationLink, frontendUrl},
     );
     return RegisterResult.from("Confirmation email sent.");
   }
