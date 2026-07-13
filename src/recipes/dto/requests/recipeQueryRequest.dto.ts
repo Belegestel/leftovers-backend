@@ -8,7 +8,6 @@ import {
   Max,
   IsBoolean,
 } from "class-validator";
-import { RecipeCategory } from "../../recipe-categories.enum";
 
 export class RecipeQueryRequest {
   // Filter

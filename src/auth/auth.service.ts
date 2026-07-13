@@ -174,14 +174,18 @@ export class AuthService {
     );
 
     const link =
-      `${this.frontendUrl}/reset-password?email=${encodeURIComponent(dto.email)}` +
+      `${this.frontendUrl}/?reset-password=true&email=${encodeURIComponent(dto.email)}` +
       `&token=${encodeURIComponent(token)}`;
 
     await this.emailService.sendEmail(
       dto.email,
       "Reset your password",
       "password-reset",
-      { resetLink: link },
+      {
+        frontendUrl: this.frontendUrl,
+        resetLink: link,
+        username: dto.email.split('@')[0]
+      },
     );
   }
 

@@ -62,17 +62,7 @@ export class RecipesController {
   @ApiOkResponse({
     description:
       "List of recipes (summary or detailed, depending on the `details` flag)",
-    schema: {
-      example: [
-        {
-          id: 1,
-          title: "Pizza",
-          category: "Italian",
-          rating: 4,
-          created_at: "2020-02-02T20:20:20.200Z",
-        },
-      ],
-    },
+    type: RecipeQueryResponse
   })
   @ApiBadRequestResponse({
     description: "Invalid query parameters",

@@ -26,6 +26,8 @@ export class RecipesQueryReturnModel {
   @ApiPropertyOptional()
   ingredients?: string[];
   @ApiPropertyOptional()
+  servings: number;
+  @ApiPropertyOptional()
   steps?: string[];
   @ApiProperty()
   imageLink: string | undefined;
@@ -40,6 +42,8 @@ export class RecipesQueryReturnModel {
       this.title = recipe.title;
       this.prepTime = recipe.prepTime;
       this.rating = recipe.rating;
+      this.servings = recipe.servings;
+      this.description = recipe.description;
       this.imageLink = imageLink;
     } else {
       this.id = recipe.id;
@@ -52,6 +56,7 @@ export class RecipesQueryReturnModel {
       this.editedAt = recipe.editedAt;
       this.rating = recipe.rating;
       this.category = recipe.category;
+      this.servings = recipe.servings;
       this.ingredients = recipe.ingredients;
       this.steps = recipe.steps;
       this.imageLink = imageLink;
