@@ -435,4 +435,59 @@ describe("Recipes E2E", () => {
       .send({ key: "imvalid/path/imgg.jpg" })
       .expect(400);
   });
+
+  it("POST /recipes/:id/bookmark and /unbookmark should update bookmark state", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `user${randomUUID()}@email.com`,
+      "password123",
+    );
+
+    const recipe = await prisma.recipe.create({
+      data: {
+        title: "Bookmark recipe",
+        ingredients: ["ingredient"],
+        steps: ["step"],
+        isPublic: true,
+        servings: 2,
+        category: RecipeCategory.LUNCH,
+        authorId: user.user.id,
+      },
+    });
+
+    const getRecipes = () =>
+      request(app.getHttpServer())
+        .get("/recipes")
+        .set("Authorization", `Bearer ${user.token}`)
+        .expect(200);
+
+    let response = await getRecipes();
+
+    expect(
+      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+    ).toBe(false);
+
+    await request(app.getHttpServer())
+      .post(`/recipes/${recipe.id}/bookmark`)
+      .set("Authorization", `Bearer ${user.token}`)
+      .expect(200);
+
+    response = await getRecipes();
+
+    expect(
+      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+    ).toBe(true);
+
+
+    const resp = await request(app.getHttpServer())
+      .post(`/recipes/${recipe.id}/unbookmark`)
+      .set("Authorization", `Bearer ${user.token}`);
+
+    response = await getRecipes();
+
+    expect(
+      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+    ).toBe(false);
+  });
 });

@@ -270,4 +270,54 @@ describe("RecipesService", () => {
     const result = await service.findById(1, 1);
     expect(result).toEqual({ id: 1, isPublic: false, authorId: 1 });
   });
+
+  describe("bookmarkRecipe", () => {
+    it("delegates bookmarking a recipe to the repository", async () => {
+      const dto: BookmarkRecipe = {
+        recipeId: 1,
+        userId: 2,
+      };
+
+      await service.bookmarkRecipe(dto);
+
+      expect(mockRecipesRepository.bookmarkRecipe).toHaveBeenCalledWith(
+        dto.recipeId,
+        dto.userId,
+      );
+    });
+  });
+
+  describe("unbookmarkRecipe", () => {
+    it("delegates unbookmarking a recipe to the repository", async () => {
+      const dto: UnbookmarkRecipe = {
+        recipeId: 1,
+        userId: 2,
+      };
+
+      await service.unbookmarkRecipe(dto);
+
+      expect(mockRecipesRepository.unbookmarkRecipe).toHaveBeenCalledWith(
+        dto.recipeId,
+        dto.userId,
+      );
+    });
+  });
+
+  describe("rateRecipe", () => {
+    it("delegates rating a recipe to the repository", async () => {
+      const dto: RateRecipe = {
+        recipeId: 1,
+        userId: 2,
+        value: 5,
+      };
+
+      await service.rateRecipe(dto);
+
+      expect(mockRecipesRepository.rateRecipe).toHaveBeenCalledWith(
+        dto.recipeId,
+        dto.userId,
+        dto.value,
+      );
+    });
+  });
 });

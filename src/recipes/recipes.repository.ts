@@ -146,7 +146,7 @@ export class RecipesRepository {
       select: { id: true },
     });
     const user = await this.prisma.user.findUnique({
-      where: { id: recipeId },
+      where: { id: userId },
       select: { id: true },
     });
     if (!recipe || !user) {
@@ -164,13 +164,13 @@ export class RecipesRepository {
       select: { id: true },
     });
     const user = await this.prisma.user.findUnique({
-      where: { id: recipeId },
+      where: { id: userId },
       select: { id: true },
     });
-    if (!recipe) {
+    if (!recipe || !user) {
       throw new NotFoundException("Recipe or user not found!");
     }
-    return this.prisma.user.update({
+    const result = await this.prisma.user.update({
       where: {
         id: userId,
       },
@@ -179,7 +179,12 @@ export class RecipesRepository {
           disconnect: { id: recipeId },
         },
       },
+      include: {
+        savedRecipes: true,
+      },
     });
+
+    return result;
   }
 
   async getBookmarks(userId: number) {
