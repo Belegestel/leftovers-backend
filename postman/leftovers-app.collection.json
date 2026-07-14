@@ -38,7 +38,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\", \"name\": \"{{name}}\"}"
+          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\"}"
         },
         "url": {
           "raw": "{{baseUrl}}/auth/signup",
@@ -72,7 +72,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\", \"name\": \"{{name}}\"}"
+          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\"}"
         },
         "url": {
           "raw": "{{baseUrl}}/auth/register",
@@ -284,11 +284,6 @@
     {
       "key": "password",
       "value": "password",
-      "type": "string"
-    },
-    {
-      "key": "name",
-      "value": "John Doe",
       "type": "string"
     },
     {

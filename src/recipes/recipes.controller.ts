@@ -40,6 +40,11 @@ import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto
 import { ConfirmReceivedImageRequest } from "./dto/requests/confirmReceivedImageRequest.dto";
 import { RecipeImageUploadResponse } from "./dto/responses/recipeImageUploadResponse.dto";
 import { ConfirmImageResponse } from "./dto/responses/imageConfirmResponse.dto";
+import { CategoriesResponse } from "./dto/responses/categoriesResponse.dto";
+import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
+import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
+import { RateRecipeRequest } from "./dto/requests/rateRecipeRequest.dto";
+import { RateRecipe } from "./dto/rateRecipe.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -61,7 +66,7 @@ export class RecipesController {
   @ApiOkResponse({
     description:
       "List of recipes (summary or detailed, depending on the `details` flag)",
-    type: RecipeQueryResponse
+    type: RecipeQueryResponse,
   })
   @ApiBadRequestResponse({
     description: "Invalid query parameters",
@@ -120,7 +125,7 @@ export class RecipesController {
       },
     },
   })
-  @Post()
+  @Post("")
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createRecipe(
@@ -247,5 +252,52 @@ export class RecipesController {
       dto.key,
     );
     return ConfirmImageResponse.from(res);
+  }
+
+  @ApiOperation({
+    summary: "Authenticated user bookmarks a recipe",
+  })
+  @ApiOkResponse({ description: "Recipe bookmarked succesfully" })
+  @HttpCode(HttpStatus.OK)
+  @Post(":id/bookmark")
+  @UseGuards(JwtAuthGuard)
+  async bookmarkRecipe(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const input = BookmarkRecipe.from(id, req.user.userId);
+    await this.recipesService.bookmarkRecipe(input);
+  }
+
+  @ApiOperation({
+    summary: "Authenticated user bookmarks a recipe",
+  })
+  @ApiOkResponse({ description: "Recipe bookmarked succesfully" })
+  @HttpCode(HttpStatus.OK)
+  @Post(":id/unbookmark")
+  @UseGuards(JwtAuthGuard)
+  async unbookmarkRecipe(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const input = UnbookmarkRecipe.from(id, req.user.userId);
+    await this.recipesService.unbookmarkRecipe(input);
+  }
+
+  @ApiOperation({
+    summary: "Authenticated user rates a recipe or replaces previous rating",
+  })
+  @ApiBody({ type: RateRecipeRequest })
+  @ApiOkResponse({ description: "The recipe has been rated." })
+  @HttpCode(HttpStatus.OK)
+  @Post(":id/rate")
+  @UseGuards(JwtAuthGuard)
+  async rateRecipe(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: RateRecipeRequest,
+  ) {
+    const input = RateRecipe.from(dto, req.user.userId, id);
+    await this.recipesService.rateRecipe(input);
   }
 }
