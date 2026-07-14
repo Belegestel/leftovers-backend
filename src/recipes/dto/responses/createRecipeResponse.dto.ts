@@ -1,6 +1,7 @@
 import { CreateRecipeResult } from "../createRecipeResult.dto";
 import { RecipeCategory } from "../../recipe-categories.enum";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { DEFAULT_PREP_TIME } from "../../../common/utils";
 
 export class CreateRecipeResponse {
   @ApiProperty()
@@ -90,7 +91,7 @@ export class CreateRecipeResponse {
       result.title,
       result.description,
       result.servings,
-      result.prepTime ?? 10,
+      result.prepTime ?? DEFAULT_PREP_TIME,
       result.isPublic,
       result.authorId,
       result.createdAt,
