@@ -64,10 +64,20 @@ export class RecipesRepository {
         AND: conditions,
       },
       orderBy: { createdAt: "desc" },
-      include: { ratings: true },
+      include: {
+        ratings: true,
+        savedBy: userId
+          ? {
+              where: { id: userId },
+              select: { id: true },
+            }
+          : false,
+      },
     });
     const result_filtered = result
-      .map((value) => Recipe.fromPrisma(value))
+      .map((value) =>
+        Recipe.fromPrisma(value, userId ? value.savedBy.length > 0 : false),
+      )
       .filter((recipe: Recipe) =>
         recipeQuery?.rating ? recipe.rating >= recipeQuery.rating : true,
       );
@@ -114,7 +124,11 @@ export class RecipesRepository {
           : false,
       },
     });
-    const isBookmarked = userId ? (recipe?.savedBy?.length ? recipe.savedBy.length > 0 : false ) : false;
+    const isBookmarked = userId
+      ? recipe?.savedBy?.length
+        ? recipe.savedBy.length > 0
+        : false
+      : false;
     return recipe ? Recipe.fromPrisma(recipe, isBookmarked) : null;
   }
 
