@@ -14,7 +14,12 @@ export class SignupResponse {
   })
   email: string;
 
+  private constructor(id: number, email: string) {
+    this.id = id;
+    this.email = email;
+  }
+
   static from(signupResult: SignupResult): SignupResponse {
-    return { id: signupResult.id, email: signupResult.email };
+    return new SignupResponse(signupResult.id, signupResult.email);
   }
 }

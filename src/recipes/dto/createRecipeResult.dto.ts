@@ -16,21 +16,57 @@ export class CreateRecipeResult {
   ingredients: string[];
   steps: string[];
 
+  private constructor(
+    id: number,
+    title: string,
+    description: string | undefined,
+    servings: number,
+    prepTime: number | undefined,
+    isPublic: boolean,
+    authorId: number,
+    createdAt: Date,
+    editedAt: Date,
+    rating: number,
+    category: RecipeCategory | undefined,
+    ingredients: string[],
+    steps: string[],
+  ) {
+    this.id = id;
+    this.title = title;
+    if (description !== undefined) {
+      this.description = description;
+    }
+    this.servings = servings;
+    if (prepTime) {
+      this.prepTime = prepTime;
+    }
+    this.isPublic = isPublic;
+    this.authorId = authorId;
+    this.createdAt = createdAt;
+    this.editedAt = editedAt;
+    this.rating = rating;
+    if (category) {
+      this.category = category;
+    }
+    this.ingredients = ingredients;
+    this.steps = steps;
+  }
+
   static from(recipe: Recipe): CreateRecipeResult {
-    return {
-      id: recipe.id,
-      title: recipe.title,
-      description: recipe.description,
-      servings: recipe.servings,
-      prepTime: recipe.prepTime,
-      isPublic: recipe.isPublic,
-      authorId: recipe.authorId,
-      createdAt: recipe.createdAt,
-      editedAt: recipe.editedAt,
-      rating: recipe.rating,
-      category: recipe.category,
-      ingredients: recipe.ingredients,
-      steps: recipe.steps,
-    };
+    return new CreateRecipeResult(
+      recipe.id,
+      recipe.title,
+      recipe.description,
+      recipe.servings,
+      recipe.prepTime,
+      recipe.isPublic,
+      recipe.authorId,
+      recipe.createdAt,
+      recipe.editedAt,
+      recipe.rating,
+      recipe.category,
+      recipe.ingredients,
+      recipe.steps,
+    );
   }
 }

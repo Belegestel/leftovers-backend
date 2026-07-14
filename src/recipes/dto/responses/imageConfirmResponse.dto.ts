@@ -5,7 +5,12 @@ export class ConfirmImageResponse {
     description: "Presigned GET URL to the uploaded file",
   })
   imageUrl: string;
+
+  private constructor(imageUrl: string) {
+    this.imageUrl = imageUrl;
+  }
+
   static from(imageUrl: string): ConfirmImageResponse {
-    return { imageUrl };
+    return new ConfirmImageResponse(imageUrl);
   }
 }

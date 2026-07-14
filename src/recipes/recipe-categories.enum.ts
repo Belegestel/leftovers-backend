@@ -24,6 +24,22 @@ export function categoryFromPrisma(prisma: PrismaCategory): RecipeCategory {
       return RecipeCategory.OTHER;
   }
 }
+export function categoryFromString(category: string): RecipeCategory {
+  switch (category.toLowerCase().trim()) {
+    case "italian":
+      return RecipeCategory.ITALIAN;
+    case "asian":
+      return RecipeCategory.ASIAN;
+    case "dessert":
+      return RecipeCategory.DESSERT;
+    case "vegetarian":
+      return RecipeCategory.VEGETARIAN;
+    case "vegan":
+      return RecipeCategory.VEGAN;
+    default:
+      return RecipeCategory.OTHER;
+  }
+}
 export function prismaFromCategory(category: RecipeCategory): PrismaCategory {
   switch (category) {
     case RecipeCategory.ITALIAN:

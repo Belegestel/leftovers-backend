@@ -6,4 +6,11 @@ export class RegisterResult {
     example: "Confirmation email sent.",
   })
   message: string;
+
+  private constructor(message: string) {
+    this.message = message;
+  }
+  static from(message: string): RegisterResult {
+    return new RegisterResult(message);
+  }
 }

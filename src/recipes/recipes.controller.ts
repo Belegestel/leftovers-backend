@@ -37,7 +37,7 @@ import { CreateRecipe } from "./dto/createRecipe.dto";
 import { SingleRecipeQueryResponse } from "./dto/responses/singleRecipeQueryResponse.dto";
 import { RecipeImageUploadRequest } from "./dto/requests/recipeImageUploadRequest.dto";
 import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto";
-import { ConfirmReceivedImageRequest } from "./dto/confirmReceivedImageRequest.dto";
+import { ConfirmReceivedImageRequest } from "./dto/requests/confirmReceivedImageRequest.dto";
 import { RecipeImageUploadResponse } from "./dto/responses/recipeImageUploadResponse.dto";
 import { ConfirmImageResponse } from "./dto/responses/imageConfirmResponse.dto";
 

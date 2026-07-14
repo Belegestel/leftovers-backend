@@ -17,10 +17,12 @@ export class LoginUser {
   @IsString()
   password: string;
 
+  private constructor(email: string, password: string) {
+    this.email = email;
+    this.password = password;
+  }
+
   static from(loginRequest: LoginRequest): LoginUser {
-    return {
-      email: loginRequest.email,
-      password: loginRequest.password,
-    };
+    return new LoginUser(loginRequest.email, loginRequest.password);
   }
 }

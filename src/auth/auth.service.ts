@@ -65,10 +65,7 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    return {
-      id: user.id,
-      email: user.email,
-    };
+    return SignupResult.from(user.id, user.email);
   }
 
   async login(dto: LoginUser): Promise<LoginResult> {
@@ -91,7 +88,7 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(payload);
 
-    return { accessToken };
+    return LoginResult.from(accessToken);
   }
 
   async register(dto: RegisterUser): Promise<RegisterResult> {
@@ -133,7 +130,7 @@ export class AuthService {
       "registration-confirmation",
       { name: dto.name, confirmationLink },
     );
-    return { message: "Confirmation email sent." };
+    return RegisterResult.from("Confirmation email sent.");
   }
 
   async confirmRegistration(
@@ -159,7 +156,7 @@ export class AuthService {
 
     this.signupRequestsRepository.deleteById(req.id);
 
-    return { id: user.id, email: user.email };
+    return new ConfirmRegistrationResult(user.id, user.email);
   }
 
   async initiatePasswordReset(dto: CreatePasswordReset): Promise<void> {
@@ -219,7 +216,5 @@ export class AuthService {
       user.id,
       hashedPassword,
     );
-    // await this.usersRepository.updatePassword(user.id, hashedPassword);
-    // await this.passwordResetRepository.markAsUsed(req.id);
   }
 }

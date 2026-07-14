@@ -4,10 +4,12 @@ export class CreatePresignedUrl {
   fileName: string;
   fileType: string;
 
+  private constructor(fileName: string, fileType: string) {
+    this.fileName = fileName;
+    this.fileType = fileType;
+  }
+
   static from(dto: PresignedUrlRequest): CreatePresignedUrl {
-    return {
-      fileName: dto.fileName,
-      fileType: dto.fileType,
-    };
+    return new CreatePresignedUrl(dto.fileName, dto.fileType);
   }
 }

@@ -10,15 +10,33 @@ export class CreateRecipe {
   ingredients: string[];
   steps: string[];
 
+  private constructor(
+    title: string,
+    description: string,
+    category: RecipeCategory,
+    prepTime: number,
+    servings: number,
+    ingredients: string[],
+    steps: string[],
+  ) {
+    this.title = title;
+    this.description = description;
+    this.category = category;
+    this.prepTime = prepTime;
+    this.servings = servings;
+    this.ingredients = ingredients;
+    this.steps = steps;
+  }
+
   static from(dto: CreateRecipeRequest): CreateRecipe {
-    return {
-      title: dto.title,
-      description: dto.description,
-      category: dto.category,
-      prepTime: dto.prepTime,
-      servings: dto.servings,
-      ingredients: dto.ingredients,
-      steps: dto.steps,
-    };
+    return new CreateRecipe(
+      dto.title,
+      dto.description,
+      dto.category,
+      dto.prepTime,
+      dto.servings,
+      dto.ingredients,
+      dto.steps,
+    );
   }
 }

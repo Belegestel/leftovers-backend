@@ -98,12 +98,12 @@ describe("RecipesService", () => {
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
-        category: "Dessert,Dinner",
+        category: "Asian",
       } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
-        expect.objectContaining({ category: "Dessert,Dinner" }),
+        expect.objectContaining({ category: "ASIAN" }),
       );
     });
 

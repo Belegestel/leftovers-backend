@@ -3,9 +3,9 @@ import { PasswordResetRequest } from "./request/passwordResetRequest.dto";
 export class CreatePasswordReset {
   email: string;
 
-  static from(dto: PasswordResetRequest) {
-    return {
-      email: dto.email
-    }
+  private constructor(email: string) { this.email = email;}
+
+  static from(dto: PasswordResetRequest): CreatePasswordReset {
+    return new CreatePasswordReset(dto.email)
   }
 }
