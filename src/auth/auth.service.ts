@@ -124,11 +124,13 @@ export class AuthService {
       `?email=${encodeURIComponent(email)}` +
       `&token=${encodeURIComponent(token)}`;
 
+    const frontendUrl = this.frontendUrl;
+
     await this.emailService.sendEmail(
       email,
       "Confirm your registration",
       "registration-confirmation",
-      { name: dto.name, confirmationLink },
+      { confirmationLink, frontendUrl},
     );
     return RegisterResult.from("Confirmation email sent.");
   }
@@ -150,7 +152,6 @@ export class AuthService {
 
     const user = await this.usersRepository.create({
       email: req.email,
-      name: req.name,
       password: req.password_hash,
     });
 
