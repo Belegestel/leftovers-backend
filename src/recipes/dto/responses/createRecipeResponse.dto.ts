@@ -5,30 +5,43 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 export class CreateRecipeResponse {
   @ApiProperty()
   id: number;
+
   @ApiProperty()
   title: string;
+
   @ApiPropertyOptional()
   description?: string;
+
   @ApiProperty()
   servings: number;
+
   @ApiPropertyOptional()
   prepTime?: number;
+
   @ApiProperty()
   isPublic: boolean;
+
   @ApiProperty()
   authorId: number;
+
   @ApiProperty()
   createdAt: Date;
+
   @ApiProperty()
   editedAt: Date;
+
   @ApiProperty()
   rating: number;
+
   @ApiPropertyOptional()
   category?: RecipeCategory;
+
   @ApiProperty()
   ingredients: string[];
+
   @ApiProperty()
   steps: string[];
+
   @ApiProperty()
   imageLink: string | undefined;
 
