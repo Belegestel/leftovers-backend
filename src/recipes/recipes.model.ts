@@ -1,5 +1,6 @@
-import { Recipe as PrismaRecipe } from "../generated/prisma/client";
 import { RecipeCategory, categoryFromPrisma } from "./recipe-categories.enum";
+import { RecipeRating } from "./recipeRating.model";
+import { Prisma, Recipe as PrismaRecipe } from "../generated/prisma/client";
 
 export class Recipe {
   id: number;
@@ -12,10 +13,12 @@ export class Recipe {
   createdAt: Date;
   editedAt: Date;
   rating: number;
+  ratingCount: number;
   category?: RecipeCategory;
   ingredients: string[];
   steps: string[];
   imageKey: string | undefined;
+  isBookmarked: boolean;
 
   private constructor(
     id: number,
@@ -27,11 +30,12 @@ export class Recipe {
     authorId: number,
     createdAt: Date,
     editedAt: Date,
-    rating: number,
+    ratings: RecipeRating[],
     category: RecipeCategory | undefined,
     ingredients: string[],
     steps: string[],
     imageKey: string | undefined,
+    isBookmarked: boolean,
   ) {
     this.id = id;
     this.title = title;
@@ -46,7 +50,10 @@ export class Recipe {
     this.authorId = authorId;
     this.createdAt = createdAt;
     this.editedAt = editedAt;
-    this.rating = rating;
+    this.rating = ratings
+      .map((rating) => rating.value / ratings.length)
+      .reduce((total, n) => total + n, 0);
+    this.ratingCount = ratings.length;
     if (category) {
       this.category = category;
     }
@@ -55,9 +62,15 @@ export class Recipe {
     if (imageKey) {
       this.imageKey = imageKey;
     }
+    this.isBookmarked = isBookmarked;
   }
 
-  static fromPrisma(recipe: PrismaRecipe): Recipe {
+  static fromPrisma(
+    recipe:
+      | Prisma.RecipeGetPayload<{ include: { ratings: true } }>
+      | PrismaRecipe,
+    isBookmarked?: boolean,
+  ): Recipe {
     return new Recipe(
       recipe.id,
       recipe.title,
@@ -68,11 +81,12 @@ export class Recipe {
       recipe.authorId,
       recipe.createdAt,
       recipe.editedAt,
-      recipe.rating,
+      "ratings" in recipe ? recipe.ratings : [],
       categoryFromPrisma(recipe.category),
       recipe.ingredients,
       recipe.steps,
       recipe.imageKey ?? undefined,
-      )
+      isBookmarked ?? false,
+    );
   }
 }

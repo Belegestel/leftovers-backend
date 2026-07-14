@@ -22,6 +22,8 @@ export class RecipesQueryReturnModel {
   @ApiPropertyOptional()
   rating?: number;
   @ApiPropertyOptional()
+  ratingCount?: number;
+  @ApiPropertyOptional()
   category?: RecipeCategory;
   @ApiPropertyOptional()
   ingredients?: string[];
@@ -31,6 +33,8 @@ export class RecipesQueryReturnModel {
   steps?: string[];
   @ApiProperty()
   imageLink: string | undefined;
+  @ApiProperty()
+  isBookmarked: boolean;
 
   private constructor(
     recipe: Recipe,
@@ -42,9 +46,11 @@ export class RecipesQueryReturnModel {
       this.title = recipe.title;
       this.prepTime = recipe.prepTime;
       this.rating = recipe.rating;
+      this.ratingCount = recipe.ratingCount;
       this.servings = recipe.servings;
       this.description = recipe.description;
       this.imageLink = imageLink;
+      this.isBookmarked = recipe.isBookmarked;
     } else {
       this.id = recipe.id;
       this.title = recipe.title;
@@ -55,11 +61,13 @@ export class RecipesQueryReturnModel {
       this.createdAt = recipe.createdAt;
       this.editedAt = recipe.editedAt;
       this.rating = recipe.rating;
+      this.ratingCount = recipe.ratingCount;
       this.category = recipe.category;
       this.servings = recipe.servings;
       this.ingredients = recipe.ingredients;
       this.steps = recipe.steps;
       this.imageLink = imageLink;
+      this.isBookmarked = recipe.isBookmarked;
     }
   }
 

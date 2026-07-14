@@ -17,6 +17,9 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { RecipeImageUploadUrl } from "./dto/recipeImageUploadUrl.dto";
 import { allRecipeCategories } from "./recipe-categories.enum";
+import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
+import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
+import { RateRecipe } from "./dto/rateRecipe.dto";
 
 @Injectable()
 export class RecipesService {
@@ -121,5 +124,17 @@ export class RecipesService {
 
   async getRecipeCategories(): Promise<string[]> {
     return allRecipeCategories;
+  }
+
+  async bookmarkRecipe(dto: BookmarkRecipe): Promise<void> {
+    this.recipesRepository.bookmarkRecipe(dto.recipeId, dto.userId);
+  }
+
+  async unbookmarkRecipe(dto: UnbookmarkRecipe): Promise<void> {
+    this.recipesRepository.unbookmarkRecipe(dto.recipeId, dto.userId);
+  }
+
+  async rateRecipe(dto: RateRecipe): Promise<void> {
+    this.recipesRepository.rateRecipe(dto.recipeId, dto.userId, dto.value);
   }
 }
