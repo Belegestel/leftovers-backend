@@ -127,14 +127,14 @@ export class RecipesService {
   }
 
   async bookmarkRecipe(dto: BookmarkRecipe): Promise<void> {
-    this.recipesRepository.bookmarkRecipe(dto.recipeId, dto.userId);
+    await this.recipesRepository.bookmarkRecipe(dto.recipeId, dto.userId);
   }
 
   async unbookmarkRecipe(dto: UnbookmarkRecipe): Promise<void> {
-    this.recipesRepository.unbookmarkRecipe(dto.recipeId, dto.userId);
+    await this.recipesRepository.unbookmarkRecipe(dto.recipeId, dto.userId);
   }
 
   async rateRecipe(dto: RateRecipe): Promise<void> {
-    this.recipesRepository.rateRecipe(dto.recipeId, dto.userId, dto.value);
+    await this.recipesRepository.rateRecipe(dto.recipeId, dto.userId, dto.value);
   }
 }

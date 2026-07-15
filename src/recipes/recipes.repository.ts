@@ -64,10 +64,20 @@ export class RecipesRepository {
         AND: conditions,
       },
       orderBy: { createdAt: "desc" },
-      include: { ratings: true },
+      include: {
+        ratings: true,
+        savedBy: userId
+          ? {
+              where: { id: userId },
+              select: { id: true },
+            }
+          : false,
+      },
     });
     const result_filtered = result
-      .map((value) => Recipe.fromPrisma(value))
+      .map((value) =>
+        Recipe.fromPrisma(value, userId ? value.savedBy.length > 0 : false),
+      )
       .filter((recipe: Recipe) =>
         recipeQuery?.rating ? recipe.rating >= recipeQuery.rating : true,
       );
@@ -114,7 +124,11 @@ export class RecipesRepository {
           : false,
       },
     });
-    const isBookmarked = userId ? (recipe?.savedBy?.length ? recipe.savedBy.length > 0 : false ) : false;
+    const isBookmarked = userId
+      ? recipe?.savedBy?.length
+        ? recipe.savedBy.length > 0
+        : false
+      : false;
     return recipe ? Recipe.fromPrisma(recipe, isBookmarked) : null;
   }
 
@@ -132,7 +146,7 @@ export class RecipesRepository {
       select: { id: true },
     });
     const user = await this.prisma.user.findUnique({
-      where: { id: recipeId },
+      where: { id: userId },
       select: { id: true },
     });
     if (!recipe || !user) {
@@ -150,13 +164,13 @@ export class RecipesRepository {
       select: { id: true },
     });
     const user = await this.prisma.user.findUnique({
-      where: { id: recipeId },
+      where: { id: userId },
       select: { id: true },
     });
-    if (!recipe) {
+    if (!recipe || !user) {
       throw new NotFoundException("Recipe or user not found!");
     }
-    return this.prisma.user.update({
+    const result = await this.prisma.user.update({
       where: {
         id: userId,
       },
@@ -165,7 +179,12 @@ export class RecipesRepository {
           disconnect: { id: recipeId },
         },
       },
+      include: {
+        savedRecipes: true,
+      },
     });
+
+    return result;
   }
 
   async getBookmarks(userId: number) {

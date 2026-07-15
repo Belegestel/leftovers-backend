@@ -5,6 +5,7 @@ export class ConfirmPasswordResetRequest {
   @ApiProperty()
   @IsString()
   token: string;
+
   @ApiProperty()
   @MinLength(8)
   newPassword: string;

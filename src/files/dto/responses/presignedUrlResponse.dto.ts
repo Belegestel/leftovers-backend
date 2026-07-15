@@ -1,7 +1,11 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { PresignedUrlResult } from "../presignedUrlResult.dto";
 
 export class PresignedUrlResponse {
+  @ApiProperty()
   url: string;
+
+  @ApiProperty()
   key: string;
 
   private constructor(url: string, key: string) {

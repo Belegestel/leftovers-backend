@@ -1,4 +1,7 @@
+import { ApiProperty } from "@nestjs/swagger";
+
 export class ConfirmPasswordResetResponse {
+  @ApiProperty()
   message: string;
 
   private constructor(message: string) {

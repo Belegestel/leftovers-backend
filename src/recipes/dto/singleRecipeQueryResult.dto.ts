@@ -50,7 +50,7 @@ export class SingleRecipeQueryResult {
     this.ingredients = ingredients;
     this.steps = steps;
     if (imageLink) {
-      this.imageLink;
+      this.imageLink = imageLink;
     }
   }
 

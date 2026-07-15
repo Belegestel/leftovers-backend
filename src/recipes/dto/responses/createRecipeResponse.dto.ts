@@ -1,34 +1,48 @@
 import { CreateRecipeResult } from "../createRecipeResult.dto";
 import { RecipeCategory } from "../../recipe-categories.enum";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { DEFAULT_PREP_TIME } from "../../../common/utils";
 
 export class CreateRecipeResponse {
   @ApiProperty()
   id: number;
+
   @ApiProperty()
   title: string;
+
   @ApiPropertyOptional()
   description?: string;
+
   @ApiProperty()
   servings: number;
+
   @ApiPropertyOptional()
   prepTime?: number;
+
   @ApiProperty()
   isPublic: boolean;
+
   @ApiProperty()
   authorId: number;
+
   @ApiProperty()
   createdAt: Date;
+
   @ApiProperty()
   editedAt: Date;
+
   @ApiProperty()
   rating: number;
+
   @ApiPropertyOptional()
   category?: RecipeCategory;
+
   @ApiProperty()
   ingredients: string[];
+
   @ApiProperty()
   steps: string[];
+
   @ApiProperty()
   imageLink: string | undefined;
 
@@ -77,7 +91,7 @@ export class CreateRecipeResponse {
       result.title,
       result.description,
       result.servings,
-      result.prepTime ?? 10,
+      result.prepTime ?? DEFAULT_PREP_TIME,
       result.isPublic,
       result.authorId,
       result.createdAt,

@@ -4,6 +4,7 @@ import { RecipeImageUploadUrl } from "../recipeImageUploadUrl.dto";
 export class RecipeImageUploadResponse {
   @ApiProperty()
   url: string;
+
   @ApiProperty()
   key: string;
 
