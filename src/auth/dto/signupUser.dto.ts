@@ -1,6 +1,6 @@
 import { IsEmail, IsString, MinLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { SignupRequest } from "./request/signupRequest.dto";
+import { SignupRequest } from "./request";
 
 export class SignupUser {
   @ApiProperty({
@@ -18,24 +18,12 @@ export class SignupUser {
   @MinLength(8)
   password: string;
 
-  @ApiProperty({
-    example: "John Doe",
-    description: "User name.",
-  })
-  @IsString()
-  name: string;
-
-  private constructor(email: string, password: string, name: string) {
+  private constructor(email: string, password: string) {
     this.email = email;
     this.password = password;
-    this.name = name;
   }
 
   static from(signupRequest: SignupRequest): SignupUser {
-    return new SignupUser(
-      signupRequest.email,
-      signupRequest.password,
-      signupRequest.name,
-    );
+    return new SignupUser(signupRequest.email, signupRequest.password);
   }
 }

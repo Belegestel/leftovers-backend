@@ -32,16 +32,14 @@ describe("Auth E2E", () => {
       .send({
         email: "a",
         password: "password",
-        name: "John Doe",
       })
       .expect(HttpStatus.BAD_REQUEST);
   });
 
-  it("/auth/register/ should return 400 if the name is missing", async () => {
+  it("/auth/register/ should return 400 if the email is missing", async () => {
     await request(app.getHttpServer())
       .post("/auth/register/")
       .send({
-        email: `john.doe${randomUUID()}@email.com`,
         password: "password",
       })
       .expect(HttpStatus.BAD_REQUEST);
@@ -53,7 +51,7 @@ describe("Auth E2E", () => {
 
     await request(app.getHttpServer())
       .post("/auth/register")
-      .send({ email, password, name: "John Doe" })
+      .send({ email, password,  })
       .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
@@ -77,7 +75,7 @@ describe("Auth E2E", () => {
 
     await request(app.getHttpServer())
       .post("/auth/register")
-      .send({ email, password, name: "John Doe" })
+      .send({ email, password,  })
       .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
@@ -109,7 +107,6 @@ describe("Auth E2E", () => {
       .send({
         email,
         password: "password",
-        name: "John Doe",
       })
       .expect(HttpStatus.OK);
 
@@ -128,11 +125,11 @@ describe("Auth E2E", () => {
 
     await request(app.getHttpServer())
       .post("/auth/register")
-      .send({ email, password: "password", name: "John Doe" })
+      .send({ email, password: "password",  })
       .expect(HttpStatus.OK);
     await request(app.getHttpServer())
       .post("/auth/register")
-      .send({ email, password: "password", name: "John Doe" })
+      .send({ email, password: "password",  })
       .expect(409);
   });
 
@@ -140,7 +137,7 @@ describe("Auth E2E", () => {
     const email = `john.doe${randomUUID()}@email.com`;
     await request(app.getHttpServer())
       .post("/auth/register")
-      .send({ email, password: "password", name: "John Doe" })
+      .send({ email, password: "password",  })
       .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({
@@ -166,7 +163,7 @@ describe("Auth E2E", () => {
 
     await request(app.getHttpServer())
       .post("/auth/register")
-      .send({ email, password: "password", name: "John Doe" })
+      .send({ email, password: "password",  })
       .expect(HttpStatus.OK);
 
     await request(app.getHttpServer())
@@ -181,7 +178,7 @@ describe("Auth E2E", () => {
 
     await request(app.getHttpServer())
       .post("/auth/register")
-      .send({ email, password, name: "John Doe" })
+      .send({ email, password,  })
       .expect(HttpStatus.OK);
 
     const signupRequest = await prisma.signupRequest.findUnique({

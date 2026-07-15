@@ -32,7 +32,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -58,7 +58,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -84,7 +84,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -98,12 +98,12 @@ describe("RecipesService", () => {
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
-        category: "Asian",
+        category: "Lunch",
       } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
-        expect.objectContaining({ category: "ASIAN" }),
+        expect.objectContaining({ category: "LUNCH" }),
       );
     });
 
@@ -112,7 +112,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -140,7 +140,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -168,7 +168,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -196,7 +196,7 @@ describe("RecipesService", () => {
       const dto: CreateRecipe = {
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -206,7 +206,7 @@ describe("RecipesService", () => {
         id: 123,
         title: "Pizza",
         description: "TastyPizza",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["Flour", "Water"],
@@ -224,7 +224,7 @@ describe("RecipesService", () => {
       expect(mockRecipesRepository.create).toHaveBeenCalledWith(
         "Pizza",
         "TastyPizza",
-        RecipeCategory.ITALIAN,
+        RecipeCategory.LUNCH,
         30,
         2,
         ["Flour", "Water"],
@@ -269,5 +269,55 @@ describe("RecipesService", () => {
     });
     const result = await service.findById(1, 1);
     expect(result).toEqual({ id: 1, isPublic: false, authorId: 1 });
+  });
+
+  describe("bookmarkRecipe", () => {
+    it("delegates bookmarking a recipe to the repository", async () => {
+      const dto: BookmarkRecipe = {
+        recipeId: 1,
+        userId: 2,
+      };
+
+      await service.bookmarkRecipe(dto);
+
+      expect(mockRecipesRepository.bookmarkRecipe).toHaveBeenCalledWith(
+        dto.recipeId,
+        dto.userId,
+      );
+    });
+  });
+
+  describe("unbookmarkRecipe", () => {
+    it("delegates unbookmarking a recipe to the repository", async () => {
+      const dto: UnbookmarkRecipe = {
+        recipeId: 1,
+        userId: 2,
+      };
+
+      await service.unbookmarkRecipe(dto);
+
+      expect(mockRecipesRepository.unbookmarkRecipe).toHaveBeenCalledWith(
+        dto.recipeId,
+        dto.userId,
+      );
+    });
+  });
+
+  describe("rateRecipe", () => {
+    it("delegates rating a recipe to the repository", async () => {
+      const dto: RateRecipe = {
+        recipeId: 1,
+        userId: 2,
+        value: 5,
+      };
+
+      await service.rateRecipe(dto);
+
+      expect(mockRecipesRepository.rateRecipe).toHaveBeenCalledWith(
+        dto.recipeId,
+        dto.userId,
+        dto.value,
+      );
+    });
   });
 });

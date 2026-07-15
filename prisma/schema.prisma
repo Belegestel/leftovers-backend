@@ -4,18 +4,20 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 enum RecipeCategory {
-  ITALIAN
-  ASIAN
-  DESSERT
-  VEGETARIAN
-  VEGAN 
-  OTHER
+  BREAKFAST
+  SOUPS
+  LUNCH
+  BAKING
+  DESSERTS
+  DRINKS
+  SNACKS
+  SALADS
 }
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-  moduleFormat = "cjs"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "cjs"
   importFileExtension = ""
 }
 
@@ -24,61 +26,78 @@ datasource db {
 }
 
 model User {
-  id Int @default(autoincrement()) @id 
-  name String
-  email String @unique
+  id       Int    @id @default(autoincrement())
+  email    String @unique
   password String
 
-  recipes Recipe[]
+  recipes Recipe[] @relation("RecipeAuthor")
+  savedRecipes Recipe[] @relation("SavedRecipes")
+  ratedRecipes RecipeRating[]
 
   @@map("users")
 }
 
+model RecipeRating {
+  id Int @id @default(autoincrement())
+
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipeId Int    @map("recipe_id")
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  value Int
+
+  @@unique([userId, recipeId])
+  @@map("recipe_rating")
+}
+
 model Recipe {
-  id Int @default(autoincrement()) @id
-  title String
+  id          Int     @id @default(autoincrement())
+  title       String
   description String?
-  prepTime Int? @map("prep_time")
-  servings Int
+  prepTime    Int?    @map("prep_time")
+  servings    Int
 
   ingredients String[]
-  steps String[]
+  steps       String[]
 
   isPublic Boolean @default(true) @map("is_public")
 
-  authorId Int @map("author_id")
-  author User @relation(fields: [authorId], references: [id])
+  authorId Int  @map("author_id")
+  author   User @relation("RecipeAuthor", fields: [authorId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
-  editedAt DateTime @updatedAt @map("edited_at")
+  editedAt  DateTime @updatedAt @map("edited_at")
 
-  rating Int @default(0)
+  savedBy User[] @relation("SavedRecipes")
+
+  ratings  RecipeRating[]
   category RecipeCategory
 
-  imageKey String? @map("image_key")
+  imageKey    String?      @map("image_key")
 
   @@map("recipe")
 }
 
 model SignupRequest {
-  id Int @default(autoincrement()) @id 
-  email String @unique 
-  name String
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
   password_hash String
-  token String @unique 
-  expires_at DateTime
-  created_at DateTime @default(now())
+  token         String   @unique
+  expires_at    DateTime
+  created_at    DateTime @default(now())
 
   @@map("signup_requests")
 }
 
 model PasswordResetRequest {
-  id Int @default(autoincrement()) @id
-  email String 
-  tokenHash String @unique @map("token_hash")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @map("created_at") @default(now())
-  usedAt DateTime? @map("used_at")
+  id        Int       @id @default(autoincrement())
+  email     String
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  usedAt    DateTime? @map("used_at")
 
   @@index([email])
   @@map("password_reset_requests")

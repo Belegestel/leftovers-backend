@@ -1,58 +1,36 @@
+import { InternalServerErrorException } from "@nestjs/common";
 import { RecipeCategory as PrismaCategory } from "../generated/prisma/client";
 
 export enum RecipeCategory {
-  ITALIAN = "ITALIAN",
-  ASIAN = "ASIAN",
-  DESSERT = "DESSERT",
-  VEGETARIAN = "VEGETARIAN",
-  VEGAN = "VEGAN",
-  OTHER = "OTHER",
+  BREAKFAST = "BREAKFAST",
+  SOUPS = "SOUPS",
+  LUNCH = "LUNCH",
+  BAKING = "BAKING",
+  DESSERTS = "DESSERTS",
+  DRINKS = "DRINKS",
+  SNACKS = "SNACKS",
+  SALADS = "SALADS",
 }
 export function categoryFromPrisma(prisma: PrismaCategory): RecipeCategory {
-  switch (prisma) {
-    case PrismaCategory.ITALIAN:
-      return RecipeCategory.ITALIAN;
-    case PrismaCategory.ASIAN:
-      return RecipeCategory.ASIAN;
-    case PrismaCategory.DESSERT:
-      return RecipeCategory.DESSERT;
-    case PrismaCategory.VEGETARIAN:
-      return RecipeCategory.VEGETARIAN;
-    case PrismaCategory.VEGAN:
-      return RecipeCategory.VEGAN;
-    case PrismaCategory.OTHER:
-      return RecipeCategory.OTHER;
-  }
+  return RecipeCategory[prisma];
 }
 export function categoryFromString(category: string): RecipeCategory {
-  switch (category.toLowerCase().trim()) {
-    case "italian":
-      return RecipeCategory.ITALIAN;
-    case "asian":
-      return RecipeCategory.ASIAN;
-    case "dessert":
-      return RecipeCategory.DESSERT;
-    case "vegetarian":
-      return RecipeCategory.VEGETARIAN;
-    case "vegan":
-      return RecipeCategory.VEGAN;
-    default:
-      return RecipeCategory.OTHER;
+  const recipeCategory = RecipeCategory[category.trim().toUpperCase()];
+  if (!recipeCategory) {
+    throw new InternalServerErrorException("Unknown recipe category");
   }
+  return recipeCategory;
 }
 export function prismaFromCategory(category: RecipeCategory): PrismaCategory {
-  switch (category) {
-    case RecipeCategory.ITALIAN:
-      return PrismaCategory.ITALIAN;
-    case RecipeCategory.ASIAN:
-      return PrismaCategory.ASIAN;
-    case RecipeCategory.DESSERT:
-      return PrismaCategory.DESSERT;
-    case RecipeCategory.VEGETARIAN:
-      return PrismaCategory.VEGETARIAN;
-    case RecipeCategory.VEGAN:
-      return PrismaCategory.VEGAN;
-    case RecipeCategory.OTHER:
-      return PrismaCategory.OTHER;
-  }
+  return PrismaCategory[category];
 }
+export const allRecipeCategories = [
+  "🥪 breakfasts",
+  "🍲 soups",
+  "🍔 lunch",
+  "🥐 baking",
+  "🧁 desserts",
+  "🍹 drinks",
+  "🍿 snacks",
+  "🥗 salads",
+];

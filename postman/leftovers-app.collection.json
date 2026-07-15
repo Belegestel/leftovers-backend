@@ -38,7 +38,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\", \"name\": \"{{name}}\"}"
+          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\"}"
         },
         "url": {
           "raw": "{{baseUrl}}/auth/signup",
@@ -72,7 +72,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\", \"name\": \"{{name}}\"}"
+          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\"}"
         },
         "url": {
           "raw": "{{baseUrl}}/auth/register",
@@ -196,10 +196,17 @@
       "name": "Create new recipe",
       "request": {
         "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text",
+            "disabled": true
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\"title\": \"Pizza\",\"description\": \"Tasty pizza\",\"category\": \"ITALIAN\",\"prepTime\": 30,\"servings\": 2,\"ingredients\": [\"flour\", \"water\"],\"steps\": [\"mix\", \"bake\"]}"
+          "raw": "{\"title\": \"Pizza\",\"description\": \"Tasty pizza\",\"category\": \"LUNCH\",\"prepTime\": 30,\"servings\": 2,\"ingredients\": [\"flour\", \"water\"],\"steps\": [\"mix\", \"bake\"]}"
         },
         "url": {
           "raw": "{{baseUrl}}/recipes",
@@ -277,11 +284,6 @@
     {
       "key": "password",
       "value": "password",
-      "type": "string"
-    },
-    {
-      "key": "name",
-      "value": "John Doe",
       "type": "string"
     },
     {

@@ -40,20 +40,18 @@ describe("Recipes E2E", () => {
           title: "Public recipe",
           ingredients: ["a"],
           steps: ["b"],
-          rating: 5,
           isPublic: true,
           servings: 1,
-          category: RecipeCategory.ITALIAN,
+          category: RecipeCategory.LUNCH,
           authorId: user.user.id,
         },
         {
           title: "Private recipe",
           ingredients: ["c"],
           steps: ["d"],
-          rating: 4,
           isPublic: false,
           servings: 2,
-          category: RecipeCategory.ASIAN,
+          category: RecipeCategory.SNACKS,
           authorId: user.user.id,
         },
       ],
@@ -85,30 +83,27 @@ describe("Recipes E2E", () => {
           title: "Public recipe",
           ingredients: ["a"],
           steps: ["b"],
-          rating: 5,
           isPublic: true,
           servings: 1,
-          category: RecipeCategory.ITALIAN,
+          category: RecipeCategory.LUNCH,
           authorId: userA.user.id,
         },
         {
           title: "Private recipe",
           ingredients: ["c"],
           steps: ["d"],
-          rating: 4,
           isPublic: false,
           servings: 2,
-          category: RecipeCategory.ASIAN,
+          category: RecipeCategory.SNACKS,
           authorId: userA.user.id,
         },
         {
           title: "Another private recipe",
           ingredients: ["e"],
           steps: ["f"],
-          rating: 3,
           isPublic: false,
           servings: 2,
-          category: RecipeCategory.ASIAN,
+          category: RecipeCategory.SNACKS,
           authorId: userB.user.id,
         },
       ],
@@ -145,10 +140,9 @@ describe("Recipes E2E", () => {
         title: "Private recipe",
         ingredients: ["g"],
         steps: ["h"],
-        rating: 2,
         isPublic: false,
         servings: 1,
-        category: RecipeCategory.VEGAN,
+        category: RecipeCategory.SOUPS,
         authorId: userB.user.id,
       },
     });
@@ -173,12 +167,11 @@ describe("Recipes E2E", () => {
         title: "Public recipe",
         ingredients: ["i"],
         steps: ["j"],
-        rating: 1,
         isPublic: true,
         authorId: userA.user.id,
         description: "desc",
         servings: 8,
-        category: RecipeCategory.OTHER,
+        category: RecipeCategory.BREAKFAST,
       },
     });
 
@@ -191,7 +184,6 @@ describe("Recipes E2E", () => {
         title: recipe.title,
         description: recipe.description,
         isPublic: true,
-        rating: 1,
       }),
     ]);
   });
@@ -202,7 +194,7 @@ describe("Recipes E2E", () => {
       .send({
         title: "Pizza",
         description: "Tasty",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 30,
         servings: 2,
         ingredients: ["flour"],
@@ -227,7 +219,7 @@ describe("Recipes E2E", () => {
       .send({
         title: "",
         description: "ok",
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         prepTime: 1,
         servings: 0,
         ingredients: [],
@@ -247,7 +239,7 @@ describe("Recipes E2E", () => {
     const payload = {
       title: "Pizza",
       description: "Tasty pizza",
-      category: RecipeCategory.ITALIAN,
+      category: RecipeCategory.LUNCH,
       prepTime: 30,
       servings: 2,
       ingredients: ["flour", "water"],
@@ -262,7 +254,7 @@ describe("Recipes E2E", () => {
       id: 1,
       title: "Pizza",
       description: "Tasty pizza",
-      category: RecipeCategory.ITALIAN,
+      category: RecipeCategory.LUNCH,
       prepTime: 30,
       servings: 2,
       ingredients: ["flour", "water"],
@@ -287,12 +279,11 @@ describe("Recipes E2E", () => {
         title: "Public recipe",
         ingredients: ["i"],
         steps: ["j"],
-        rating: 1,
         isPublic: true,
         authorId: user.user.id,
         description: "desc",
         servings: 3,
-        category: RecipeCategory.OTHER,
+        category: RecipeCategory.BREAKFAST,
       },
     });
 
@@ -318,10 +309,9 @@ describe("Recipes E2E", () => {
         title: "Pizza",
         ingredients: ["flour"],
         steps: ["mix"],
-        rating: 2,
         isPublic: true,
         servings: 2,
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         authorId: user.user.id,
       },
     });
@@ -356,10 +346,9 @@ describe("Recipes E2E", () => {
         title: "Pizza",
         ingredients: ["flour"],
         steps: ["mix"],
-        rating: 2,
         isPublic: true,
         servings: 2,
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         authorId: owner.user.id,
       },
     });
@@ -397,10 +386,9 @@ describe("Recipes E2E", () => {
         title: "Pizza",
         ingredients: ["flour"],
         steps: ["mix"],
-        rating: 2,
         isPublic: true,
         servings: 2,
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         authorId: user.user.id,
       },
     });
@@ -435,10 +423,9 @@ describe("Recipes E2E", () => {
         title: "Pizza",
         ingredients: ["flour"],
         steps: ["mix"],
-        rating: 2,
         isPublic: true,
         servings: 2,
-        category: RecipeCategory.ITALIAN,
+        category: RecipeCategory.LUNCH,
         authorId: user.user.id,
       },
     });
@@ -447,5 +434,60 @@ describe("Recipes E2E", () => {
       .set("Authorization", `Bearer ${user.token}`)
       .send({ key: "imvalid/path/imgg.jpg" })
       .expect(400);
+  });
+
+  it("POST /recipes/:id/bookmark and /unbookmark should update bookmark state", async () => {
+    const user = await createUserAndLogin(
+      app,
+      prisma,
+      `user${randomUUID()}@email.com`,
+      "password123",
+    );
+
+    const recipe = await prisma.recipe.create({
+      data: {
+        title: "Bookmark recipe",
+        ingredients: ["ingredient"],
+        steps: ["step"],
+        isPublic: true,
+        servings: 2,
+        category: RecipeCategory.LUNCH,
+        authorId: user.user.id,
+      },
+    });
+
+    const getRecipes = () =>
+      request(app.getHttpServer())
+        .get("/recipes")
+        .set("Authorization", `Bearer ${user.token}`)
+        .expect(200);
+
+    let response = await getRecipes();
+
+    expect(
+      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+    ).toBe(false);
+
+    await request(app.getHttpServer())
+      .post(`/recipes/${recipe.id}/bookmark`)
+      .set("Authorization", `Bearer ${user.token}`)
+      .expect(200);
+
+    response = await getRecipes();
+
+    expect(
+      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+    ).toBe(true);
+
+
+    const resp = await request(app.getHttpServer())
+      .post(`/recipes/${recipe.id}/unbookmark`)
+      .set("Authorization", `Bearer ${user.token}`);
+
+    response = await getRecipes();
+
+    expect(
+      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+    ).toBe(false);
   });
 });

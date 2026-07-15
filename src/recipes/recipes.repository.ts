@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { RecipeWhereInput } from "../generated/prisma/models";
@@ -50,9 +50,6 @@ export class RecipesRepository {
     if (categoryList?.length) {
       conditions.push({ category: { in: categoryList } });
     }
-    if (recipeQuery?.rating) {
-      conditions.push({ rating: { gte: recipeQuery.rating } });
-    }
     if (recipeQuery?.startDate || recipeQuery?.endDate) {
       conditions.push({
         createdAt: { gte: recipeQuery.startDate, lte: recipeQuery.endDate },
@@ -67,8 +64,24 @@ export class RecipesRepository {
         AND: conditions,
       },
       orderBy: { createdAt: "desc" },
+      include: {
+        ratings: true,
+        savedBy: userId
+          ? {
+              where: { id: userId },
+              select: { id: true },
+            }
+          : false,
+      },
     });
-    return result.map(Recipe.fromPrisma);
+    const result_filtered = result
+      .map((value) =>
+        Recipe.fromPrisma(value, userId ? value.savedBy.length > 0 : false),
+      )
+      .filter((recipe: Recipe) =>
+        recipeQuery?.rating ? recipe.rating >= recipeQuery.rating : true,
+      );
+    return result_filtered;
   }
 
   async create(
@@ -98,9 +111,25 @@ export class RecipesRepository {
     return Recipe.fromPrisma(recipe);
   }
 
-  async findById(id: number): Promise<Recipe | null> {
-    const recipe = await this.prisma.recipe.findUnique({ where: { id } });
-    return recipe ? Recipe.fromPrisma(recipe) : null;
+  async findById(id: number, userId?: number): Promise<Recipe | null> {
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id },
+      include: {
+        ratings: true,
+        savedBy: userId
+          ? {
+              where: { id: userId },
+              select: { id: true },
+            }
+          : false,
+      },
+    });
+    const isBookmarked = userId
+      ? recipe?.savedBy?.length
+        ? recipe.savedBy.length > 0
+        : false
+      : false;
+    return recipe ? Recipe.fromPrisma(recipe, isBookmarked) : null;
   }
 
   async updateImageKey(recipeId: number, key: string) {
@@ -109,5 +138,103 @@ export class RecipesRepository {
       data: { imageKey: key },
     });
     return recipe ? Recipe.fromPrisma(recipe) : null;
+  }
+
+  async bookmarkRecipe(recipeId: number, userId: number) {
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id: recipeId },
+      select: { id: true },
+    });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!recipe || !user) {
+      throw new NotFoundException("Recipe or user not found!");
+    }
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { savedRecipes: { connect: { id: recipeId } } },
+    });
+  }
+
+  async unbookmarkRecipe(recipeId: number, userId: number) {
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id: recipeId },
+      select: { id: true },
+    });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!recipe || !user) {
+      throw new NotFoundException("Recipe or user not found!");
+    }
+    const result = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        savedRecipes: {
+          disconnect: { id: recipeId },
+        },
+      },
+      include: {
+        savedRecipes: true,
+      },
+    });
+
+    return result;
+  }
+
+  async getBookmarks(userId: number) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { savedRecipes: { include: { ratings: true } } },
+    });
+  }
+
+  async isBookmarked(recipeId: number, userId: number): Promise<boolean> {
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id: recipeId },
+      include: {
+        savedBy: {
+          where: {
+            id: userId,
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!recipe) {
+      return false;
+    }
+    return recipe.savedBy.length > 0;
+  }
+
+  async rateRecipe(
+    recipeId: number,
+    userId: number,
+    value: number,
+  ): Promise<void> {
+    await this.prisma.recipeRating.upsert({
+      where: {
+        userId_recipeId: {
+          userId,
+          recipeId,
+        },
+      },
+      create: {
+        userId,
+        recipeId,
+        value,
+      },
+      update: {
+        value,
+      },
+    });
   }
 }
