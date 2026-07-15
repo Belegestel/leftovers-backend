@@ -7,6 +7,11 @@ import { ConfigService } from "@nestjs/config";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const config = new DocumentBuilder()
+    .setTitle("Leftovers app")
+    .setDescription("Leftovers app backend API")
+    .build();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -15,16 +20,9 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174'
-    ]
-  })
+    origin: [app.get(ConfigService).get<string>("CORS_ORIGINS")?.split(",")],
+  });
 
-  const config = new DocumentBuilder()
-    .setTitle("Leftovers app")
-    .setDescription("Leftovers app backend API")
-    .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, documentFactory);
 

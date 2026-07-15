@@ -125,7 +125,7 @@ export class RecipesController {
       },
     },
   })
-  @Post("")
+  @Post()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createRecipe(

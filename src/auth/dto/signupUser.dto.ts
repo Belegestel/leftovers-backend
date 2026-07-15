@@ -1,6 +1,6 @@
 import { IsEmail, IsString, MinLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { RegisterRequest } from "./request";
+import { SignupRequest } from "./request";
 
 export class SignupUser {
   @ApiProperty({
@@ -23,10 +23,7 @@ export class SignupUser {
     this.password = password;
   }
 
-  static from(signupRequest: RegisterRequest): SignupUser {
-    return new SignupUser(
-      signupRequest.email,
-      signupRequest.password,
-    );
+  static from(signupRequest: SignupRequest): SignupUser {
+    return new SignupUser(signupRequest.email, signupRequest.password);
   }
 }
