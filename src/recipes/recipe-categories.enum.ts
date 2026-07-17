@@ -18,6 +18,9 @@ export function categoryFromPrisma(prisma: PrismaCategory): RecipeCategory {
 export function categoryFromString(category: string): RecipeCategory {
   const recipeCategory = RecipeCategory[category.trim().toUpperCase()];
   if (!recipeCategory) {
+    if (category.trim().toUpperCase() == "BREAKFASTS") {
+      return RecipeCategory.BREAKFAST;
+    }
     throw new InternalServerErrorException("Unknown recipe category");
   }
   return recipeCategory;

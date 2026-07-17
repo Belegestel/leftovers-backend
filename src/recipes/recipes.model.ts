@@ -19,6 +19,8 @@ export class Recipe {
   steps: string[];
   imageKey: string | undefined;
   isBookmarked: boolean;
+  userRating: number | null;
+  isPrivate: boolean | undefined;
 
   private constructor(
     id: number,
@@ -36,6 +38,8 @@ export class Recipe {
     steps: string[],
     imageKey: string | undefined,
     isBookmarked: boolean,
+    userRating: number | null,
+    isPrivate: boolean | undefined,
   ) {
     this.id = id;
     this.title = title;
@@ -63,6 +67,11 @@ export class Recipe {
       this.imageKey = imageKey;
     }
     this.isBookmarked = isBookmarked;
+    this.userRating = userRating;
+
+    if (isPrivate) {
+      this.isPrivate = isPrivate;
+    }
   }
 
   static fromPrisma(
@@ -70,6 +79,7 @@ export class Recipe {
       | Prisma.RecipeGetPayload<{ include: { ratings: true } }>
       | PrismaRecipe,
     isBookmarked?: boolean,
+    userRating?: number | null,
   ): Recipe {
     return new Recipe(
       recipe.id,
@@ -87,6 +97,8 @@ export class Recipe {
       recipe.steps,
       recipe.imageKey ?? undefined,
       isBookmarked ?? false,
+      userRating ?? null,
+      !recipe.isPublic
     );
   }
 }

@@ -3,9 +3,6 @@ import { Transform, Type } from "class-transformer";
 import {
   IsOptional,
   IsString,
-  IsInt,
-  Min,
-  Max,
   IsBoolean,
 } from "class-validator";
 
@@ -15,25 +12,7 @@ export class RecipeQueryRequest {
   @IsOptional()
   @IsString()
   category?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  @Max(5)
-  rating?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Date)
-  startDate?: Date;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Date)
-  endDate?: Date;
-
+  
   // Search
   @ApiPropertyOptional()
   @IsOptional()
@@ -60,4 +39,25 @@ export class RecipeQueryRequest {
   @Transform(({ value }) => value === "true")
   @IsBoolean()
   details?: boolean;
+
+  @ApiPropertyOptional({ example: "true" })
+  @IsOptional()
+  @Transform(({ value }) => value === "true")
+  @IsBoolean()
+  saved?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === "asc")
+  dateOrderIncr?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === "asc")
+  ratingOrderIncr?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === "true")
+  authored?: boolean;
 }

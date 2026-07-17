@@ -7,16 +7,13 @@ export class RecipeQueryFilters {
   userId?: number;
   // Filter
   @ApiPropertyOptional()
-  category?: RecipeCategory;
+  category?: RecipeCategory[];
 
   @ApiPropertyOptional()
-  rating?: number;
+  ratingOrderIncr?: boolean;
 
   @ApiPropertyOptional()
-  startDate?: Date;
-
-  @ApiPropertyOptional()
-  endDate?: Date;
+  dateOrderIncr: boolean;
 
   // Search
   @ApiPropertyOptional()
@@ -34,32 +31,36 @@ export class RecipeQueryFilters {
   @ApiPropertyOptional({ example: "true" })
   details?: boolean;
 
+  @ApiPropertyOptional()
+  saved?: boolean;
+
+  @ApiPropertyOptional()
+  authored?: boolean;
+
   private constructor(
     userId?: number,
     category?: string,
-    rating?: number,
-    startDate?: Date,
-    endDate?: Date,
+    ratingOrderIncr?: boolean,
+    dateOrderIncr?: boolean,
     title?: string,
     description?: string,
     ingredients?: string,
     steps?: string,
     details?: boolean,
+    saved?: boolean,
+    authored?: boolean,
   ) {
     if (userId !== undefined) {
       this.userId = userId;
     }
     if (category) {
-      this.category = categoryFromString(category);
+      this.category = category.split(",").map((c) => categoryFromString(c));
     }
-    if (rating !== undefined) {
-      this.rating = rating;
+    if (ratingOrderIncr !== undefined) {
+      this.ratingOrderIncr = ratingOrderIncr;
     }
-    if (startDate !== undefined) {
-      this.startDate = startDate;
-    }
-    if (endDate !== undefined) {
-      this.endDate = endDate;
+    if (dateOrderIncr !== undefined) {
+      this.dateOrderIncr = dateOrderIncr;
     }
     if (title !== undefined) {
       this.title = title;
@@ -76,22 +77,29 @@ export class RecipeQueryFilters {
     if (details !== undefined) {
       this.details = details;
     }
+    if (saved !== undefined) {
+      this.saved = saved;
+    }
+    if(authored !== undefined) {
+      this.authored = authored;
+    }
   }
   static from(
     userId: number | undefined,
     recipeQueryRequest: RecipeQueryRequest | undefined,
   ): RecipeQueryFilters {
     return new RecipeQueryFilters(
-       userId,
-       recipeQueryRequest?.category,
-       recipeQueryRequest?.rating,
-       recipeQueryRequest?.startDate,
-       recipeQueryRequest?.endDate,
-       recipeQueryRequest?.title,
-       recipeQueryRequest?.description,
-       recipeQueryRequest?.ingredients,
-       recipeQueryRequest?.steps,
-       recipeQueryRequest?.details,
-    )
+      userId,
+      recipeQueryRequest?.category,
+      recipeQueryRequest?.ratingOrderIncr,
+      recipeQueryRequest?.dateOrderIncr,
+      recipeQueryRequest?.title,
+      recipeQueryRequest?.description,
+      recipeQueryRequest?.ingredients,
+      recipeQueryRequest?.steps,
+      recipeQueryRequest?.details,
+      recipeQueryRequest?.saved,
+      recipeQueryRequest?.authored,
+    );
   }
 }

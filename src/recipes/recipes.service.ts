@@ -65,7 +65,7 @@ export class RecipesService {
     id: number,
     userId?: number,
   ): Promise<SingleRecipeQueryResult> {
-    const recipe = await this.recipesRepository.findById(id);
+    const recipe = await this.recipesRepository.findById(id, userId);
     if (!recipe) {
       throw new NotFoundException("Recipe not found");
     }

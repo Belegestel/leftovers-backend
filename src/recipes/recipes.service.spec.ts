@@ -9,6 +9,9 @@ import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { FilesService } from "../files/files.service";
 import { mockFilesService } from "../../test/unit/mocks/mockFilesService";
+import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
+import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
+import { RateRecipe } from "./dto/rateRecipe.dto";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -43,6 +46,14 @@ describe("RecipesService", () => {
         rating: 1,
         authorId: 1,
         imageKey: undefined,
+        userRating: 1,
+        isPrivate: false,
+        ratingCount: 2,
+        isBookmarked: false,
+        userRating: 1,
+        isPrivate: false,
+        ratingCount: 2,
+        isBookmarked: false
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll();
@@ -69,6 +80,10 @@ describe("RecipesService", () => {
         rating: 1,
         authorId: 1,
         imageKey: undefined,
+        userRating: 1,
+        isPrivate: false,
+        ratingCount: 2,
+        isBookmarked: false,
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(1);
@@ -95,6 +110,10 @@ describe("RecipesService", () => {
         rating: 1,
         authorId: 1,
         imageKey: undefined,
+        userRating: 1,
+        isPrivate: false,
+        ratingCount: 2,
+        isBookmarked: false,
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
@@ -103,35 +122,7 @@ describe("RecipesService", () => {
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
-        expect.objectContaining({ category: "LUNCH" }),
-      );
-    });
-
-    it("applies rating filter", async () => {
-      const repoResult: Recipe = {
-        id: 123,
-        title: "Pizza",
-        description: "TastyPizza",
-        category: RecipeCategory.LUNCH,
-        prepTime: 30,
-        servings: 2,
-        ingredients: ["Flour", "Water"],
-        steps: ["mix", "bake"],
-        isPublic: true,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        rating: 1,
-        authorId: 1,
-        imageKey: undefined,
-      };
-      mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
-      await service.findAll(undefined, {
-        rating: 4,
-      });
-
-      expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
-        undefined,
-        expect.objectContaining({ rating: 4 }),
+        expect.objectContaining({ category: ["LUNCH"] }),
       );
     });
 
@@ -151,6 +142,10 @@ describe("RecipesService", () => {
         rating: 1,
         authorId: 1,
         imageKey: undefined,
+        userRating: 1,
+        isPrivate: false,
+        ratingCount: 2,
+        isBookmarked: false,
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
@@ -179,6 +174,10 @@ describe("RecipesService", () => {
         rating: 1,
         authorId: 1,
         imageKey: undefined,
+        userRating: 1,
+        isPrivate: false,
+        ratingCount: 2,
+        isBookmarked: false,
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
@@ -217,6 +216,10 @@ describe("RecipesService", () => {
         rating: 1,
         authorId: 1,
         imageKey: undefined,
+        userRating: 1,
+        isPrivate: false,
+        ratingCount: 2,
+        isBookmarked: false
       };
 
       mockRecipesRepository.create.mockResolvedValue(repoResult);
@@ -268,7 +271,7 @@ describe("RecipesService", () => {
       authorId: 1,
     });
     const result = await service.findById(1, 1);
-    expect(result).toEqual({ id: 1, isPublic: false, authorId: 1 });
+    expect(result).toMatchObject({ id: 1, isPublic: false, authorId: 1 });
   });
 
   describe("bookmarkRecipe", () => {

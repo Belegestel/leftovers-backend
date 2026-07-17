@@ -1,4 +1,11 @@
-import { Body, Post, Controller, HttpCode, HttpStatus } from "@nestjs/common";
+import {
+  Body,
+  Post,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignupRequest } from "./dto/request/signupRequest.dto";
 import {
@@ -16,7 +23,12 @@ import {
   RegisterResponse,
   ConfirmRegistrationResponse,
 } from "./dto/response";
-import { SignupUser, LoginUser, ConfirmRegistration, RegisterUser } from "./dto";
+import {
+  SignupUser,
+  LoginUser,
+  ConfirmRegistration,
+  RegisterUser,
+} from "./dto";
 import {
   LoginRequest,
   RegisterRequest,
@@ -28,6 +40,7 @@ import { PasswordResetResponse } from "./dto/response/passwordResetResponse.dto"
 import { ConfirmPasswordResetRequest } from "./dto/request/confirmPasswordResetRequest.dto";
 import { ConfirmPasswordResetResponse } from "./dto/response/confirmPasswordResetResponse.dto";
 import { ConfirmPasswordReset } from "./dto/confirmPasswordReset.dto";
+import { JwtAuthGuard } from "./jwt-auth.guard";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -238,4 +251,12 @@ export class AuthController {
     await this.authService.confirmPasswordReset(input);
     return ConfirmPasswordResetResponse.new();
   }
+
+  @ApiOperation({ description: "Check if user is authenticated" })
+  @ApiOkResponse({ description: "User is authenticated" })
+  @ApiUnauthorizedResponse({ description: "User is not authenticated" })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post("/me")
+  async checkAuthorized() {}
 }

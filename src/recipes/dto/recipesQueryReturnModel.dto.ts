@@ -35,6 +35,8 @@ export class RecipesQueryReturnModel {
   imageLink: string | undefined;
   @ApiProperty()
   isBookmarked: boolean;
+  @ApiPropertyOptional()
+  isPrivate?: boolean;
 
   private constructor(
     recipe: Recipe,
@@ -51,6 +53,7 @@ export class RecipesQueryReturnModel {
       this.description = recipe.description;
       this.imageLink = imageLink;
       this.isBookmarked = recipe.isBookmarked;
+      this.isPrivate = recipe.isPrivate;
     } else {
       this.id = recipe.id;
       this.title = recipe.title;
@@ -68,6 +71,7 @@ export class RecipesQueryReturnModel {
       this.steps = recipe.steps;
       this.imageLink = imageLink;
       this.isBookmarked = recipe.isBookmarked;
+      this.isPrivate = recipe.isPrivate;
     }
   }
 

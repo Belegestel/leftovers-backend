@@ -156,7 +156,7 @@ export class RecipesController {
   })
   @ApiOkResponse({
     description: "Recipe found and returned succesfully",
-    type: RecipeQueryResponse,
+    type: SingleRecipeQueryResponse,
   })
   @ApiNotFoundResponse({
     description: "Recipe not found",

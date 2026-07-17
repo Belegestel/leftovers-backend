@@ -15,6 +15,11 @@ export class SingleRecipeQueryResult {
   ingredients: string[];
   steps: string[];
   imageLink: string | undefined;
+  servings: number;
+  ratingCount: number;
+  isBookmarked: boolean;
+  userRating: number | null;
+  isPrivate: boolean | null;
 
   private constructor(
     id: number,
@@ -30,6 +35,11 @@ export class SingleRecipeQueryResult {
     ingredients: string[],
     steps: string[],
     imageLink: string | undefined,
+    servings: number,
+    ratingCount: number,
+    isBookmarked: boolean,
+    userRating: number | null,
+    isPrivate: boolean | null,
   ) {
     this.id = id;
     this.title = title;
@@ -52,6 +62,13 @@ export class SingleRecipeQueryResult {
     if (imageLink) {
       this.imageLink = imageLink;
     }
+    this.servings = servings;
+    this.ratingCount = ratingCount;
+    this.isBookmarked = isBookmarked;
+    this.userRating = userRating;
+    if (isPrivate) {
+      this.isPrivate = isPrivate;
+    }
   }
 
   static from(
@@ -72,6 +89,11 @@ export class SingleRecipeQueryResult {
       recipe.ingredients,
       recipe.steps,
       imageLink,
+      recipe.servings,
+      recipe.ratingCount,
+      recipe.isBookmarked,
+      recipe.userRating,
+      !recipe.isPublic
     );
   }
 }
