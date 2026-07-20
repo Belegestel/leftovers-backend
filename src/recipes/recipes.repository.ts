@@ -9,6 +9,7 @@ import {
 } from "./recipe-categories.enum";
 import { RecipeQueryFilters } from "./dto/recipeQueryFilters.dto";
 import { Prisma } from "../generated/prisma/client";
+import { EditRecipe } from "./dto/editRecipe.dto";
 
 @Injectable()
 export class RecipesRepository {
@@ -294,5 +295,25 @@ export class RecipesRepository {
         value,
       },
     });
+  }
+
+  async editRecipe(dto: EditRecipe): Promise<boolean> {
+    const recipe = await this.prisma.recipe.update({
+      where: { id: dto.recipeId, authorId: dto.userId },
+      data: {
+        title: dto.title,
+        description: dto.description,
+        category: dto.category,
+        prepTime: dto.prepTime,
+        servings: dto.servings,
+        ingredients: dto.ingredients,
+        steps: dto.steps,
+        isPublic: dto.isPublic,
+      },
+    });
+    if (recipe) {
+      return true;
+    }
+    return false;
   }
 }

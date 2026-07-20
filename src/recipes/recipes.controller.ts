@@ -10,6 +10,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  ForbiddenException,
 } from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
@@ -45,6 +46,8 @@ import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipeRequest } from "./dto/requests/rateRecipeRequest.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
+import { EditRecipeRequest } from "./dto/requests/editRecipeRequest.dto";
+import { EditRecipe } from "./dto/editRecipe.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -303,5 +306,25 @@ export class RecipesController {
   ) {
     const input = RateRecipe.from(dto, req.user.userId, id);
     await this.recipesService.rateRecipe(input);
+  }
+
+  @ApiOperation({ summary: "Authenticated user edits their own recipe" })
+  @ApiOkResponse({ description: "Recipe has been edited" })
+  @ApiForbiddenResponse({
+    description: "User has no permissions to edit a recipe",
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post(":id/edit")
+  @UseGuards(JwtAuthGuard)
+  async editRecipe(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: EditRecipeRequest,
+  ) {
+    const input = EditRecipe.from(id, dto, req.user.userId);
+    const res = await this.recipesService.editRecipe(input);
+    if (!res) {
+      return new ForbiddenException("Can't edit the recipe")
+    }
   }
 }

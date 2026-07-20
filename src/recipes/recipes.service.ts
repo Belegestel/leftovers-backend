@@ -16,10 +16,15 @@ import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { RecipeImageUploadUrl } from "./dto/recipeImageUploadUrl.dto";
-import { allRecipeCategories } from "./recipe-categories.enum";
+import {
+  allRecipeCategories,
+  categoryFromPrisma,
+} from "./recipe-categories.enum";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
+import { EditRecipe } from "./dto/editRecipe.dto";
+import { isJSDocPublicTag } from "typescript";
 
 @Injectable()
 export class RecipesService {
@@ -135,6 +140,14 @@ export class RecipesService {
   }
 
   async rateRecipe(dto: RateRecipe): Promise<void> {
-    await this.recipesRepository.rateRecipe(dto.recipeId, dto.userId, dto.value);
+    await this.recipesRepository.rateRecipe(
+      dto.recipeId,
+      dto.userId,
+      dto.value,
+    );
+  }
+
+  async editRecipe(dto: EditRecipe): Promise<boolean> {
+    return await this.recipesRepository.editRecipe(dto);
   }
 }
