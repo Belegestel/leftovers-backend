@@ -128,7 +128,7 @@ export class RecipesController {
       },
     },
   })
-  @Post("")
+  @Post()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createRecipe(
@@ -311,7 +311,7 @@ export class RecipesController {
   @ApiOperation({ summary: "Authenticated user edits their own recipe" })
   @ApiOkResponse({ description: "Recipe has been edited" })
   @ApiForbiddenResponse({
-    description: "User has no permissions to edit a recipe",
+    description: "User has no permissions to edit the recipe",
   })
   @HttpCode(HttpStatus.OK)
   @Post(":id/edit")
@@ -324,7 +324,25 @@ export class RecipesController {
     const input = EditRecipe.from(id, dto, req.user.userId);
     const res = await this.recipesService.editRecipe(input);
     if (!res) {
-      return new ForbiddenException("Can't edit the recipe")
+      return new ForbiddenException("Can't edit the recipe");
+    }
+  }
+
+  @ApiOperation({ summary: "Authenticated user deletes their own recipe" })
+  @ApiOkResponse({ description: "Recipe has been deleted" })
+  @ApiForbiddenResponse({
+    description: "User has no permissions to delete the recipe",
+  })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post(":id/delete")
+  async deleteRecipe(
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const res = await this.recipesService.deleteRecipe(id, req.user.userId);
+    if (!res) {
+      throw new ForbiddenException("Can't delete the recipe");
     }
   }
 }

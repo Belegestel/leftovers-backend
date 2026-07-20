@@ -133,6 +133,7 @@ export class RecipesRepository {
     ingredients: string[],
     steps: string[],
     userId: number,
+    isPublic: boolean,
   ): Promise<Recipe> {
     const recipe = await this.prisma.recipe.create({
       data: {
@@ -145,6 +146,7 @@ export class RecipesRepository {
         steps,
         authorId: userId,
         imageKey: undefined,
+        isPublic,
       },
     });
     return Recipe.fromPrisma(recipe);
@@ -315,5 +317,12 @@ export class RecipesRepository {
       return true;
     }
     return false;
+  }
+
+  async deleteRecipe(recipeId: number, userId: number): Promise<boolean> {
+    const recipe = await this.prisma.recipe.delete({
+      where: { id: recipeId, authorId: userId }
+    });
+    return !!recipe;
   }
 }

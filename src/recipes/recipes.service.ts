@@ -18,13 +18,11 @@ import { randomUUID } from "node:crypto";
 import { RecipeImageUploadUrl } from "./dto/recipeImageUploadUrl.dto";
 import {
   allRecipeCategories,
-  categoryFromPrisma,
 } from "./recipe-categories.enum";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { EditRecipe } from "./dto/editRecipe.dto";
-import { isJSDocPublicTag } from "typescript";
 
 @Injectable()
 export class RecipesService {
@@ -63,6 +61,7 @@ export class RecipesService {
       dto.ingredients,
       dto.steps,
       userId,
+      dto.isPublic,
     );
     return CreateRecipeResult.from(recipe);
   }
@@ -149,5 +148,9 @@ export class RecipesService {
 
   async editRecipe(dto: EditRecipe): Promise<boolean> {
     return await this.recipesRepository.editRecipe(dto);
+  }
+
+  async deleteRecipe(recipeId: number, userId: number): Promise<boolean> {
+    return await this.recipesRepository.deleteRecipe(recipeId, userId);
   }
 }

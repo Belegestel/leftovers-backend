@@ -12,6 +12,7 @@ import { mockFilesService } from "../../test/unit/mocks/mockFilesService";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
+import { EditRecipe } from "./dto/editRecipe.dto";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -50,10 +51,6 @@ describe("RecipesService", () => {
         isPrivate: false,
         ratingCount: 2,
         isBookmarked: false,
-        userRating: 1,
-        isPrivate: false,
-        ratingCount: 2,
-        isBookmarked: false
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll();
@@ -200,6 +197,7 @@ describe("RecipesService", () => {
         servings: 2,
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
+        isPublic: true,
       };
       const repoResult: Recipe = {
         id: 123,
@@ -219,7 +217,7 @@ describe("RecipesService", () => {
         userRating: 1,
         isPrivate: false,
         ratingCount: 2,
-        isBookmarked: false
+        isBookmarked: false,
       };
 
       mockRecipesRepository.create.mockResolvedValue(repoResult);
@@ -233,6 +231,7 @@ describe("RecipesService", () => {
         ["Flour", "Water"],
         ["mix", "bake"],
         1,
+        true,
       );
       expect(result).toEqual(CreateRecipeResult.from(repoResult));
     });
@@ -320,6 +319,25 @@ describe("RecipesService", () => {
         dto.recipeId,
         dto.userId,
         dto.value,
+      );
+    });
+  });
+
+  describe("editRecipe", () => {
+    it("delegates a recipe edit to the repository", async () => {
+      const dto: EditRecipe = { userId: 1, recipeId: 2, isPublic: true };
+      await service.editRecipe(dto);
+      expect(mockRecipesRepository.editRecipe).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 1, recipeId:2, isPublic: true }),
+      );
+    });
+  });
+
+  describe("deleteRecipe", () => {
+    it("delegates a recipe deletion to the repository", async () => {
+      await service.deleteRecipe(0, 1);
+      expect(mockRecipesRepository.deleteRecipe).toHaveBeenCalledWith(
+        0, 1
       );
     });
   });

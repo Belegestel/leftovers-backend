@@ -4,6 +4,8 @@ import { mockRecipesService } from "../../test/unit/mocks/mockRecipesService";
 import { RecipesService } from "./recipes.service";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { AuthenticatedRequest } from "src/types/authenticated-request.interface";
+import { EditRecipeRequest } from "./dto/requests/editRecipeRequest.dto";
+import { mockRecipesRepository } from '../../test/unit/mocks/mockRecipesRepository';
 
 describe("RecipesController", () => {
   let controller: RecipesController;
@@ -103,5 +105,27 @@ describe("RecipesController", () => {
       user: { userId: 2 },
     } as AuthenticatedRequest);
     expect(mockRecipesService.findById).toHaveBeenCalledWith(1, 2);
+  });
+
+  it("edits the recipe", async () => {
+    await controller.editRecipe(
+      1,
+      { user: { userId: 2 } } as AuthenticatedRequest,
+      { isPublic: false } as EditRecipeRequest,
+    );
+    expect(mockRecipesService.editRecipe).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 2, recipeId: 1, isPublic: false }),
+    );
+  });
+
+  it("deletes the recipe", async () => {
+    mockRecipesService.deleteRecipe.mockResolvedValue(true);
+    await controller.deleteRecipe(
+      1,
+      { user: { userId: 2 } } as AuthenticatedRequest,
+    );
+    expect(mockRecipesService.deleteRecipe).toHaveBeenCalledWith(
+      1, 2
+    );
   });
 });
