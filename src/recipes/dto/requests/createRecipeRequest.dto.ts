@@ -60,7 +60,7 @@ export class CreateRecipeRequest {
   steps: string[];
 
   @ApiProperty()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   isPublic: boolean;
 }

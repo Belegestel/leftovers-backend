@@ -36,13 +36,13 @@ export class RecipeQueryRequest {
 
   @ApiPropertyOptional({ example: "true" })
   @IsOptional()
-  @Transform(({ value }) => value === "true")
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   details?: boolean;
 
   @ApiPropertyOptional({ example: "true" })
   @IsOptional()
-  @Transform(({ value }) => value === "true")
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   saved?: boolean;
 
@@ -58,6 +58,6 @@ export class RecipeQueryRequest {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => value === "true")
+  @Transform(({ value }) => value === "true" || value === true)
   authored?: boolean;
 }
