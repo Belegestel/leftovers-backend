@@ -206,7 +206,7 @@ export class RecipesController {
   @ApiBearerAuth()
   @ApiOkResponse({
     description: "Presigned URL has been generated",
-    type: CreateRecipeResponse,
+    type: RecipeImageUploadResponse,
   })
   @ApiBadRequestResponse({
     description: "Bad request data",
@@ -239,6 +239,10 @@ export class RecipesController {
   }
 
   @Post(":id/image-confirm")
+  @ApiBearerAuth()
+  @ApiBody({ type: ConfirmReceivedImageRequest })
+  @ApiOkResponse({ type: ConfirmImageResponse })
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   async confirmReceivedImageUpload(
     @Param("id") id: number,

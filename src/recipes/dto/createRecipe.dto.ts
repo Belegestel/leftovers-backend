@@ -9,6 +9,7 @@ export class CreateRecipe {
   servings: number;
   ingredients: string[];
   steps: string[];
+  isPublic: boolean;
 
   private constructor(
     title: string,
@@ -18,6 +19,7 @@ export class CreateRecipe {
     servings: number,
     ingredients: string[],
     steps: string[],
+    isPublic: boolean,
   ) {
     this.title = title;
     this.description = description;
@@ -26,6 +28,7 @@ export class CreateRecipe {
     this.servings = servings;
     this.ingredients = ingredients;
     this.steps = steps;
+    this.isPublic = isPublic;
   }
 
   static from(dto: CreateRecipeRequest): CreateRecipe {
@@ -37,6 +40,7 @@ export class CreateRecipe {
       dto.servings,
       dto.ingredients,
       dto.steps,
+      dto.isPublic,
     );
   }
 }
