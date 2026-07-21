@@ -1,10 +1,6 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import {
-  IsOptional,
-  IsString,
-  IsBoolean,
-} from "class-validator";
+import { IsOptional, IsString, IsBoolean } from "class-validator";
 
 export class RecipeQueryRequest {
   // Filter
@@ -12,7 +8,7 @@ export class RecipeQueryRequest {
   @IsOptional()
   @IsString()
   category?: string;
-  
+
   // Search
   @ApiPropertyOptional()
   @IsOptional()
@@ -48,12 +44,16 @@ export class RecipeQueryRequest {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => value === "asc")
+  @Transform(
+    ({ value }) => value === "asc" || value === "false" || value === false,
+  )
   dateOrderIncr?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => value === "asc")
+  @Transform(
+    ({ value }) => value === "asc" || value === "false" || value === false,
+  )
   ratingOrderIncr?: boolean;
 
   @ApiPropertyOptional()
