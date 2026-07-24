@@ -1,5 +1,6 @@
 import { InternalServerErrorException } from "@nestjs/common";
 import { RecipeCategory as PrismaCategory } from "../generated/prisma/client";
+import { SingleCategory } from "./dto/responses/categoriesResponse.dto";
 
 export enum RecipeCategory {
   BREAKFAST = "BREAKFAST",
@@ -29,12 +30,12 @@ export function prismaFromCategory(category: RecipeCategory): PrismaCategory {
   return PrismaCategory[category];
 }
 export const allRecipeCategories = [
-  "🥪 breakfasts",
-  "🍲 soups",
-  "🍔 lunch",
-  "🥐 baking",
-  "🧁 desserts",
-  "🍹 drinks",
-  "🍿 snacks",
-  "🥗 salads",
+  new SingleCategory("🥪",  "Breakfasts", "BREAKFAST"),
+  new SingleCategory("🍲", "Soups", "SOUPS"),
+  new SingleCategory("🍔",  "Lunch", "LUNCH"),
+  new SingleCategory("🥐",  "Baking", "BAKING"),
+  new SingleCategory("🧁",  "Desserts", "DESSERTS"),
+  new SingleCategory("🍹",  "Drinks", "DRINKS"),
+  new SingleCategory("🍿",  "Snacks", "SNACKS"),
+  new SingleCategory("🥗",  "Salads", "SALADS"),
 ];

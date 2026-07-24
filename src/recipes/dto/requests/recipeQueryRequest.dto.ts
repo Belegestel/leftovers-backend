@@ -45,14 +45,14 @@ export class RecipeQueryRequest {
   @ApiPropertyOptional()
   @IsOptional()
   @Transform(
-    ({ value }) => value === "asc" || value === "false" || value === false,
+    ({ value }) => value === "asc" || value === "true" || value === true,
   )
   dateOrderIncr?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
   @Transform(
-    ({ value }) => value === "asc" || value === "false" || value === false,
+    ({ value }) => value === "asc" || value === "true" || value === true,
   )
   ratingOrderIncr?: boolean;
 

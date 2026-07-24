@@ -23,6 +23,7 @@ import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { EditRecipe } from "./dto/editRecipe.dto";
+import { SingleCategory } from "./dto/responses/categoriesResponse.dto";
 
 @Injectable()
 export class RecipesService {
@@ -126,7 +127,7 @@ export class RecipesService {
     return imageUrl;
   }
 
-  async getRecipeCategories(): Promise<string[]> {
+  async getRecipeCategories(): Promise<SingleCategory[]> {
     return allRecipeCategories;
   }
 

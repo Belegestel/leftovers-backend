@@ -25,16 +25,33 @@ export class RecipesRepository {
 
     const searchConditions: RecipeWhereInput[] = [];
 
-    if (recipeQuery?.title) {
+    if (recipeQuery?.description && recipeQuery?.title) {
       searchConditions.push({
-        title: { contains: recipeQuery.title, mode: "insensitive" },
+        OR: [
+          { title: { contains: recipeQuery.title, mode: "insensitive" } },
+          {
+            description: {
+              contains: recipeQuery.description,
+              mode: "insensitive",
+            },
+          },
+        ],
       });
-    }
+    } else {
+      if (recipeQuery?.title) {
+        searchConditions.push({
+          title: { contains: recipeQuery.title, mode: "insensitive" },
+        });
+      }
 
-    if (recipeQuery?.description) {
-      searchConditions.push({
-        description: { contains: recipeQuery.description, mode: "insensitive" },
-      });
+      if (recipeQuery?.description) {
+        searchConditions.push({
+          description: {
+            contains: recipeQuery.description,
+            mode: "insensitive",
+          },
+        });
+      }
     }
 
     if (recipeQuery?.ingredients) {
@@ -83,7 +100,7 @@ export class RecipesRepository {
 
     if (recipeQuery?.dateOrderIncr !== undefined) {
       orderBy.push({
-        createdAt: recipeQuery.dateOrderIncr ? "asc" : "desc",
+        createdAt: recipeQuery.dateOrderIncr ? "desc" : "asc",
       });
     }
 
@@ -321,7 +338,7 @@ export class RecipesRepository {
 
   async deleteRecipe(recipeId: number, userId: number): Promise<boolean> {
     const recipe = await this.prisma.recipe.delete({
-      where: { id: recipeId, authorId: userId }
+      where: { id: recipeId, authorId: userId },
     });
     return !!recipe;
   }
