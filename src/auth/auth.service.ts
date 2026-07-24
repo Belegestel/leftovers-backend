@@ -11,7 +11,7 @@ import { UsersRepository } from "../users/users.repository";
 import { SignupRequestsRepository } from "./signup-requests.repository";
 import { JwtService } from "@nestjs/jwt";
 import { EmailService } from "../email/email.service";
-import { createHash, randomBytes } from "crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { ConfirmRegistration } from "./dto/confirmRegistration.dto";
 import { LoginUser } from "./dto/loginUser.dto";
 import { LoginResult } from "./dto/loginResult.dto";
@@ -27,6 +27,8 @@ import { CreatePasswordResetEntry } from "./dto/createPasswordResetEntry.dto";
 import { ConfirmPasswordReset } from "./dto/confirmPasswordReset.dto";
 import { FindPasswordResetToken } from "./dto/findPasswordResetToken.dto";
 import { HOUR_IN_MS } from "../common/utils";
+import { RefreshResult } from "./dto/refreshResult.dto";
+import { TokenRefresh } from "./dto/tokenRefresh.dto";
 
 @Injectable()
 export class AuthService {
@@ -68,12 +70,12 @@ export class AuthService {
   }
 
   async login(dto: LoginUser): Promise<LoginResult> {
-    const email = dto.email;
-    const user = await this.usersRepository.findByEmail(email);
+    const user = await this.usersRepository.findByEmail(dto.email);
 
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
     }
+
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
 
     if (!isPasswordValid) {
@@ -85,9 +87,67 @@ export class AuthService {
       email: user.email,
     };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.config.getOrThrow<string>("ACCESS_TOKEN_SECRET"),
+      expiresIn: "10m",
+    });
 
-    return LoginResult.from(accessToken);
+    const refreshToken = randomBytes(64).toString("hex");
+
+    const refreshTokenHash = createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
+    await this.usersRepository.storeRefreshToken(
+      refreshTokenHash,
+      user.id,
+      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    );
+
+    return LoginResult.from(accessToken, refreshToken);
+  }
+
+  async refresh(dto: TokenRefresh): Promise<RefreshResult> {
+    const tokenHash = createHash("sha256").update(dto.token).digest("hex");
+
+    const storedToken = await this.usersRepository.getRefreshToken(tokenHash);
+
+    if (!storedToken) {
+      throw new UnauthorizedException("Invalid refresh token");
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      await this.usersRepository.deleteRefreshToken(tokenHash);
+      throw new UnauthorizedException("Token expired");
+    }
+
+    const user = storedToken.user;
+
+    await this.usersRepository.deleteRefreshToken(tokenHash);
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.config.getOrThrow<string>("ACCESS_TOKEN_SECRET"),
+      expiresIn: "10m",
+    });
+
+    const newRefreshToken = randomBytes(64).toString("hex");
+
+    const newRefreshTokenHash = createHash("sha256")
+      .update(newRefreshToken)
+      .digest("hex");
+
+    await this.usersRepository.storeRefreshToken(
+      newRefreshTokenHash,
+      user.id,
+      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    );
+
+    return RefreshResult.from(accessToken, newRefreshToken);
   }
 
   async register(dto: RegisterUser): Promise<RegisterResult> {
@@ -128,7 +188,7 @@ export class AuthService {
       email,
       "Confirm your registration",
       "registration-confirmation",
-      { confirmationLink, frontendUrl},
+      { confirmationLink, frontendUrl },
     );
     return RegisterResult.from("Confirmation email sent.");
   }
@@ -184,7 +244,7 @@ export class AuthService {
       {
         frontendUrl: this.frontendUrl,
         resetLink: link,
-        username: dto.email.split('@')[0]
+        username: dto.email.split("@")[0],
       },
     );
   }

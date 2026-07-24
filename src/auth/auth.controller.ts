@@ -41,6 +41,9 @@ import { ConfirmPasswordResetRequest } from "./dto/request/confirmPasswordResetR
 import { ConfirmPasswordResetResponse } from "./dto/response/confirmPasswordResetResponse.dto";
 import { ConfirmPasswordReset } from "./dto/confirmPasswordReset.dto";
 import { JwtAuthGuard } from "./jwt-auth.guard";
+import { TokenRefresh } from "./dto/tokenRefresh.dto";
+import { TokenRefreshRequest } from "./dto/request/tokenRefreshRequest.dto";
+import { TokenRefreshResponse } from "./dto/response/tokenRefreshResponse.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -250,6 +253,22 @@ export class AuthController {
     const input = ConfirmPasswordReset.from(dto);
     await this.authService.confirmPasswordReset(input);
     return ConfirmPasswordResetResponse.new();
+  }
+
+  @ApiOperation({ description: "Refreshes the users's access token." })
+  @ApiOkResponse({
+    description: "Refresh successful.",
+    type: TokenRefreshResponse,
+  })
+  @ApiUnauthorizedResponse({ description: "Token invalid or outdated" })
+  @HttpCode(HttpStatus.OK)
+  @Post("/refresh")
+  async refreshToken(
+    @Body() dto: TokenRefreshRequest,
+  ): Promise<TokenRefreshResponse> {
+    const input = TokenRefresh.from(dto);
+    const result = await this.authService.refresh(input);
+    return TokenRefreshResponse.from(result);
   }
 
   @ApiOperation({ description: "Check if user is authenticated" })

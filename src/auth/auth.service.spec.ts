@@ -73,7 +73,6 @@ describe("AuthService", () => {
     it("should create a signup request and send email", async () => {
       const dto: RegisterUser = {
         email: "john.doe@email.com",
-        name: "John Doe",
         password: "password123",
       };
 
@@ -102,7 +101,6 @@ describe("AuthService", () => {
     it("should throw ConflictException if email already exists", async () => {
       const dto: RegisterUser = {
         email: "john.doe@email.com",
-        name: "John Doe",
         password: "password123",
       };
 
@@ -127,7 +125,6 @@ describe("AuthService", () => {
         email: dto.email,
         token: dto.token,
         expires_at: new Date(Date.now() + 10000),
-        name: "John Doe",
         password_hash: "hashed-password",
         id: 1,
       });
@@ -144,7 +141,6 @@ describe("AuthService", () => {
         email: dto.email,
         token: "valid-token",
         expires_at: new Date(Date.now() + 10000),
-        name: "John Doe",
         password_hash: "hashed-password",
       });
 
@@ -157,7 +153,6 @@ describe("AuthService", () => {
         email: dto.email,
         token: dto.token,
         expires_at: new Date(Date.now() - 10000),
-        name: "John Doe",
         password_hash: "hashed-password",
       });
       await expect(service.confirmRegistration(dto)).rejects.toThrow();
@@ -170,6 +165,10 @@ describe("AuthService", () => {
         email: "john.doe@email.com",
         password: "password",
       };
+      (crypto.createHash as jest.Mock).mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        digest: jest.fn().mockReturnValue("hashed-refresh-token"),
+      });
 
       mockUsersRepository.findByEmail.mockResolvedValue({
         id: 1,
@@ -190,6 +189,7 @@ describe("AuthService", () => {
       expect(mockJwtService.signAsync).toHaveBeenCalled();
       expect(result).toEqual({
         accessToken: expectedResult,
+        refreshToken: "raw-token"
       });
     });
 
