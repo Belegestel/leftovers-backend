@@ -108,4 +108,38 @@ describe("AuthController", () => {
     );
     expect(mockAuthService.confirmPasswordReset).toHaveBeenCalledWith(dto);
   });
+
+  it("should refresh tokens and call auth service", async () => {
+    const dto = {
+      token: "refresh-token",
+    };
+
+    const expectedResult = {
+      accessToken: "new-access-token",
+      refreshToken: "new-refresh-token",
+    };
+
+    mockAuthService.refresh.mockResolvedValue(expectedResult);
+
+    const result = await controller.refreshToken(dto);
+
+    expect(result).toEqual(expectedResult);
+    expect(mockAuthService.refresh).toHaveBeenCalledWith(dto);
+  });
+
+  it("should propagate error when refresh token is invalid", async () => {
+    const dto = {
+      token: "invalid-token",
+    };
+
+    mockAuthService.refresh.mockRejectedValue(
+      new Error("Invalid refresh token"),
+    );
+
+    await expect(controller.refreshToken(dto)).rejects.toThrow(
+      "Invalid refresh token",
+    );
+
+    expect(mockAuthService.refresh).toHaveBeenCalledWith(dto);
+  });
 });

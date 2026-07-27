@@ -189,7 +189,7 @@ describe("AuthService", () => {
       expect(mockJwtService.signAsync).toHaveBeenCalled();
       expect(result).toEqual({
         accessToken: expectedResult,
-        refreshToken: "raw-token"
+        refreshToken: "raw-token",
       });
     });
 
@@ -337,5 +337,95 @@ describe("AuthService", () => {
         BadRequestException,
       );
     });
+  });
+
+  it("should return new access and refresh tokens for a valid refresh token", async () => {
+    (crypto.createHash as jest.Mock).mockReturnValue({
+      update: jest.fn().mockReturnThis(),
+      digest: jest.fn().mockReturnValue("hashed-refresh-token"),
+    });
+
+    mockUsersRepository.getRefreshToken.mockResolvedValue({
+      tokenHash: "hashed-refresh-token",
+      expiresAt: new Date(Date.now() + 10000),
+      user: {
+        id: 1,
+        email: "john.doe@email.com",
+      },
+    });
+
+    mockUsersRepository.deleteRefreshToken.mockResolvedValue(undefined);
+    mockUsersRepository.storeRefreshToken.mockResolvedValue(undefined);
+
+    mockJwtService.signAsync.mockResolvedValue("new-access-token");
+
+    const result = await service.refresh({
+      token: "old-refresh-token",
+    });
+
+    expect(mockUsersRepository.getRefreshToken).toHaveBeenCalledWith(
+      "hashed-refresh-token",
+    );
+
+    expect(mockUsersRepository.deleteRefreshToken).toHaveBeenCalledWith(
+      "hashed-refresh-token",
+    );
+
+    expect(mockUsersRepository.storeRefreshToken).toHaveBeenCalledWith(
+      expect.any(String),
+      1,
+      expect.any(Date),
+    );
+
+    expect(result).toEqual({
+      accessToken: "new-access-token",
+      refreshToken: "raw-token",
+    });
+  });
+
+  it("should throw UnauthorizedException if refresh token does not exist", async () => {
+    (crypto.createHash as jest.Mock).mockReturnValue({
+      update: jest.fn().mockReturnThis(),
+      digest: jest.fn().mockReturnValue("hashed-refresh-token"),
+    });
+
+    mockUsersRepository.getRefreshToken.mockResolvedValue(null);
+
+    await expect(
+      service.refresh({
+        token: "invalid-token",
+      }),
+    ).rejects.toThrow(UnauthorizedException);
+
+    expect(mockUsersRepository.deleteRefreshToken).not.toHaveBeenCalled();
+    expect(mockUsersRepository.storeRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it("should throw UnauthorizedException if refresh token is expired", async () => {
+    (crypto.createHash as jest.Mock).mockReturnValue({
+      update: jest.fn().mockReturnThis(),
+      digest: jest.fn().mockReturnValue("hashed-refresh-token"),
+    });
+
+    mockUsersRepository.getRefreshToken.mockResolvedValue({
+      tokenHash: "hashed-refresh-token",
+      expiresAt: new Date(Date.now() - 10000),
+      user: {
+        id: 1,
+        email: "john.doe@email.com",
+      },
+    });
+
+    await expect(
+      service.refresh({
+        token: "expired-token",
+      }),
+    ).rejects.toThrow(UnauthorizedException);
+
+    expect(mockUsersRepository.deleteRefreshToken).toHaveBeenCalledWith(
+      "hashed-refresh-token",
+    );
+
+    expect(mockUsersRepository.storeRefreshToken).not.toHaveBeenCalled();
   });
 });

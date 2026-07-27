@@ -11,6 +11,7 @@ import {
   Param,
   ParseIntPipe,
   ForbiddenException,
+  Patch,
 } from "@nestjs/common";
 import { RecipesService } from "./recipes.service";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-guard";
@@ -314,7 +315,7 @@ export class RecipesController {
     description: "User has no permissions to edit the recipe",
   })
   @HttpCode(HttpStatus.OK)
-  @Post(":id/edit")
+  @Patch(":id/edit")
   @UseGuards(JwtAuthGuard)
   async editRecipe(
     @Param("id", ParseIntPipe) id: number,
