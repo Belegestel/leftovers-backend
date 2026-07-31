@@ -59,6 +59,8 @@ export class RecipesService {
       await this.cacheManager.set(cacheKey, result);
       this.recipeCacheKeys.add(cacheKey);
     }
+    else {
+    }
 
     const links = await Promise.all(
       result.map(async (value) =>

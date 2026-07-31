@@ -9,6 +9,10 @@ import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { FilesService } from "../files/files.service";
 import { mockFilesService } from "../../test/unit/mocks/mockFilesService";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { mockCacheManager } from "../../test/unit/mocks/mockCacheManager";
+import { RateRecipe } from "./dto/rateRecipe.dto";
+import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -19,6 +23,7 @@ describe("RecipesService", () => {
         RecipesService,
         { provide: RecipesRepository, useValue: mockRecipesRepository },
         { provide: FilesService, useValue: mockFilesService },
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
 
@@ -38,6 +43,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        ratingCount: 0,
+        isBookmarked: false,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -64,6 +71,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -90,6 +99,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -118,6 +129,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -146,6 +159,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -174,6 +189,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -212,6 +229,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -318,6 +337,87 @@ describe("RecipesService", () => {
         dto.userId,
         dto.value,
       );
+    });
+  });
+
+  describe("cacheRecipe", () => {
+    it("returns recipes from cache when cache hit occurs", async () => {
+      const cachedRecipes = [
+        {
+          id: 1,
+          title: "Cached pizza",
+        } as Recipe,
+      ];
+
+      mockCacheManager.get.mockResolvedValue(cachedRecipes);
+
+      const result = await service.findAll();
+
+      expect(result).toBeDefined();
+      expect(mockCacheManager.get).toHaveBeenCalled();
+      expect(mockRecipesRepository.findAll).not.toHaveBeenCalled();
+    });
+
+    it("fetches from repository and stores result when cache misses", async () => {
+      const recipes = [
+        {
+          id: 1,
+          title: "Pizza",
+          imageKey: undefined,
+        } as Recipe,
+      ];
+
+      mockCacheManager.get.mockResolvedValue(undefined);
+      mockRecipesRepository.findAll.mockResolvedValue(recipes);
+
+      await service.findAll();
+
+      expect(mockRecipesRepository.findAll).toHaveBeenCalled();
+      expect(mockCacheManager.set).toHaveBeenCalledWith(
+        expect.stringContaining("recipes:"),
+        recipes,
+      );
+    });
+
+    it("invalidates user's recipe cache after bookmarking", async () => {
+      const recipe = {
+        id: 1,
+        title: "Pizza",
+        imageKey: undefined,
+      } as Recipe;
+
+      mockCacheManager.get.mockResolvedValue(undefined);
+      mockRecipesRepository.findAll.mockResolvedValue([recipe]);
+
+      await service.findAll(2);
+
+      await service.bookmarkRecipe({
+        recipeId: 1,
+        userId: 2,
+      });
+
+      expect(mockCacheManager.del).toHaveBeenCalled();
+    });
+
+    it("invalidates user's recipe cache after rating", async () => {
+      const recipe = {
+        id: 1,
+        title: "Pizza",
+        imageKey: undefined,
+      } as Recipe;
+
+      mockCacheManager.get.mockResolvedValue(undefined);
+      mockRecipesRepository.findAll.mockResolvedValue([recipe]);
+
+      await service.findAll(2);
+
+      await service.rateRecipe({
+        recipeId: 1,
+        userId: 2,
+        value: 3,
+      });
+
+      expect(mockCacheManager.del).toHaveBeenCalled();
     });
   });
 });
