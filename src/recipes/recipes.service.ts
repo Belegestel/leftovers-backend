@@ -27,7 +27,7 @@ import { Recipe } from "./recipes.model";
 
 @Injectable()
 export class RecipesService {
-  private readonly recipeCacheKeys = new Set<string>();
+  private readonly recipeCacheIndexKey = "recipes:cache:index";
 
   constructor(
     private readonly recipesRepository: RecipesRepository,
@@ -57,9 +57,15 @@ export class RecipesService {
       result = await this.recipesRepository.findAll(userId, input);
 
       await this.cacheManager.set(cacheKey, result);
-      this.recipeCacheKeys.add(cacheKey);
-    }
-    else {
+      const cacheKeys =
+        (await this.cacheManager.get<string[]>(this.recipeCacheIndexKey)) ?? [];
+
+      if (!cacheKeys.includes(cacheKey)) {
+        await this.cacheManager.set(this.recipeCacheIndexKey, [
+          ...cacheKeys,
+          cacheKey,
+        ]);
+      }
     }
 
     const links = await Promise.all(
@@ -74,12 +80,22 @@ export class RecipesService {
   }
 
   private async invalidateRecipeCache(userId?: number): Promise<void> {
-    const keys = Array.from(this.recipeCacheKeys).filter((key) =>
-      key.startsWith(userId === undefined ? "recipes:" : `recipes:${userId}:`),
-    );
-    await Promise.all(keys.map((key) => this.cacheManager.del(key)));
+    const cachedKeys =
+      (await this.cacheManager.get<string[]>(this.recipeCacheIndexKey)) ?? [];
 
-    keys.forEach((key) => this.recipeCacheKeys.delete(key));
+    const keysToDelete = cachedKeys.filter((key) =>
+      userId === undefined
+        ? key.startsWith("recipes:")
+        : key.startsWith(`recipes:${userId}:`),
+    );
+
+    await Promise.all(keysToDelete.map((key) => this.cacheManager.del(key)));
+
+    const remainingKeys = cachedKeys.filter(
+      (key) => !keysToDelete.includes(key),
+    );
+
+    await this.cacheManager.set(this.recipeCacheIndexKey, remainingKeys);
   }
 
   async createRecipe(

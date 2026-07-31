@@ -8,6 +8,7 @@ import { EmailModule } from "./email/email.module";
 import { RecipesModule } from "./recipes/recipes.module";
 import { FilesModule } from "./files/files.module";
 import { CacheModule } from "@nestjs/cache-manager";
+import KeyvRedis from "@keyv/redis";
 
 @Module({
   imports: [
@@ -15,9 +16,12 @@ import { CacheModule } from "@nestjs/cache-manager";
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === "test" ? "test.env" : ".env",
     }),
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
-      ttl: 5 * 60 * 1000,
+      useFactory: async () => ({
+        stores: [new KeyvRedis("redis://localhost:6379")],
+        ttl: 3 * 60 * 1000,
+      }),
     }),
     UsersModule,
     AuthModule,
