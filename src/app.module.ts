@@ -1,4 +1,4 @@
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
@@ -10,6 +10,8 @@ import { FilesModule } from "./files/files.module";
 import { CacheModule } from "@nestjs/cache-manager";
 import KeyvRedis from "@keyv/redis";
 
+const THREE_MINUTES = 3 * 60 * 1000;
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,9 +20,10 @@ import KeyvRedis from "@keyv/redis";
     }),
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: async () => ({
-        stores: [new KeyvRedis("redis://localhost:6379")],
-        ttl: 3 * 60 * 1000,
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        stores: [new KeyvRedis(config.getOrThrow<string>("REDIS_URL"))],
+        ttl: THREE_MINUTES,
       }),
     }),
     UsersModule,
