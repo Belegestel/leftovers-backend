@@ -13,11 +13,13 @@ import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { mockCacheManager } from "../../test/unit/mocks/mockCacheManager";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
+import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 
 describe("RecipesService", () => {
   let service: RecipesService;
 
   beforeEach(async () => {
+    jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecipesService,
@@ -28,7 +30,6 @@ describe("RecipesService", () => {
     }).compile();
 
     service = module.get<RecipesService>(RecipesService);
-    jest.clearAllMocks();
   });
 
   describe("findAll", () => {
@@ -380,36 +381,38 @@ describe("RecipesService", () => {
     });
 
     it("invalidates user's recipe cache after bookmarking", async () => {
-      const recipe = {
-        id: 1,
-        title: "Pizza",
-        imageKey: undefined,
-      } as Recipe;
+      mockCacheManager.get
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(['recipes:2:{"category":"LUNCH"}']);
 
-      mockCacheManager.get.mockResolvedValue(undefined);
-      mockRecipesRepository.findAll.mockResolvedValue([recipe]);
+      mockRecipesRepository.findAll.mockResolvedValue([]);
 
-      await service.findAll(2);
+      await service.findAll(2, {
+        category: "LUNCH",
+      });
 
       await service.bookmarkRecipe({
         recipeId: 1,
         userId: 2,
       });
 
-      expect(mockCacheManager.del).toHaveBeenCalled();
+      expect(mockCacheManager.del).toHaveBeenCalledWith(
+        'recipes:2:{"category":"LUNCH"}',
+      );
     });
 
     it("invalidates user's recipe cache after rating", async () => {
-      const recipe = {
-        id: 1,
-        title: "Pizza",
-        imageKey: undefined,
-      } as Recipe;
+      mockCacheManager.get
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(['recipes:2:{"category":"LUNCH"}']);
 
-      mockCacheManager.get.mockResolvedValue(undefined);
-      mockRecipesRepository.findAll.mockResolvedValue([recipe]);
+      mockRecipesRepository.findAll.mockResolvedValue([]);
 
-      await service.findAll(2);
+      await service.findAll(2, {
+        category: "LUNCH",
+      });
 
       await service.rateRecipe({
         recipeId: 1,
@@ -417,7 +420,9 @@ describe("RecipesService", () => {
         value: 3,
       });
 
-      expect(mockCacheManager.del).toHaveBeenCalled();
+      expect(mockCacheManager.del).toHaveBeenCalledWith(
+        'recipes:2:{"category":"LUNCH"}',
+      );
     });
   });
 });
