@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -20,29 +21,63 @@ import { allRecipeCategories } from "./recipe-categories.enum";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import type { Cache } from "cache-manager";
+import { Recipe } from "./recipes.model";
 
 @Injectable()
 export class RecipesService {
+  private readonly recipeCacheKeys = new Set<string>();
+
   constructor(
     private readonly recipesRepository: RecipesRepository,
     private readonly filesService: FilesService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
+
+  private getRecipeCacheKey(
+    userId?: number,
+    filters?: RecipeQueryRequest,
+  ): string {
+    return `recipes:${userId ?? "anonymous"}:${JSON.stringify(filters ?? {})}`;
+  }
 
   async findAll(
     userId?: number,
     filters?: RecipeQueryRequest,
   ): Promise<RecipeQueryResult> {
-    const input = RecipeQueryFilters.from(userId, filters);
-    const result = await this.recipesRepository.findAll(userId, input);
+    const cacheKey = this.getRecipeCacheKey(userId, filters);
+
+    let result = await this.cacheManager.get<Recipe[]>(cacheKey);
+
+    if (!result) {
+      const input = RecipeQueryFilters.from(userId, filters);
+
+      result = await this.recipesRepository.findAll(userId, input);
+
+      await this.cacheManager.set(cacheKey, result);
+      this.recipeCacheKeys.add(cacheKey);
+    }
+
     const links = await Promise.all(
-      result.map(
-        async (value) =>
-          await (value.imageKey
-            ? this.filesService.createPresignedGetUrl(value.imageKey)
-            : undefined),
+      result.map(async (value) =>
+        value.imageKey
+          ? this.filesService.createPresignedGetUrl(value.imageKey)
+          : undefined,
       ),
     );
+
     return RecipeQueryResult.from(result, links);
+  }
+
+  private async invalidateRecipeCache(userId?: number): Promise<void> {
+    const keys = Array.from(this.recipeCacheKeys).filter((key) =>
+      key.startsWith(userId === undefined ? "recipes:" : `recipes:${userId}:`),
+    );
+    await Promise.all(keys.map((key) => this.cacheManager.del(key)));
+
+    keys.forEach((key) => this.recipeCacheKeys.delete(key));
   }
 
   async createRecipe(
@@ -59,8 +94,10 @@ export class RecipesService {
       dto.steps,
       userId,
     );
+    await this.invalidateRecipeCache();
     return CreateRecipeResult.from(recipe);
   }
+
   async findById(
     id: number,
     userId?: number,
@@ -119,6 +156,7 @@ export class RecipesService {
     }
     await this.recipesRepository.updateImageKey(id, key);
     const imageUrl = await this.filesService.createPresignedGetUrl(key);
+    await this.invalidateRecipeCache();
     return imageUrl;
   }
 
@@ -128,13 +166,20 @@ export class RecipesService {
 
   async bookmarkRecipe(dto: BookmarkRecipe): Promise<void> {
     await this.recipesRepository.bookmarkRecipe(dto.recipeId, dto.userId);
+    await this.invalidateRecipeCache(dto.userId);
   }
 
   async unbookmarkRecipe(dto: UnbookmarkRecipe): Promise<void> {
     await this.recipesRepository.unbookmarkRecipe(dto.recipeId, dto.userId);
+    await this.invalidateRecipeCache(dto.userId);
   }
 
   async rateRecipe(dto: RateRecipe): Promise<void> {
-    await this.recipesRepository.rateRecipe(dto.recipeId, dto.userId, dto.value);
+    await this.recipesRepository.rateRecipe(
+      dto.recipeId,
+      dto.userId,
+      dto.value,
+    );
+    await this.invalidateRecipeCache();
   }
 }

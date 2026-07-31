@@ -4,16 +4,20 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { UsersModule } from "./users/users.module";
 import { AuthModule } from "./auth/auth.module";
-import { EmailModule } from './email/email.module';
-import { RecipesModule } from './recipes/recipes.module';
-import { FilesModule } from './files/files.module';
+import { EmailModule } from "./email/email.module";
+import { RecipesModule } from "./recipes/recipes.module";
+import { FilesModule } from "./files/files.module";
+import { CacheModule } from "@nestjs/cache-manager";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'test' ?
-        'test.env' : '.env',
+      envFilePath: process.env.NODE_ENV === "test" ? "test.env" : ".env",
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 5 * 60 * 1000,
     }),
     UsersModule,
     AuthModule,
