@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { User, UserMapper } from "../users/users.model";
 import { PrismaTransaction } from "../prisma/prisma.types";
+import { RefreshToken } from "../auth/dto/refreshToken.model";
 
 @Injectable()
 export class UsersRepository {
@@ -19,10 +20,7 @@ export class UsersRepository {
     return res ? UserMapper.toDto(res) : null;
   }
 
-  async create(data: {
-    email: string;
-    password: string;
-  }): Promise<User> {
+  async create(data: { email: string; password: string }): Promise<User> {
     const user = await this.prisma.user.create({
       data,
     });
@@ -40,5 +38,29 @@ export class UsersRepository {
       where: { id },
       data: { password: passwordHash },
     });
+  }
+
+  async storeRefreshToken(tokenHash: string, userId: number, expiresAt: Date) {
+    await this.prisma.refreshToken.create({
+      data: {
+        tokenHash,
+        userId,
+        expiresAt,
+      },
+    });
+  }
+
+  async getRefreshToken(
+    tokenHash: string,
+  ): Promise<RefreshToken | null> {
+    const token = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    });
+    return token ? RefreshToken.from(token) : null;
+  }
+
+  async deleteRefreshToken(tokenHash: string): Promise<void> {
+    await this.prisma.refreshToken.delete({ where: { tokenHash } });
   }
 }

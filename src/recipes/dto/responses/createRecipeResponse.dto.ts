@@ -64,9 +64,7 @@ export class CreateRecipeResponse {
   ) {
     this.id = id;
     this.title = title;
-    if (description !== undefined) {
-      this.description = description;
-    }
+    this.description = description;
     this.servings = servings;
     if (prepTime) {
       this.prepTime = prepTime;

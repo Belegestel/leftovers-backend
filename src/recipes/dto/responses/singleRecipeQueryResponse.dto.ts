@@ -45,6 +45,21 @@ export class SingleRecipeQueryResponse {
   @ApiProperty()
   imageLink: string | undefined;
 
+  @ApiProperty()
+  servings: number;
+
+  @ApiProperty()
+  ratingCount: number;
+
+  @ApiProperty()
+  isBookmarked: boolean;
+
+  @ApiProperty()
+  userRating: number | null;
+
+  @ApiPropertyOptional()
+  isPrivate: boolean | null;
+
   private constructor(
     id: number,
     title: string,
@@ -59,12 +74,15 @@ export class SingleRecipeQueryResponse {
     ingredients: string[],
     steps: string[],
     imageLink: string | undefined,
+    servings: number,
+    ratingCount: number,
+    isBookmarked: boolean,
+    userRating: number | null,
+    isPrivate: boolean | null,
   ) {
     this.id = id;
     this.title = title;
-    if (description !== undefined) {
-      this.description = description;
-    }
+    this.description = description;
     if (prepTime) {
       this.prepTime = prepTime;
     }
@@ -80,6 +98,15 @@ export class SingleRecipeQueryResponse {
     this.steps = steps;
     if (imageLink) {
       this.imageLink = imageLink;
+    }
+
+    this.servings = servings;
+    this.ratingCount = ratingCount;
+    this.isBookmarked = isBookmarked;
+    this.userRating = userRating;
+
+    if (isPrivate) {
+      this.isPrivate = isPrivate;
     }
   }
 
@@ -98,6 +125,11 @@ export class SingleRecipeQueryResponse {
       result.ingredients,
       result.steps,
       result.imageLink,
+      result.servings,
+      result.ratingCount,
+      result.isBookmarked,
+      result.userRating,
+      result.isPrivate,
     );
   }
 }

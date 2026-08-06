@@ -9,9 +9,34 @@ import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { FilesService } from "../files/files.service";
 import { mockFilesService } from "../../test/unit/mocks/mockFilesService";
-import { RateRecipe } from "./dto/rateRecipe.dto";
-import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
+import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
+import { RateRecipe } from "./dto/rateRecipe.dto";
+import { EditRecipe } from "./dto/editRecipe.dto";
+
+const createRecipe = (overrides?: Partial<Recipe>): Recipe => {
+  return {
+    id: 1,
+    title: "Pizza",
+    description: "TastyPizza",
+    category: RecipeCategory.LUNCH,
+    prepTime: 30,
+    servings: 2,
+    ingredients: ["Flour", "Water"],
+    steps: ["mix", "bake"],
+    isPublic: true,
+    ratingCount: 0,
+    isBookmarked: false,
+    createdAt: new Date(),
+    editedAt: new Date(),
+    rating: 1,
+    authorId: 1,
+    imageKey: undefined,
+    userRating: 1,
+    isPrivate: false,
+    ...overrides,
+  } as Recipe;
+};
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -35,24 +60,7 @@ describe("RecipesService", () => {
 
   describe("findAll", () => {
     it("returns only public recipes for guests", async () => {
-      const repoResult: Recipe = {
-        id: 123,
-        title: "Pizza",
-        description: "TastyPizza",
-        category: RecipeCategory.LUNCH,
-        prepTime: 30,
-        servings: 2,
-        ingredients: ["Flour", "Water"],
-        steps: ["mix", "bake"],
-        isPublic: true,
-        ratingCount: 0,
-        isBookmarked: false,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        rating: 1,
-        authorId: 1,
-        imageKey: undefined,
-      };
+      const repoResult = createRecipe();
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll();
 
@@ -63,24 +71,7 @@ describe("RecipesService", () => {
     });
 
     it("returns public recipes and own private recipes for logged in users", async () => {
-      const repoResult: Recipe = {
-        id: 123,
-        title: "Pizza",
-        description: "TastyPizza",
-        category: RecipeCategory.LUNCH,
-        prepTime: 30,
-        servings: 2,
-        ingredients: ["Flour", "Water"],
-        steps: ["mix", "bake"],
-        isPublic: true,
-        isBookmarked: false,
-        ratingCount: 0,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        rating: 1,
-        authorId: 1,
-        imageKey: undefined,
-      };
+      const repoResult = createRecipe();
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(1);
 
@@ -91,84 +82,20 @@ describe("RecipesService", () => {
     });
 
     it("applies category filtering", async () => {
-      const repoResult: Recipe = {
-        id: 123,
-        title: "Pizza",
-        description: "TastyPizza",
-        category: RecipeCategory.LUNCH,
-        prepTime: 30,
-        servings: 2,
-        ingredients: ["Flour", "Water"],
-        steps: ["mix", "bake"],
-        isPublic: true,
-        isBookmarked: false,
-        ratingCount: 0,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        rating: 1,
-        authorId: 1,
-        imageKey: undefined,
-      };
+      const repoResult = createRecipe();
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
-        category: "Lunch",
+        category: "LUNCH",
       } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
         undefined,
-        expect.objectContaining({ category: "LUNCH" }),
-      );
-    });
-
-    it("applies rating filter", async () => {
-      const repoResult: Recipe = {
-        id: 123,
-        title: "Pizza",
-        description: "TastyPizza",
-        category: RecipeCategory.LUNCH,
-        prepTime: 30,
-        servings: 2,
-        ingredients: ["Flour", "Water"],
-        steps: ["mix", "bake"],
-        isPublic: true,
-        isBookmarked: false,
-        ratingCount: 0,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        rating: 1,
-        authorId: 1,
-        imageKey: undefined,
-      };
-      mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
-      await service.findAll(undefined, {
-        rating: 4,
-      });
-
-      expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
-        undefined,
-        expect.objectContaining({ rating: 4 }),
+        expect.objectContaining({ category: ["LUNCH"] }),
       );
     });
 
     it("applies title search", async () => {
-      const repoResult: Recipe = {
-        id: 123,
-        title: "Pizza",
-        description: "TastyPizza",
-        category: RecipeCategory.LUNCH,
-        prepTime: 30,
-        servings: 2,
-        ingredients: ["Flour", "Water"],
-        steps: ["mix", "bake"],
-        isPublic: true,
-        isBookmarked: false,
-        ratingCount: 0,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        rating: 1,
-        authorId: 1,
-        imageKey: undefined,
-      };
+      const repoResult = createRecipe();
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
         title: "cake",
@@ -181,24 +108,7 @@ describe("RecipesService", () => {
     });
 
     it("applies multiple search conditions", async () => {
-      const repoResult: Recipe = {
-        id: 123,
-        title: "Pizza",
-        description: "TastyPizza",
-        category: RecipeCategory.LUNCH,
-        prepTime: 30,
-        servings: 2,
-        ingredients: ["Flour", "Water"],
-        steps: ["mix", "bake"],
-        isPublic: true,
-        isBookmarked: false,
-        ratingCount: 0,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        rating: 1,
-        authorId: 1,
-        imageKey: undefined,
-      };
+      const repoResult = createRecipe();
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
         title: "cake",
@@ -220,25 +130,9 @@ describe("RecipesService", () => {
         servings: 2,
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
-      };
-      const repoResult: Recipe = {
-        id: 123,
-        title: "Pizza",
-        description: "TastyPizza",
-        category: RecipeCategory.LUNCH,
-        prepTime: 30,
-        servings: 2,
-        ingredients: ["Flour", "Water"],
-        steps: ["mix", "bake"],
         isPublic: true,
-        isBookmarked: false,
-        ratingCount: 0,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        rating: 1,
-        authorId: 1,
-        imageKey: undefined,
       };
+      const repoResult = createRecipe();
 
       mockRecipesRepository.create.mockResolvedValue(repoResult);
       const result = await service.createRecipe(1, dto);
@@ -251,6 +145,7 @@ describe("RecipesService", () => {
         ["Flour", "Water"],
         ["mix", "bake"],
         1,
+        true,
       );
       expect(result).toEqual(CreateRecipeResult.from(repoResult));
     });
@@ -262,34 +157,28 @@ describe("RecipesService", () => {
   });
 
   it("throws ForbiddenException when accesing another user's private recipe", async () => {
-    mockRecipesRepository.findById.mockResolvedValue({
-      id: 1,
-      isPublic: false,
-      authorId: 2,
-    });
+    mockRecipesRepository.findById.mockResolvedValue(
+      createRecipe({ authorId: 2, isPublic: false }),
+    );
     await expect(service.findById(1, 1)).rejects.toThrow(
       "You do not have access to this recipe",
     );
   });
 
   it("returns a public recipe for a guest", async () => {
-    mockRecipesRepository.findById.mockResolvedValue({
-      id: 1,
-      isPublic: true,
-      authorId: 2,
-    });
+    mockRecipesRepository.findById.mockResolvedValue(
+      createRecipe({ authorId: 2 }),
+    );
     const result = await service.findById(1, undefined);
-    expect(result).toEqual({ id: 1, isPublic: true, authorId: 2 });
+    expect(result).toMatchObject({ id: 1, isPublic: true, authorId: 2 });
   });
 
   it("returns a private recipe when the user is the owner", async () => {
-    mockRecipesRepository.findById.mockResolvedValue({
-      id: 1,
-      isPublic: false,
-      authorId: 1,
-    });
+    mockRecipesRepository.findById.mockResolvedValue(
+      createRecipe({ isPublic: false }),
+    );
     const result = await service.findById(1, 1);
-    expect(result).toEqual({ id: 1, isPublic: false, authorId: 1 });
+    expect(result).toMatchObject({ id: 1, isPublic: false, authorId: 1 });
   });
 
   describe("bookmarkRecipe", () => {
@@ -339,6 +228,23 @@ describe("RecipesService", () => {
         dto.userId,
         dto.value,
       );
+    });
+  });
+
+  describe("editRecipe", () => {
+    it("delegates a recipe edit to the repository", async () => {
+      const dto: EditRecipe = { userId: 1, recipeId: 2, isPublic: true };
+      await service.editRecipe(dto);
+      expect(mockRecipesRepository.editRecipe).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 1, recipeId: 2, isPublic: true }),
+      );
+    });
+  });
+
+  describe("deleteRecipe", () => {
+    it("delegates a recipe deletion to the repository", async () => {
+      await service.deleteRecipe(0, 1);
+      expect(mockRecipesRepository.deleteRecipe).toHaveBeenCalledWith(0, 1);
     });
   });
 });

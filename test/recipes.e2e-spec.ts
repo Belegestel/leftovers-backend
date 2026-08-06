@@ -244,6 +244,7 @@ describe("Recipes E2E", () => {
       servings: 2,
       ingredients: ["flour", "water"],
       steps: ["mix", "bake"],
+      isPublic: true,
     };
     const response = await request(app.getHttpServer())
       .post("/recipes")
@@ -478,7 +479,6 @@ describe("Recipes E2E", () => {
     expect(
       response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
     ).toBe(true);
-
 
     const resp = await request(app.getHttpServer())
       .post(`/recipes/${recipe.id}/unbookmark`)

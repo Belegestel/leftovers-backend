@@ -10,11 +10,19 @@ export class LoginResponse {
   @IsString()
   accessToken: string;
 
-  private constructor(accessToken: string) {
+  @ApiProperty({
+    example: "VGzaxSmzmSKULOLvrHrdFDCjHQywmd",
+    description: "Refresh token",
+  })
+  @IsString()
+  refreshToken: string;
+
+  private constructor(accessToken: string, refreshToken: string) {
     this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
   }
 
   static from(loginResult: LoginResult): LoginResponse {
-    return new LoginResponse(loginResult.accessToken);
+    return new LoginResponse(loginResult.accessToken, loginResult.refreshToken);
   }
 }

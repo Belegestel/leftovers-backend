@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { RecipeQueryRequest } from "./requests/recipeQueryRequest.dto";
 import { categoryFromString, RecipeCategory } from "../recipe-categories.enum";
 
@@ -7,16 +7,13 @@ export class RecipeQueryFilters {
   userId?: number;
   // Filter
   @ApiPropertyOptional()
-  category?: RecipeCategory;
+  category?: RecipeCategory[];
 
-  @ApiPropertyOptional()
-  rating?: number;
+  @ApiProperty()
+  ratingOrderIncr: boolean;
 
-  @ApiPropertyOptional()
-  startDate?: Date;
-
-  @ApiPropertyOptional()
-  endDate?: Date;
+  @ApiProperty()
+  dateOrderIncr: boolean;
 
   // Search
   @ApiPropertyOptional()
@@ -31,67 +28,58 @@ export class RecipeQueryFilters {
   @ApiPropertyOptional()
   steps?: string;
 
-  @ApiPropertyOptional({ example: "true" })
-  details?: boolean;
+  @ApiProperty({ example: "true" })
+  details: boolean;
+
+  @ApiProperty()
+  saved: boolean;
+
+  @ApiProperty()
+  authored: boolean;
 
   private constructor(
     userId?: number,
     category?: string,
-    rating?: number,
-    startDate?: Date,
-    endDate?: Date,
+    ratingOrderIncr?: boolean,
+    dateOrderIncr?: boolean,
     title?: string,
     description?: string,
     ingredients?: string,
     steps?: string,
     details?: boolean,
+    saved?: boolean,
+    authored?: boolean,
   ) {
-    if (userId !== undefined) {
-      this.userId = userId;
-    }
+    this.userId = userId;
     if (category) {
-      this.category = categoryFromString(category);
+      this.category = category.split(",").map((c) => categoryFromString(c));
     }
-    if (rating !== undefined) {
-      this.rating = rating;
-    }
-    if (startDate !== undefined) {
-      this.startDate = startDate;
-    }
-    if (endDate !== undefined) {
-      this.endDate = endDate;
-    }
-    if (title !== undefined) {
-      this.title = title;
-    }
-    if (description !== undefined) {
-      this.description = description;
-    }
-    if (ingredients !== undefined) {
-      this.ingredients = ingredients;
-    }
-    if (steps !== undefined) {
-      this.steps = steps;
-    }
-    if (details !== undefined) {
-      this.details = details;
-    }
+    this.ratingOrderIncr = ratingOrderIncr ?? false;
+    this.dateOrderIncr = dateOrderIncr ?? false;
+    this.title = title;
+    this.description = description;
+    this.ingredients = ingredients;
+    this.steps = steps;
+    this.details = details ?? false;
+    this.saved = saved ?? false;
+    this.authored = authored ?? false;
   }
   static from(
     userId: number | undefined,
     recipeQueryRequest: RecipeQueryRequest | undefined,
   ): RecipeQueryFilters {
     return new RecipeQueryFilters(
-       userId,
-       recipeQueryRequest?.category,
-       recipeQueryRequest?.rating,
-       recipeQueryRequest?.startDate,
-       recipeQueryRequest?.endDate,
-       recipeQueryRequest?.title,
-       recipeQueryRequest?.description,
-       recipeQueryRequest?.ingredients,
-       recipeQueryRequest?.steps,
-       recipeQueryRequest?.details,
-    )
+      userId,
+      recipeQueryRequest?.category,
+      recipeQueryRequest?.ratingOrderIncr,
+      recipeQueryRequest?.dateOrderIncr,
+      recipeQueryRequest?.title,
+      recipeQueryRequest?.description,
+      recipeQueryRequest?.ingredients,
+      recipeQueryRequest?.steps,
+      recipeQueryRequest?.details,
+      recipeQueryRequest?.saved,
+      recipeQueryRequest?.authored,
+    );
   }
 }

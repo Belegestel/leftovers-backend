@@ -16,10 +16,14 @@ import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { RecipeImageUploadUrl } from "./dto/recipeImageUploadUrl.dto";
-import { allRecipeCategories } from "./recipe-categories.enum";
+import {
+  allRecipeCategories,
+} from "./recipe-categories.enum";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
+import { EditRecipe } from "./dto/editRecipe.dto";
+import { SingleCategory } from "./dto/responses/categoriesResponse.dto";
 
 @Injectable()
 export class RecipesService {
@@ -60,6 +64,7 @@ export class RecipesService {
       dto.ingredients,
       dto.steps,
       userId,
+      dto.isPublic,
     );
     return CreateRecipeResult.from(recipe);
   }
@@ -68,7 +73,7 @@ export class RecipesService {
     id: number,
     userId?: number,
   ): Promise<SingleRecipeQueryResult> {
-    const recipe = await this.recipesRepository.findById(id);
+    const recipe = await this.recipesRepository.findById(id, userId);
     if (!recipe) {
       throw new NotFoundException("Recipe not found");
     }
@@ -125,7 +130,7 @@ export class RecipesService {
     return imageUrl;
   }
 
-  async getRecipeCategories(): Promise<string[]> {
+  async getRecipeCategories(): Promise<SingleCategory[]> {
     return allRecipeCategories;
   }
 
@@ -143,5 +148,13 @@ export class RecipesService {
       dto.userId,
       dto.value,
     );
+  }
+
+  async editRecipe(dto: EditRecipe): Promise<boolean> {
+    return await this.recipesRepository.editRecipe(dto);
+  }
+
+  async deleteRecipe(recipeId: number, userId: number): Promise<boolean> {
+    return await this.recipesRepository.deleteRecipe(recipeId, userId);
   }
 }

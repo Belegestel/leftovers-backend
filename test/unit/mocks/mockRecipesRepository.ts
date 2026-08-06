@@ -5,4 +5,6 @@ export const mockRecipesRepository = {
   rateRecipe: jest.fn(),
   bookmarkRecipe: jest.fn(),
   unbookmarkRecipe: jest.fn(),
+  editRecipe: jest.fn(),
+  deleteRecipe: jest.fn(),
 };

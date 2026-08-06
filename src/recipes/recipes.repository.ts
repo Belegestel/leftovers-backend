@@ -1,9 +1,15 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { RecipeWhereInput } from "../generated/prisma/models";
 import { Recipe } from "./recipes.model";
-import { RecipeCategory, prismaFromCategory } from "./recipe-categories.enum";
+import {
+  RecipeCategory,
+  categoryFromString,
+  prismaFromCategory,
+} from "./recipe-categories.enum";
+import { RecipeQueryFilters } from "./dto/recipeQueryFilters.dto";
+import { Prisma } from "../generated/prisma/client";
+import { EditRecipe } from "./dto/editRecipe.dto";
 import { RecipesCacheService } from "./recipes-cache.service";
 
 @Injectable()
@@ -15,37 +21,60 @@ export class RecipesRepository {
 
   async findAll(
     userId?: number,
-    recipeQuery?: RecipeQueryRequest,
+    recipeQuery?: RecipeQueryFilters,
   ): Promise<Recipe[]> {
     const cacheResult = await this.cacheService.findAll(userId, recipeQuery);
     if (cacheResult) {
       return cacheResult;
     }
-    const categoryList = recipeQuery?.category
-      ? recipeQuery?.category
-          ?.split(",")
-          .map((c) => c.trim().toUpperCase() as RecipeCategory)
-      : undefined;
+    const categoryList = recipeQuery?.category?.length
+      ? recipeQuery.category.map((c) => categoryFromString(c)) : undefined;
 
     const searchConditions: RecipeWhereInput[] = [];
-    if (recipeQuery?.title) {
+
+    if (recipeQuery?.description && recipeQuery?.title) {
       searchConditions.push({
-        title: { contains: recipeQuery.title, mode: "insensitive" },
+        OR: [
+          { title: { contains: recipeQuery.title, mode: "insensitive" } },
+          {
+            description: {
+              contains: recipeQuery.description,
+              mode: "insensitive",
+            },
+          },
+        ],
       });
+    } else {
+      if (recipeQuery?.title) {
+        searchConditions.push({
+          title: { contains: recipeQuery.title, mode: "insensitive" },
+        });
+      }
+
+      if (recipeQuery?.description) {
+        searchConditions.push({
+          description: {
+            contains: recipeQuery.description,
+            mode: "insensitive",
+          },
+        });
+      }
     }
-    if (recipeQuery?.description) {
-      searchConditions.push({
-        description: { contains: recipeQuery.description, mode: "insensitive" },
-      });
-    }
+
     if (recipeQuery?.ingredients) {
       searchConditions.push({
         ingredients: { hasSome: recipeQuery.ingredients.split(",") },
       });
     }
+
     if (recipeQuery?.steps) {
       searchConditions.push({
         steps: { hasSome: recipeQuery.steps.split(",") },
+      });
+    }
+    if (recipeQuery?.authored && userId !== undefined) {
+      searchConditions.push({
+        authorId: userId, 
       });
     }
 
@@ -58,20 +87,32 @@ export class RecipesRepository {
     if (categoryList?.length) {
       conditions.push({ category: { in: categoryList } });
     }
-    if (recipeQuery?.startDate || recipeQuery?.endDate) {
+
+    if (categoryList?.length) {
       conditions.push({
-        createdAt: { gte: recipeQuery.startDate, lte: recipeQuery.endDate },
+        category: { in: categoryList },
       });
     }
+
     if (searchConditions.length) {
-      conditions.push({ OR: searchConditions });
+      conditions.push({
+        OR: searchConditions,
+      });
+    }
+
+    const orderBy: Prisma.RecipeOrderByWithRelationInput[] = [];
+
+    if (recipeQuery?.dateOrderIncr !== undefined) {
+      orderBy.push({
+        createdAt: recipeQuery.dateOrderIncr ? "desc" : "asc",
+      });
     }
 
     const result = await this.prisma.recipe.findMany({
       where: {
         AND: conditions,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
       include: {
         ratings: true,
         savedBy: userId
@@ -82,16 +123,26 @@ export class RecipesRepository {
           : false,
       },
     });
-    const result_filtered = result
+
+    const resultFiltered = result
       .map((value) =>
         Recipe.fromPrisma(value, userId ? value.savedBy.length > 0 : false),
       )
       .filter((recipe: Recipe) =>
-        recipeQuery?.rating ? recipe.rating >= recipeQuery.rating : true,
-      );
-
-    this.cacheService.setFindAll(result_filtered, userId, recipeQuery);
-    return result_filtered;
+        recipeQuery?.saved === undefined
+          ? true
+          : recipe.isBookmarked === recipeQuery.saved,
+      )
+      .sort((a, b) => {
+        if (recipeQuery?.ratingOrderIncr !== undefined) {
+          return recipeQuery.ratingOrderIncr
+            ? a.rating - b.rating
+            : b.rating - a.rating;
+        }
+        return 0;
+      });
+    this.cacheService.setFindAll(resultFiltered, userId, recipeQuery);
+    return resultFiltered;
   }
 
   async create(
@@ -103,6 +154,7 @@ export class RecipesRepository {
     ingredients: string[],
     steps: string[],
     userId: number,
+    isPublic: boolean,
   ): Promise<Recipe> {
     const recipe = await this.prisma.recipe.create({
       data: {
@@ -115,11 +167,10 @@ export class RecipesRepository {
         steps,
         authorId: userId,
         imageKey: undefined,
+        isPublic,
       },
     });
-
     await this.cacheService.invalidateRecipeCache();
-
     return Recipe.fromPrisma(recipe);
   }
 
@@ -127,7 +178,11 @@ export class RecipesRepository {
     const recipe = await this.prisma.recipe.findUnique({
       where: { id },
       include: {
-        ratings: true,
+        ratings: {
+          select: {
+            value: true,
+          },
+        },
         savedBy: userId
           ? {
               where: { id: userId },
@@ -136,12 +191,28 @@ export class RecipesRepository {
           : false,
       },
     });
-    const isBookmarked = userId
-      ? recipe?.savedBy?.length
-        ? recipe.savedBy.length > 0
-        : false
-      : false;
-    return recipe ? Recipe.fromPrisma(recipe, isBookmarked) : null;
+
+    if (!recipe) {
+      return null;
+    }
+
+    const isBookmarked = userId ? recipe.savedBy.length > 0 : false;
+
+    const userRating = userId
+      ? ((
+          await this.prisma.recipeRating.findFirst({
+            where: {
+              recipeId: id,
+              userId,
+            },
+            select: {
+              value: true,
+            },
+          })
+        )?.value ?? null)
+      : null;
+
+    return Recipe.fromPrisma(recipe, isBookmarked, userRating);
   }
 
   async updateImageKey(recipeId: number, key: string) {
@@ -251,5 +322,32 @@ export class RecipesRepository {
       },
     });
     this.cacheService.invalidateRecipeCache();
+  }
+
+  async editRecipe(dto: EditRecipe): Promise<boolean> {
+    const recipe = await this.prisma.recipe.update({
+      where: { id: dto.recipeId, authorId: dto.userId },
+      data: {
+        title: dto.title,
+        description: dto.description,
+        category: dto.category,
+        prepTime: dto.prepTime,
+        servings: dto.servings,
+        ingredients: dto.ingredients,
+        steps: dto.steps,
+        isPublic: dto.isPublic,
+      },
+    });
+    if (recipe) {
+      return true;
+    }
+    return false;
+  }
+
+  async deleteRecipe(recipeId: number, userId: number): Promise<boolean> {
+    const recipe = await this.prisma.recipe.delete({
+      where: { id: recipeId, authorId: userId },
+    });
+    return !!recipe;
   }
 }

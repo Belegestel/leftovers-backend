@@ -47,6 +47,8 @@ describe("RecipesRepository", () => {
           ingredients: [],
           steps: [],
           imageKey: "key",
+          userRating: 0,
+          isPrivate: true,
         },
       ];
       mockCacheService.findAll.mockResolvedValue(cachedRecipes);
@@ -95,7 +97,7 @@ describe("RecipesRepository", () => {
       mockPrismaService.recipe.findMany.mockResolvedValue([]);
 
       await repository.findAll(undefined, {
-        category: "Lunch",
+        category: [RecipeCategory.LUNCH],
       });
 
       expect(mockPrismaService.recipe.findMany).toHaveBeenCalledWith(
@@ -159,6 +161,7 @@ describe("RecipesRepository", () => {
         [],
         [],
         1,
+        true,
       );
 
       expect(mockPrismaService.recipe.create).toHaveBeenCalled();

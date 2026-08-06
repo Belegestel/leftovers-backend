@@ -1,6 +1,7 @@
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -12,6 +13,7 @@ import {
 } from "class-validator";
 import { RecipeCategory } from "../../recipe-categories.enum";
 import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 
 export class CreateRecipeRequest {
   @IsString()
@@ -56,4 +58,9 @@ export class CreateRecipeRequest {
   @IsNotEmpty({ each: true })
   @ApiProperty()
   steps: string[];
+
+  @ApiProperty()
+  @Transform(({ value }) => value === "true" || value === true)
+  @IsBoolean()
+  isPublic: boolean;
 }

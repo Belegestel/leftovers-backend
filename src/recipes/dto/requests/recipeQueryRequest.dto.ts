@@ -1,13 +1,7 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { Transform, Type } from "class-transformer";
-import {
-  IsOptional,
-  IsString,
-  IsInt,
-  Min,
-  Max,
-  IsBoolean,
-} from "class-validator";
+import { Transform } from "class-transformer";
+import { IsOptional, IsString, IsBoolean } from "class-validator";
+import { ToBoolean } from "../../../common/toBoolean";
 
 export class RecipeQueryRequest {
   // Filter
@@ -15,24 +9,6 @@ export class RecipeQueryRequest {
   @IsOptional()
   @IsString()
   category?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  @Max(5)
-  rating?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Date)
-  startDate?: Date;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Date)
-  endDate?: Date;
 
   // Search
   @ApiPropertyOptional()
@@ -57,7 +33,28 @@ export class RecipeQueryRequest {
 
   @ApiPropertyOptional({ example: "true" })
   @IsOptional()
-  @Transform(({ value }) => value === "true")
+  @ToBoolean()
   @IsBoolean()
   details?: boolean;
+
+  @ApiPropertyOptional({ example: "true" })
+  @IsOptional()
+  @ToBoolean()
+  @IsBoolean()
+  saved?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  dateOrderIncr?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  ratingOrderIncr?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  authored?: boolean;
 }

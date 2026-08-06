@@ -1,8 +1,8 @@
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Inject, Injectable } from "@nestjs/common";
-import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import type { Cache } from "cache-manager";
 import { Recipe } from "./recipes.model";
+import { RecipeQueryFilters } from "./dto/recipeQueryFilters.dto";
 
 @Injectable()
 export class RecipesCacheService {
@@ -27,7 +27,7 @@ export class RecipesCacheService {
 
   async findAll(
     userId?: number,
-    query?: RecipeQueryRequest,
+    query?: RecipeQueryFilters,
   ): Promise<Recipe[] | undefined> {
     const key = this.getRecipeCacheKey(userId, query);
     return await this.withTimeout(this.cache.get(key));
@@ -36,7 +36,7 @@ export class RecipesCacheService {
   async setFindAll(
     value: Recipe[],
     userId?: number,
-    query?: RecipeQueryRequest,
+    query?: RecipeQueryFilters,
   ): Promise<void> {
     const key = this.getRecipeCacheKey(userId, query);
     await this.withTimeout(this.cache.set(key, value));
@@ -73,7 +73,7 @@ export class RecipesCacheService {
 
   private getRecipeCacheKey(
     userId?: number,
-    filters?: RecipeQueryRequest,
+    filters?: RecipeQueryFilters,
   ): string {
     return `recipes:${userId ?? "anonymous"}:${JSON.stringify(filters ?? {})}`;
   }
