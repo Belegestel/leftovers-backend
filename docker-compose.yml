@@ -25,11 +25,10 @@ services:
       - leftovers-network
 
   redis:
-    image: redis/redis-stack
+    image: redis:8.10-trixie
     restart: always
     ports:
       - "6379:6379"
-      - "8001:8001"
     networks:
       - leftovers-network
 
