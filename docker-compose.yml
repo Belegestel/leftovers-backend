@@ -24,6 +24,13 @@ services:
     networks:
       - leftovers-network
 
+  redis:
+    image: redis:8.10-trixie
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - leftovers-network
 
 volumes:
   leftovers-database-volume:

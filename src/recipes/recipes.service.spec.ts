@@ -9,11 +9,15 @@ import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { FilesService } from "../files/files.service";
 import { mockFilesService } from "../../test/unit/mocks/mockFilesService";
+import { RateRecipe } from "./dto/rateRecipe.dto";
+import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
+import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 
 describe("RecipesService", () => {
   let service: RecipesService;
 
   beforeEach(async () => {
+    jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecipesService,
@@ -23,7 +27,10 @@ describe("RecipesService", () => {
     }).compile();
 
     service = module.get<RecipesService>(RecipesService);
-    jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    jest.resetAllMocks();
   });
 
   describe("findAll", () => {
@@ -38,6 +45,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        ratingCount: 0,
+        isBookmarked: false,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -64,6 +73,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -90,6 +101,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -118,6 +131,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -146,6 +161,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -174,6 +191,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -212,6 +231,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,

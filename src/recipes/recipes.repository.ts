@@ -4,15 +4,23 @@ import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { RecipeWhereInput } from "../generated/prisma/models";
 import { Recipe } from "./recipes.model";
 import { RecipeCategory, prismaFromCategory } from "./recipe-categories.enum";
+import { RecipesCacheService } from "./recipes-cache.service";
 
 @Injectable()
 export class RecipesRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cacheService: RecipesCacheService,
+  ) {}
 
   async findAll(
     userId?: number,
     recipeQuery?: RecipeQueryRequest,
   ): Promise<Recipe[]> {
+    const cacheResult = await this.cacheService.findAll(userId, recipeQuery);
+    if (cacheResult) {
+      return cacheResult;
+    }
     const categoryList = recipeQuery?.category
       ? recipeQuery?.category
           ?.split(",")
@@ -41,7 +49,7 @@ export class RecipesRepository {
       });
     }
 
-    let conditions: RecipeWhereInput[] = [];
+    const conditions: RecipeWhereInput[] = [];
     if (userId) {
       conditions.push({ OR: [{ isPublic: true }, { authorId: userId }] });
     } else {
@@ -81,6 +89,8 @@ export class RecipesRepository {
       .filter((recipe: Recipe) =>
         recipeQuery?.rating ? recipe.rating >= recipeQuery.rating : true,
       );
+
+    this.cacheService.setFindAll(result_filtered, userId, recipeQuery);
     return result_filtered;
   }
 
@@ -107,6 +117,8 @@ export class RecipesRepository {
         imageKey: undefined,
       },
     });
+
+    await this.cacheService.invalidateRecipeCache();
 
     return Recipe.fromPrisma(recipe);
   }
@@ -137,6 +149,7 @@ export class RecipesRepository {
       where: { id: recipeId },
       data: { imageKey: key },
     });
+    await this.cacheService.invalidateRecipeCache();
     return recipe ? Recipe.fromPrisma(recipe) : null;
   }
 
@@ -156,6 +169,7 @@ export class RecipesRepository {
       where: { id: userId },
       data: { savedRecipes: { connect: { id: recipeId } } },
     });
+    await this.cacheService.invalidateRecipeCache(userId);
   }
 
   async unbookmarkRecipe(recipeId: number, userId: number) {
@@ -183,7 +197,7 @@ export class RecipesRepository {
         savedRecipes: true,
       },
     });
-
+    await this.cacheService.invalidateRecipeCache(userId);
     return result;
   }
 
@@ -236,5 +250,6 @@ export class RecipesRepository {
         value,
       },
     });
+    this.cacheService.invalidateRecipeCache();
   }
 }
