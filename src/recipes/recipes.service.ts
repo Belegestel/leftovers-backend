@@ -22,8 +22,8 @@ import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import type { Cache } from "cache-manager";
 import { Recipe } from "./recipes.model";
+import { RecipesCacheService } from "./recipes-cache.service";
 
 @Injectable()
 export class RecipesService {
@@ -33,39 +33,21 @@ export class RecipesService {
     private readonly recipesRepository: RecipesRepository,
     private readonly filesService: FilesService,
     @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache,
+    private readonly cacheService: RecipesCacheService,
   ) {}
-
-  private getRecipeCacheKey(
-    userId?: number,
-    filters?: RecipeQueryRequest,
-  ): string {
-    return `recipes:${userId ?? "anonymous"}:${JSON.stringify(filters ?? {})}`;
-  }
 
   async findAll(
     userId?: number,
     filters?: RecipeQueryRequest,
   ): Promise<RecipeQueryResult> {
-    const cacheKey = this.getRecipeCacheKey(userId, filters);
-
-    let result = await this.cacheManager.get<Recipe[]>(cacheKey);
+    let result = await this.cacheService.findAll(userId, filters);
 
     if (!result) {
       const input = RecipeQueryFilters.from(userId, filters);
 
       result = await this.recipesRepository.findAll(userId, input);
 
-      await this.cacheManager.set(cacheKey, result);
-      const cacheKeys =
-        (await this.cacheManager.get<string[]>(this.recipeCacheIndexKey)) ?? [];
-
-      if (!cacheKeys.includes(cacheKey)) {
-        await this.cacheManager.set(this.recipeCacheIndexKey, [
-          ...cacheKeys,
-          cacheKey,
-        ]);
-      }
+      await this.cacheService.setFindAll(result, userId, filters);
     }
 
     const links = await Promise.all(
@@ -77,25 +59,6 @@ export class RecipesService {
     );
 
     return RecipeQueryResult.from(result, links);
-  }
-
-  private async invalidateRecipeCache(userId?: number): Promise<void> {
-    const cachedKeys =
-      (await this.cacheManager.get<string[]>(this.recipeCacheIndexKey)) ?? [];
-
-    const keysToDelete = cachedKeys.filter((key) =>
-      userId === undefined
-        ? key.startsWith("recipes:")
-        : key.startsWith(`recipes:${userId}:`),
-    );
-
-    await Promise.all(keysToDelete.map((key) => this.cacheManager.del(key)));
-
-    const remainingKeys = cachedKeys.filter(
-      (key) => !keysToDelete.includes(key),
-    );
-
-    await this.cacheManager.set(this.recipeCacheIndexKey, remainingKeys);
   }
 
   async createRecipe(
@@ -112,7 +75,7 @@ export class RecipesService {
       dto.steps,
       userId,
     );
-    await this.invalidateRecipeCache();
+    await this.cacheService.invalidateRecipeCache();
     return CreateRecipeResult.from(recipe);
   }
 
@@ -174,7 +137,7 @@ export class RecipesService {
     }
     await this.recipesRepository.updateImageKey(id, key);
     const imageUrl = await this.filesService.createPresignedGetUrl(key);
-    await this.invalidateRecipeCache();
+    await this.cacheService.invalidateRecipeCache();
     return imageUrl;
   }
 
@@ -184,12 +147,12 @@ export class RecipesService {
 
   async bookmarkRecipe(dto: BookmarkRecipe): Promise<void> {
     await this.recipesRepository.bookmarkRecipe(dto.recipeId, dto.userId);
-    await this.invalidateRecipeCache(dto.userId);
+    await this.cacheService.invalidateRecipeCache(dto.userId);
   }
 
   async unbookmarkRecipe(dto: UnbookmarkRecipe): Promise<void> {
     await this.recipesRepository.unbookmarkRecipe(dto.recipeId, dto.userId);
-    await this.invalidateRecipeCache(dto.userId);
+    await this.cacheService.invalidateRecipeCache(dto.userId);
   }
 
   async rateRecipe(dto: RateRecipe): Promise<void> {
@@ -198,6 +161,6 @@ export class RecipesService {
       dto.userId,
       dto.value,
     );
-    await this.invalidateRecipeCache();
+    await this.cacheService.invalidateRecipeCache();
   }
 }
