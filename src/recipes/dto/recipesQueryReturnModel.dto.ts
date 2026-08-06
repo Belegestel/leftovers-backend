@@ -12,7 +12,7 @@ export class RecipesQueryReturnModel {
   @ApiPropertyOptional()
   prepTime?: number;
   @ApiPropertyOptional()
-  isPublic?: boolean;
+  isPublic: boolean;
   @ApiPropertyOptional()
   authorId?: number;
   @ApiPropertyOptional()
@@ -36,7 +36,7 @@ export class RecipesQueryReturnModel {
   @ApiProperty()
   isBookmarked: boolean;
   @ApiPropertyOptional()
-  isPrivate?: boolean;
+  isPrivate: boolean;
 
   private constructor(
     recipe: Recipe,
@@ -53,7 +53,7 @@ export class RecipesQueryReturnModel {
       this.description = recipe.description;
       this.imageLink = imageLink;
       this.isBookmarked = recipe.isBookmarked;
-      this.isPrivate = recipe.isPrivate;
+      this.isPrivate = recipe.isPrivate ?? false;
     } else {
       this.id = recipe.id;
       this.title = recipe.title;
@@ -71,7 +71,7 @@ export class RecipesQueryReturnModel {
       this.steps = recipe.steps;
       this.imageLink = imageLink;
       this.isBookmarked = recipe.isBookmarked;
-      this.isPrivate = recipe.isPrivate;
+      this.isPrivate = recipe.isPrivate ?? false;
     }
   }
 

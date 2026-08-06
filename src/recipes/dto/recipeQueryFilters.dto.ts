@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { RecipeQueryRequest } from "./requests/recipeQueryRequest.dto";
 import { categoryFromString, RecipeCategory } from "../recipe-categories.enum";
 
@@ -9,11 +9,11 @@ export class RecipeQueryFilters {
   @ApiPropertyOptional()
   category?: RecipeCategory[];
 
-  @ApiPropertyOptional()
-  ratingOrderIncr?: boolean;
+  @ApiProperty()
+  ratingOrderIncr: boolean;
 
-  @ApiPropertyOptional()
-  dateOrderIncr?: boolean;
+  @ApiProperty()
+  dateOrderIncr: boolean;
 
   // Search
   @ApiPropertyOptional()
@@ -28,14 +28,14 @@ export class RecipeQueryFilters {
   @ApiPropertyOptional()
   steps?: string;
 
-  @ApiPropertyOptional({ example: "true" })
-  details?: boolean;
+  @ApiProperty({ example: "true" })
+  details: boolean;
 
-  @ApiPropertyOptional()
-  saved?: boolean;
+  @ApiProperty()
+  saved: boolean;
 
-  @ApiPropertyOptional()
-  authored?: boolean;
+  @ApiProperty()
+  authored: boolean;
 
   private constructor(
     userId?: number,
@@ -54,15 +54,15 @@ export class RecipeQueryFilters {
     if (category) {
       this.category = category.split(",").map((c) => categoryFromString(c));
     }
-    this.ratingOrderIncr = ratingOrderIncr;
-    this.dateOrderIncr = dateOrderIncr;
+    this.ratingOrderIncr = ratingOrderIncr ?? false;
+    this.dateOrderIncr = dateOrderIncr ?? false;
     this.title = title;
     this.description = description;
     this.ingredients = ingredients;
     this.steps = steps;
-    this.details = details;
-    this.saved = saved;
-    this.authored = authored;
+    this.details = details ?? false;
+    this.saved = saved ?? false;
+    this.authored = authored ?? false;
   }
   static from(
     userId: number | undefined,

@@ -11,7 +11,7 @@ export class EditRecipe {
   servings?: number;
   ingredients?: string[];
   steps?: string[];
-  isPublic?: boolean;
+  isPublic: boolean;
 
   private constructor(
     recipeId: number,
@@ -34,7 +34,7 @@ export class EditRecipe {
       this.servings = servings;
       this.ingredients = ingredients;
       this.steps = steps;
-      this.isPublic = isPublic;
+      this.isPublic = isPublic ?? false;
   }
 
   static from(recipeId: number, dto: EditRecipeRequest, userId: number): EditRecipe {

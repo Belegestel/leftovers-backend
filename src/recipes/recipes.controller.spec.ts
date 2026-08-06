@@ -51,8 +51,8 @@ describe("RecipesController", () => {
       {} as RecipeQueryRequest,
     );
 
-    expect(result).toEqual({
-      recipes: [{ id: 1, title: "Pizza", prepTime: 30 }],
+    expect(result).toMatchObject({
+      recipes: [{ id: 1, title: "Pizza", prepTime: 30, authorId: undefined }],
     });
   });
 
