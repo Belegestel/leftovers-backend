@@ -20,29 +20,21 @@ import { allRecipeCategories } from "./recipe-categories.enum";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
-import { RecipesCacheService } from "./recipes-cache.service";
 
 @Injectable()
 export class RecipesService {
   constructor(
     private readonly recipesRepository: RecipesRepository,
     private readonly filesService: FilesService,
-    private readonly cacheService: RecipesCacheService,
   ) {}
 
   async findAll(
     userId?: number,
     filters?: RecipeQueryRequest,
   ): Promise<RecipeQueryResult> {
-    let result = await this.cacheService.findAll(userId, filters);
+    const input = RecipeQueryFilters.from(userId, filters);
 
-    if (!result) {
-      const input = RecipeQueryFilters.from(userId, filters);
-
-      result = await this.recipesRepository.findAll(userId, input);
-
-      await this.cacheService.setFindAll(result, userId, filters);
-    }
+    const result = await this.recipesRepository.findAll(userId, input);
 
     const links = await Promise.all(
       result.map(async (value) =>
@@ -69,7 +61,6 @@ export class RecipesService {
       dto.steps,
       userId,
     );
-    await this.cacheService.invalidateRecipeCache();
     return CreateRecipeResult.from(recipe);
   }
 
@@ -131,7 +122,6 @@ export class RecipesService {
     }
     await this.recipesRepository.updateImageKey(id, key);
     const imageUrl = await this.filesService.createPresignedGetUrl(key);
-    await this.cacheService.invalidateRecipeCache();
     return imageUrl;
   }
 
@@ -141,12 +131,10 @@ export class RecipesService {
 
   async bookmarkRecipe(dto: BookmarkRecipe): Promise<void> {
     await this.recipesRepository.bookmarkRecipe(dto.recipeId, dto.userId);
-    await this.cacheService.invalidateRecipeCache(dto.userId);
   }
 
   async unbookmarkRecipe(dto: UnbookmarkRecipe): Promise<void> {
     await this.recipesRepository.unbookmarkRecipe(dto.recipeId, dto.userId);
-    await this.cacheService.invalidateRecipeCache(dto.userId);
   }
 
   async rateRecipe(dto: RateRecipe): Promise<void> {
@@ -155,6 +143,5 @@ export class RecipesService {
       dto.userId,
       dto.value,
     );
-    await this.cacheService.invalidateRecipeCache();
   }
 }
