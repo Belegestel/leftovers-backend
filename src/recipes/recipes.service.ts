@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ForbiddenException,
-  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -21,18 +20,13 @@ import { allRecipeCategories } from "./recipe-categories.enum";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { Recipe } from "./recipes.model";
 import { RecipesCacheService } from "./recipes-cache.service";
 
 @Injectable()
 export class RecipesService {
-  private readonly recipeCacheIndexKey = "recipes:cache:index";
-
   constructor(
     private readonly recipesRepository: RecipesRepository,
     private readonly filesService: FilesService,
-    @Inject(CACHE_MANAGER)
     private readonly cacheService: RecipesCacheService,
   ) {}
 

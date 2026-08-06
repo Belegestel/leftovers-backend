@@ -9,11 +9,11 @@ import { CreateRecipeResult } from "./dto/createRecipeResult.dto";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { FilesService } from "../files/files.service";
 import { mockFilesService } from "../../test/unit/mocks/mockFilesService";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { mockCacheManager } from "../../test/unit/mocks/mockCacheManager";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
+import { mockCacheService } from "../../test/unit/mocks/mockCacheService";
+import { RecipesCacheService } from "./recipes-cache.service";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -25,7 +25,7 @@ describe("RecipesService", () => {
         RecipesService,
         { provide: RecipesRepository, useValue: mockRecipesRepository },
         { provide: FilesService, useValue: mockFilesService },
-        { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        { provide: RecipesCacheService, useValue: mockCacheService },
       ],
     }).compile();
 
@@ -354,12 +354,12 @@ describe("RecipesService", () => {
         } as Recipe,
       ];
 
-      mockCacheManager.get.mockResolvedValue(cachedRecipes);
+      mockCacheService.findAll.mockResolvedValue(cachedRecipes);
 
       const result = await service.findAll();
 
       expect(result).toBeDefined();
-      expect(mockCacheManager.get).toHaveBeenCalled();
+      expect(mockCacheService.findAll).toHaveBeenCalled();
       expect(mockRecipesRepository.findAll).not.toHaveBeenCalled();
     });
 
@@ -372,20 +372,21 @@ describe("RecipesService", () => {
         } as Recipe,
       ];
 
-      mockCacheManager.get.mockResolvedValue(undefined);
+      mockCacheService.findAll.mockResolvedValue(undefined);
       mockRecipesRepository.findAll.mockResolvedValue(recipes);
 
       await service.findAll();
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalled();
-      expect(mockCacheManager.set).toHaveBeenCalledWith(
-        expect.stringContaining("recipes:"),
+      expect(mockCacheService.setFindAll).toHaveBeenCalledWith(
         recipes,
+        undefined,
+        undefined,
       );
     });
 
     it("invalidates user's recipe cache after bookmarking", async () => {
-      mockCacheManager.get
+      mockCacheService.findAll
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce(['recipes:2:{"category":"LUNCH"}']);
@@ -401,13 +402,11 @@ describe("RecipesService", () => {
         userId: 2,
       });
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith(
-        'recipes:2:{"category":"LUNCH"}',
-      );
+      expect(mockCacheService.invalidateRecipeCache).toHaveBeenCalledWith(2);
     });
 
     it("invalidates user's recipe cache after rating", async () => {
-      mockCacheManager.get
+      mockCacheService.findAll
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce(['recipes:2:{"category":"LUNCH"}']);
@@ -424,9 +423,7 @@ describe("RecipesService", () => {
         value: 3,
       });
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith(
-        'recipes:2:{"category":"LUNCH"}',
-      );
+      expect(mockCacheService.invalidateRecipeCache).toHaveBeenCalledWith();
     });
   });
 });
