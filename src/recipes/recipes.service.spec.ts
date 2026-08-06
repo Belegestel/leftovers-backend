@@ -32,6 +32,10 @@ describe("RecipesService", () => {
     service = module.get<RecipesService>(RecipesService);
   });
 
+  afterEach(async () => {
+    jest.resetAllMocks();
+  });
+
   describe("findAll", () => {
     it("returns only public recipes for guests", async () => {
       const repoResult: Recipe = {
