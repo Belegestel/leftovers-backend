@@ -13,12 +13,24 @@ export class RecipesCacheService {
 
   private readonly recipeCacheIndexKey = "recipes:cache:index";
 
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs = 200,
+  ): Promise<T | undefined> {
+    return Promise.race([
+      promise,
+      new Promise<undefined>((resolve) =>
+        setTimeout(() => resolve(undefined), timeoutMs),
+      ),
+    ]);
+  }
+
   async findAll(
     userId?: number,
     query?: RecipeQueryRequest,
   ): Promise<Recipe[] | undefined> {
     const key = this.getRecipeCacheKey(userId, query);
-    return await this.cache.get(key);
+    return await this.withTimeout(this.cache.get(key));
   }
 
   async setFindAll(
@@ -27,21 +39,23 @@ export class RecipesCacheService {
     query?: RecipeQueryRequest,
   ): Promise<void> {
     const key = this.getRecipeCacheKey(userId, query);
-    await this.cache.set(key, value);
+    await this.withTimeout(this.cache.set(key, value));
     await this.updateRecipeKeys(key);
   }
 
   private async updateRecipeKeys(newKey: string): Promise<void> {
     const currentKeys =
-      (await this.cache.get<string[]>(this.recipeCacheIndexKey)) ?? [];
+      (await this.withTimeout(
+        this.cache.get<string[]>(this.recipeCacheIndexKey),
+      )) ?? [];
     if (!currentKeys.includes(newKey)) {
-      await this.cache.set(this.recipeCacheIndexKey, [newKey, ...currentKeys]);
+      await this.withTimeout(this.cache.set(this.recipeCacheIndexKey, [newKey, ...currentKeys]));
     }
   }
 
   async invalidateRecipeCache(userId?: number): Promise<void> {
     const cachedKeys =
-      (await this.cache.get<string[]>(this.recipeCacheIndexKey)) ?? [];
+      (await this.withTimeout(this.cache.get<string[]>(this.recipeCacheIndexKey))) ?? [];
 
     const keysToDelete = cachedKeys.filter((key: string) =>
       userId === undefined
@@ -49,12 +63,12 @@ export class RecipesCacheService {
         : key.startsWith(`recipes:${userId}:`),
     );
 
-    await Promise.all(keysToDelete.map((key) => this.cache.del(key)));
+    await Promise.all(keysToDelete.map((key) => this.withTimeout(this.cache.del(key))));
     const remainingKeys = cachedKeys.filter(
       (key) => !keysToDelete.includes(key),
     );
 
-    await this.cache.set(this.recipeCacheIndexKey, remainingKeys);
+    await this.withTimeout(this.cache.set(this.recipeCacheIndexKey, remainingKeys));
   }
 
   private getRecipeCacheKey(
