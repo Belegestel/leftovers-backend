@@ -5,7 +5,6 @@ import { RecipesService } from "./recipes.service";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
 import { AuthenticatedRequest } from "src/types/authenticated-request.interface";
 import { EditRecipeRequest } from "./dto/requests/editRecipeRequest.dto";
-import { mockRecipesRepository } from '../../test/unit/mocks/mockRecipesRepository';
 
 describe("RecipesController", () => {
   let controller: RecipesController;
@@ -108,6 +107,7 @@ describe("RecipesController", () => {
   });
 
   it("edits the recipe", async () => {
+    mockRecipesService.editRecipe.mockResolvedValue(1);
     await controller.editRecipe(
       1,
       { user: { userId: 2 } } as AuthenticatedRequest,

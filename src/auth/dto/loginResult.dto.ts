@@ -1,12 +1,10 @@
-import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class LoginResult {
   @ApiProperty()
-  @IsString()
   accessToken: string;
 
-  @ApiProperty({})
+  @ApiProperty()
   refreshToken: string;
 
   private constructor(accessToken: string, refreshToken: string) {

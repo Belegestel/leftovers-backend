@@ -325,7 +325,7 @@ export class RecipesController {
     const input = EditRecipe.from(id, dto, req.user.userId);
     const res = await this.recipesService.editRecipe(input);
     if (!res) {
-      return new ForbiddenException("Can't edit the recipe");
+      throw new ForbiddenException("Can't edit the recipe");
     }
   }
 

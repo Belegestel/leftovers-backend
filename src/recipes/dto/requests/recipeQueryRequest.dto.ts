@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import { IsOptional, IsString, IsBoolean } from "class-validator";
+import { ToBoolean } from "../../../common/toBoolean";
 
 export class RecipeQueryRequest {
   // Filter
@@ -32,32 +33,28 @@ export class RecipeQueryRequest {
 
   @ApiPropertyOptional({ example: "true" })
   @IsOptional()
-  @Transform(({ value }) => value === "true" || value === true)
+  @ToBoolean()
   @IsBoolean()
   details?: boolean;
 
   @ApiPropertyOptional({ example: "true" })
   @IsOptional()
-  @Transform(({ value }) => value === "true" || value === true)
+  @ToBoolean()
   @IsBoolean()
   saved?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(
-    ({ value }) => value === "asc" || value === "true" || value === true,
-  )
+  @IsBoolean()
   dateOrderIncr?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(
-    ({ value }) => value === "asc" || value === "true" || value === true,
-  )
+  @IsBoolean()
   ratingOrderIncr?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => value === "true" || value === true)
+  @IsBoolean()
   authored?: boolean;
 }
