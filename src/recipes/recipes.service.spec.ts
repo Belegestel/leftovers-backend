@@ -18,6 +18,7 @@ describe("RecipesService", () => {
   let service: RecipesService;
 
   beforeEach(async () => {
+    jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecipesService,
@@ -27,7 +28,10 @@ describe("RecipesService", () => {
     }).compile();
 
     service = module.get<RecipesService>(RecipesService);
-    jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    jest.resetAllMocks();
   });
 
   describe("findAll", () => {
@@ -42,6 +46,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        ratingCount: 0,
+        isBookmarked: false,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -72,6 +78,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -102,6 +110,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -109,12 +119,10 @@ describe("RecipesService", () => {
         imageKey: undefined,
         userRating: 1,
         isPrivate: false,
-        ratingCount: 2,
-        isBookmarked: false,
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
-        category: "Lunch",
+        category: "LUNCH",
       } as RecipeQueryRequest);
 
       expect(mockRecipesRepository.findAll).toHaveBeenCalledWith(
@@ -134,6 +142,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -141,8 +151,6 @@ describe("RecipesService", () => {
         imageKey: undefined,
         userRating: 1,
         isPrivate: false,
-        ratingCount: 2,
-        isBookmarked: false,
       };
       mockRecipesRepository.findAll.mockResolvedValue([repoResult]);
       await service.findAll(undefined, {
@@ -166,6 +174,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -209,6 +219,8 @@ describe("RecipesService", () => {
         ingredients: ["Flour", "Water"],
         steps: ["mix", "bake"],
         isPublic: true,
+        isBookmarked: false,
+        ratingCount: 0,
         createdAt: new Date(),
         editedAt: new Date(),
         rating: 1,
@@ -328,7 +340,7 @@ describe("RecipesService", () => {
       const dto: EditRecipe = { userId: 1, recipeId: 2, isPublic: true };
       await service.editRecipe(dto);
       expect(mockRecipesRepository.editRecipe).toHaveBeenCalledWith(
-        expect.objectContaining({ userId: 1, recipeId:2, isPublic: true }),
+        expect.objectContaining({ userId: 1, recipeId: 2, isPublic: true }),
       );
     });
   });
@@ -336,9 +348,7 @@ describe("RecipesService", () => {
   describe("deleteRecipe", () => {
     it("delegates a recipe deletion to the repository", async () => {
       await service.deleteRecipe(0, 1);
-      expect(mockRecipesRepository.deleteRecipe).toHaveBeenCalledWith(
-        0, 1
-      );
+      expect(mockRecipesRepository.deleteRecipe).toHaveBeenCalledWith(0, 1);
     });
   });
 });

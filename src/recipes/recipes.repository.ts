@@ -10,18 +10,25 @@ import {
 import { RecipeQueryFilters } from "./dto/recipeQueryFilters.dto";
 import { Prisma } from "../generated/prisma/client";
 import { EditRecipe } from "./dto/editRecipe.dto";
+import { RecipesCacheService } from "./recipes-cache.service";
 
 @Injectable()
 export class RecipesRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cacheService: RecipesCacheService,
+  ) {}
 
   async findAll(
     userId?: number,
     recipeQuery?: RecipeQueryFilters,
   ): Promise<Recipe[]> {
+    const cacheResult = await this.cacheService.findAll(userId, recipeQuery);
+    if (cacheResult) {
+      return cacheResult;
+    }
     const categoryList = recipeQuery?.category?.length
-      ? recipeQuery.category.map((c) => categoryFromString(c))
-      : undefined;
+      ? recipeQuery.category.map((c) => categoryFromString(c)) : undefined;
 
     const searchConditions: RecipeWhereInput[] = [];
 
@@ -65,23 +72,20 @@ export class RecipesRepository {
         steps: { hasSome: recipeQuery.steps.split(",") },
       });
     }
-
     if (recipeQuery?.authored && userId !== undefined) {
       searchConditions.push({
-        authorId: userId,
+        authorId: userId, 
       });
     }
 
     const conditions: RecipeWhereInput[] = [];
-
     if (userId) {
-      conditions.push({
-        OR: [{ isPublic: true }, { authorId: userId }],
-      });
+      conditions.push({ OR: [{ isPublic: true }, { authorId: userId }] });
     } else {
-      conditions.push({
-        isPublic: true,
-      });
+      conditions.push({ isPublic: true });
+    }
+    if (categoryList?.length) {
+      conditions.push({ category: { in: categoryList } });
     }
 
     if (categoryList?.length) {
@@ -137,7 +141,7 @@ export class RecipesRepository {
         }
         return 0;
       });
-
+    this.cacheService.setFindAll(resultFiltered, userId, recipeQuery);
     return resultFiltered;
   }
 
@@ -166,6 +170,7 @@ export class RecipesRepository {
         isPublic,
       },
     });
+    await this.cacheService.invalidateRecipeCache();
     return Recipe.fromPrisma(recipe);
   }
 
@@ -215,6 +220,7 @@ export class RecipesRepository {
       where: { id: recipeId },
       data: { imageKey: key },
     });
+    await this.cacheService.invalidateRecipeCache();
     return recipe ? Recipe.fromPrisma(recipe) : null;
   }
 
@@ -234,6 +240,7 @@ export class RecipesRepository {
       where: { id: userId },
       data: { savedRecipes: { connect: { id: recipeId } } },
     });
+    await this.cacheService.invalidateRecipeCache(userId);
   }
 
   async unbookmarkRecipe(recipeId: number, userId: number) {
@@ -261,7 +268,7 @@ export class RecipesRepository {
         savedRecipes: true,
       },
     });
-
+    await this.cacheService.invalidateRecipeCache(userId);
     return result;
   }
 
@@ -314,6 +321,7 @@ export class RecipesRepository {
         value,
       },
     });
+    this.cacheService.invalidateRecipeCache();
   }
 
   async editRecipe(dto: EditRecipe): Promise<boolean> {

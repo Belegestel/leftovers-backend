@@ -37,15 +37,17 @@ export class RecipesService {
     filters?: RecipeQueryRequest,
   ): Promise<RecipeQueryResult> {
     const input = RecipeQueryFilters.from(userId, filters);
+
     const result = await this.recipesRepository.findAll(userId, input);
+
     const links = await Promise.all(
-      result.map(
-        async (value) =>
-          await (value.imageKey
-            ? this.filesService.createPresignedGetUrl(value.imageKey)
-            : undefined),
+      result.map(async (value) =>
+        value.imageKey
+          ? this.filesService.createPresignedGetUrl(value.imageKey)
+          : undefined,
       ),
     );
+
     return RecipeQueryResult.from(result, links);
   }
 
@@ -66,6 +68,7 @@ export class RecipesService {
     );
     return CreateRecipeResult.from(recipe);
   }
+
   async findById(
     id: number,
     userId?: number,

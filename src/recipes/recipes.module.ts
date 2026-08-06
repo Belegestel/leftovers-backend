@@ -4,10 +4,11 @@ import { RecipesService } from "./recipes.service";
 import { PrismaModule } from "../prisma/prisma.module";
 import { RecipesRepository } from "./recipes.repository";
 import { FilesModule } from "src/files/files.module";
+import { RecipesCacheService } from "./recipes-cache.service";
 
 @Module({
   imports: [PrismaModule, FilesModule],
   controllers: [RecipesController],
-  providers: [RecipesService, RecipesRepository],
+  providers: [RecipesService, RecipesRepository, RecipesCacheService],
 })
 export class RecipesModule {}

@@ -13,7 +13,7 @@ export class RecipeQueryFilters {
   ratingOrderIncr?: boolean;
 
   @ApiPropertyOptional()
-  dateOrderIncr: boolean;
+  dateOrderIncr?: boolean;
 
   // Search
   @ApiPropertyOptional()
