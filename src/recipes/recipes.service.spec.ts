@@ -12,8 +12,6 @@ import { mockFilesService } from "../../test/unit/mocks/mockFilesService";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
-import { mockCacheService } from "../../test/unit/mocks/mockCacheService";
-import { RecipesCacheService } from "./recipes-cache.service";
 
 describe("RecipesService", () => {
   let service: RecipesService;
@@ -25,7 +23,6 @@ describe("RecipesService", () => {
         RecipesService,
         { provide: RecipesRepository, useValue: mockRecipesRepository },
         { provide: FilesService, useValue: mockFilesService },
-        { provide: RecipesCacheService, useValue: mockCacheService },
       ],
     }).compile();
 
@@ -342,88 +339,6 @@ describe("RecipesService", () => {
         dto.userId,
         dto.value,
       );
-    });
-  });
-
-  describe("cacheRecipe", () => {
-    it("returns recipes from cache when cache hit occurs", async () => {
-      const cachedRecipes = [
-        {
-          id: 1,
-          title: "Cached pizza",
-        } as Recipe,
-      ];
-
-      mockCacheService.findAll.mockResolvedValue(cachedRecipes);
-
-      const result = await service.findAll();
-
-      expect(result).toBeDefined();
-      expect(mockCacheService.findAll).toHaveBeenCalled();
-      expect(mockRecipesRepository.findAll).not.toHaveBeenCalled();
-    });
-
-    it("fetches from repository and stores result when cache misses", async () => {
-      const recipes = [
-        {
-          id: 1,
-          title: "Pizza",
-          imageKey: undefined,
-        } as Recipe,
-      ];
-
-      mockCacheService.findAll.mockResolvedValue(undefined);
-      mockRecipesRepository.findAll.mockResolvedValue(recipes);
-
-      await service.findAll();
-
-      expect(mockRecipesRepository.findAll).toHaveBeenCalled();
-      expect(mockCacheService.setFindAll).toHaveBeenCalledWith(
-        recipes,
-        undefined,
-        undefined,
-      );
-    });
-
-    it("invalidates user's recipe cache after bookmarking", async () => {
-      mockCacheService.findAll
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce(['recipes:2:{"category":"LUNCH"}']);
-
-      mockRecipesRepository.findAll.mockResolvedValue([]);
-
-      await service.findAll(2, {
-        category: "LUNCH",
-      });
-
-      await service.bookmarkRecipe({
-        recipeId: 1,
-        userId: 2,
-      });
-
-      expect(mockCacheService.invalidateRecipeCache).toHaveBeenCalledWith(2);
-    });
-
-    it("invalidates user's recipe cache after rating", async () => {
-      mockCacheService.findAll
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce(['recipes:2:{"category":"LUNCH"}']);
-
-      mockRecipesRepository.findAll.mockResolvedValue([]);
-
-      await service.findAll(2, {
-        category: "LUNCH",
-      });
-
-      await service.rateRecipe({
-        recipeId: 1,
-        userId: 2,
-        value: 3,
-      });
-
-      expect(mockCacheService.invalidateRecipeCache).toHaveBeenCalledWith();
     });
   });
 });
