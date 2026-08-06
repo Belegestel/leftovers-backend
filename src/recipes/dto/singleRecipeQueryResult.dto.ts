@@ -43,12 +43,8 @@ export class SingleRecipeQueryResult {
   ) {
     this.id = id;
     this.title = title;
-    if (description !== undefined) {
-      this.description = description;
-    }
-    if (prepTime !== undefined) {
-      this.prepTime = prepTime;
-    }
+    this.description = description;
+    this.prepTime = prepTime;
     this.isPublic = isPublic;
     this.authorId = authorId;
     this.createdAt = createdAt;
@@ -93,7 +89,7 @@ export class SingleRecipeQueryResult {
       recipe.ratingCount,
       recipe.isBookmarked,
       recipe.userRating,
-      !recipe.isPublic
+      !recipe.isPublic,
     );
   }
 }

@@ -27,30 +27,14 @@ export class EditRecipe {
   ) {
     this.recipeId = recipeId;
     this.userId = userId;
-    if (title !== undefined) {
       this.title = title;
-    }
-    if (description !== undefined) {
       this.description = description;
-    }
-    if (category !== undefined) {
       this.category = category;
-    }
-    if (prepTime !== undefined) {
       this.prepTime = prepTime;
-    }
-    if (servings !== undefined) {
       this.servings = servings;
-    }
-    if (ingredients !== undefined) {
       this.ingredients = ingredients;
-    }
-    if (steps !== undefined) {
       this.steps = steps;
-    }
-    if (isPublic !== undefined) {
       this.isPublic = isPublic;
-    }
   }
 
   static from(recipeId: number, dto: EditRecipeRequest, userId: number): EditRecipe {

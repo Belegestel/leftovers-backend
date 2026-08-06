@@ -82,9 +82,7 @@ export class SingleRecipeQueryResponse {
   ) {
     this.id = id;
     this.title = title;
-    if (description !== undefined) {
-      this.description = description;
-    }
+    this.description = description;
     if (prepTime) {
       this.prepTime = prepTime;
     }
@@ -131,7 +129,7 @@ export class SingleRecipeQueryResponse {
       result.ratingCount,
       result.isBookmarked,
       result.userRating,
-      result.isPrivate
+      result.isPrivate,
     );
   }
 }

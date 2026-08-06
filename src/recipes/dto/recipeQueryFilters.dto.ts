@@ -50,39 +50,19 @@ export class RecipeQueryFilters {
     saved?: boolean,
     authored?: boolean,
   ) {
-    if (userId !== undefined) {
-      this.userId = userId;
-    }
+    this.userId = userId;
     if (category) {
       this.category = category.split(",").map((c) => categoryFromString(c));
     }
-    if (ratingOrderIncr !== undefined) {
-      this.ratingOrderIncr = ratingOrderIncr;
-    }
-    if (dateOrderIncr !== undefined) {
-      this.dateOrderIncr = dateOrderIncr;
-    }
-    if (title !== undefined) {
-      this.title = title;
-    }
-    if (description !== undefined) {
-      this.description = description;
-    }
-    if (ingredients !== undefined) {
-      this.ingredients = ingredients;
-    }
-    if (steps !== undefined) {
-      this.steps = steps;
-    }
-    if (details !== undefined) {
-      this.details = details;
-    }
-    if (saved !== undefined) {
-      this.saved = saved;
-    }
-    if(authored !== undefined) {
-      this.authored = authored;
-    }
+    this.ratingOrderIncr = ratingOrderIncr;
+    this.dateOrderIncr = dateOrderIncr;
+    this.title = title;
+    this.description = description;
+    this.ingredients = ingredients;
+    this.steps = steps;
+    this.details = details;
+    this.saved = saved;
+    this.authored = authored;
   }
   static from(
     userId: number | undefined,
