@@ -124,7 +124,6 @@ export class RecipesRepository {
           : false,
       },
     });
-
     const resultFiltered = result
       .map((value) =>
         Recipe.fromPrisma(value, userId ? value.savedBy.length > 0 : false),
@@ -142,7 +141,8 @@ export class RecipesRepository {
         }
         return 0;
       });
-    this.cacheService.setFindAll(resultFiltered, userId, recipeQuery);
+
+    await this.cacheService.setFindAll(resultFiltered, userId, recipeQuery);
     return resultFiltered;
   }
 
@@ -322,7 +322,7 @@ export class RecipesRepository {
         value,
       },
     });
-    this.cacheService.invalidateRecipeCache();
+    await this.cacheService.invalidateRecipeCache();
   }
 
   async editRecipe(dto: EditRecipe): Promise<boolean> {

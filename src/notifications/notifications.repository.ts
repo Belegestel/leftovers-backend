@@ -19,7 +19,7 @@ export class NotificationsRepository {
     const notifs = await this.prisma.notification.findMany({
       where: { userId },
     });
-    return notifs.map((notif) => NotificationModel.fromPrisma(notif));
+    return notifs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).map((notif) => NotificationModel.fromPrisma(notif));
   }
 
   async markNotifAsRead(notifId: number, userId: number): Promise<void> {

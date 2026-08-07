@@ -49,7 +49,7 @@ describe("NotificationsService", () => {
   it("should create recipe change notification and notify websocket client", async () => {
     const notification = {
       id: 1,
-      type: "RECIPE_CHANGE",
+      type: "RECIPE_EDIT",
     };
 
     MockNotificationsRepository.createNotification.mockResolvedValue(notification);
@@ -57,7 +57,7 @@ describe("NotificationsService", () => {
     await service.recipeChangeNotif(10, "Pizza");
 
     expect(MockNotificationsRepository.createNotification).toHaveBeenCalledWith(
-      "RECIPE_CHANGE",
+      "RECIPE_EDIT",
       {
         recipeTitle: "Pizza",
       },

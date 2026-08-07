@@ -1,7 +1,7 @@
 import { NotificationType } from "../generated/prisma/enums";
 
 export enum NotificationVariant {
-  RECIPE_CHANGE = "RECIPE_CHANGE",
+  RECIPE_EDIT = "RECIPE_EDIT",
 }
 
 export function NotifVariantFromPrisma(

@@ -6,6 +6,7 @@ import { mockEmailService } from "../unit/mocks/mockEmailService";
 import { EmailService } from "../../src/email/email.service";
 import { FilesService } from "../../src/files/files.service";
 import { mockFilesService } from "../unit/mocks/mockFilesService";
+import { RecipesCacheService } from "src/recipes/recipes-cache.service";
 
 mockEmailService.sendEmail.mockResolvedValue(undefined);
 
@@ -21,6 +22,7 @@ export async function createE2EApp(): Promise<{
   app: INestApplication;
   prisma: PrismaService;
   moduleRef: TestingModule;
+  recipesCacheService: RecipesCacheService;
 }> {
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
@@ -42,6 +44,7 @@ export async function createE2EApp(): Promise<{
 
   await app.init();
   const prisma = app.get(PrismaService);
+  const recipesCacheService = app.get(RecipesCacheService);
 
-  return { app, prisma, moduleRef };
+  return { app, prisma, moduleRef, recipesCacheService };
 }

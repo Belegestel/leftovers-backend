@@ -36,7 +36,7 @@ describe("NotificationsController", () => {
       const serviceResult = [
         {
           id: 1,
-          type: "RECIPE_CHANGE",
+          type: "RECIPE_EDIT",
           data: {
             recipeTitle: "Pizza",
           },

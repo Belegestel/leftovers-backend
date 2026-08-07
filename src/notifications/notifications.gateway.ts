@@ -7,6 +7,7 @@ import {
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { JwtService } from "@nestjs/jwt";
+import { NotificationModel } from "./notification.model";
 
 @WebSocketGateway({
   cors: {
@@ -45,7 +46,7 @@ export class NotificationsGateway
     }
   }
 
-  notifyUser(userId: number, notification: unknown) {
+  notifyUser(userId: number, notification: NotificationModel) {
     this.clients.get(userId)?.emit("notification", notification);
   }
 }
