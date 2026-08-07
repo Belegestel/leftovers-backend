@@ -22,7 +22,7 @@ import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { EditRecipe } from "./dto/editRecipe.dto";
 import { SingleCategory } from "./dto/responses/categoriesResponse.dto";
-import { NotificationsService } from "src/notifications/notifications.service";
+import { NotificationsService } from "../notifications/notifications.service";
 
 @Injectable()
 export class RecipesService {

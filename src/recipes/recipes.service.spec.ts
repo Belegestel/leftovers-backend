@@ -13,6 +13,8 @@ import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { EditRecipe } from "./dto/editRecipe.dto";
+import { NotificationsService } from "../notifications/notifications.service";
+import { MockNotificationsService } from "../../test/unit/mocks/mockNotificationsService";
 
 const createRecipe = (overrides?: Partial<Recipe>): Recipe => {
   return {
@@ -48,6 +50,7 @@ describe("RecipesService", () => {
         RecipesService,
         { provide: RecipesRepository, useValue: mockRecipesRepository },
         { provide: FilesService, useValue: mockFilesService },
+        { provide: NotificationsService, useValue: MockNotificationsService },
       ],
     }).compile();
 

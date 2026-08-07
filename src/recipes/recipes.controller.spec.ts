@@ -3,8 +3,10 @@ import { RecipesController } from "./recipes.controller";
 import { mockRecipesService } from "../../test/unit/mocks/mockRecipesService";
 import { RecipesService } from "./recipes.service";
 import { RecipeQueryRequest } from "./dto/requests/recipeQueryRequest.dto";
-import { AuthenticatedRequest } from "src/types/authenticated-request.interface";
+import { AuthenticatedRequest } from "../types/authenticated-request.interface";
 import { EditRecipeRequest } from "./dto/requests/editRecipeRequest.dto";
+import { NotificationsService } from "../notifications/notifications.service";
+import { MockNotificationsService } from "../../test/unit/mocks/mockNotificationsService";
 
 describe("RecipesController", () => {
   let controller: RecipesController;
@@ -12,7 +14,10 @@ describe("RecipesController", () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RecipesController],
-      providers: [{ provide: RecipesService, useValue: mockRecipesService }],
+      providers: [
+        { provide: RecipesService, useValue: mockRecipesService },
+        { provide: NotificationsService, useValue: MockNotificationsService },
+      ],
     }).compile();
 
     controller = module.get<RecipesController>(RecipesController);
@@ -120,12 +125,9 @@ describe("RecipesController", () => {
 
   it("deletes the recipe", async () => {
     mockRecipesService.deleteRecipe.mockResolvedValue(true);
-    await controller.deleteRecipe(
-      1,
-      { user: { userId: 2 } } as AuthenticatedRequest,
-    );
-    expect(mockRecipesService.deleteRecipe).toHaveBeenCalledWith(
-      1, 2
-    );
+    await controller.deleteRecipe(1, {
+      user: { userId: 2 },
+    } as AuthenticatedRequest);
+    expect(mockRecipesService.deleteRecipe).toHaveBeenCalledWith(1, 2);
   });
 });

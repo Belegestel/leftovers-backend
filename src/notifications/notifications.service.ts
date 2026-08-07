@@ -22,7 +22,7 @@ export class NotificationsService {
     await this.notifRepository.markNotifAsRead(dto.notifId, dto.userId);
   }
 
-  async recipeChangeNotif(userId: number, recipeTitle: string) {
+  async recipeChangeNotif(userId: number, recipeTitle: string): Promise<void> {
     const notification = await this.notifRepository.createNotification(
       NotificationVariant.RECIPE_CHANGE,
       { recipeTitle },
