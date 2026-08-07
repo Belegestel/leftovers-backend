@@ -26,6 +26,12 @@ import { PasswordResetRepository } from "./password-reset.repository";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, SignupRequestsRepository, JwtStrategy, PasswordResetRepository],
+  providers: [
+    AuthService,
+    SignupRequestsRepository,
+    JwtStrategy,
+    PasswordResetRepository,
+  ],
+  exports: [JwtModule],
 })
 export class AuthModule {}

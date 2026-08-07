@@ -4,7 +4,7 @@ import { GetAllNotifs } from "./dto/getAllNotifs.dto";
 import { NotificationsRepository } from "./notifications.repository";
 import { MarkNotifAsRead } from "./dto/markNotifAsRead.dto";
 import { NotificationsGateway } from "./notifications.gateway";
-import { CreateNotification } from "./dto/createNotification.dto";
+import { NotificationVariant } from "./notification-variant.enum";
 
 @Injectable()
 export class NotificationsService {
@@ -22,10 +22,10 @@ export class NotificationsService {
     await this.notifRepository.markNotifAsRead(dto.notifId, dto.userId);
   }
 
-  async createAndNotify(userId: number, input: CreateNotification) {
+  async recipeChangeNotif(userId: number, recipeTitle: string) {
     const notification = await this.notifRepository.createNotification(
-      input.title,
-      input.description,
+      NotificationVariant.RECIPE_CHANGE,
+      { recipeTitle },
       userId,
     );
 

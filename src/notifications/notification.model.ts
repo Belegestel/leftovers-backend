@@ -1,36 +1,40 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Notification } from "../generated/prisma/client";
+import {
+  NotificationVariant,
+  NotifVariantFromPrisma,
+} from "./notification-variant.enum";
 
 export class NotificationModel {
   @ApiProperty()
   id: number;
 
   @ApiProperty()
-  title: string;
+  variant: NotificationVariant;
 
   @ApiProperty()
-  description: string;
+  data: Record<string, unknown>;
 
   @ApiProperty()
   isRead: boolean;
 
   private constructor(
     id: number,
-    title: string,
-    description: string,
+    variant: NotificationVariant,
+    data: Record<string, unknown>,
     isRead: boolean,
   ) {
     this.id = id;
-    this.title = title;
-    this.description = description;
+    this.variant = variant;
+    this.data = data;
     this.isRead = isRead;
   }
 
   static fromPrisma(prismaNotif: Notification): NotificationModel {
     return new NotificationModel(
       prismaNotif.id,
-      prismaNotif.title,
-      prismaNotif.description,
+      NotifVariantFromPrisma(prismaNotif.type),
+      prismaNotif.data as Record<string, unknown>,
       prismaNotif.isRead,
     );
   }

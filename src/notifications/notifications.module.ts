@@ -5,9 +5,10 @@ import { NotificationsRepository } from "./notifications.repository";
 import { PrismaService } from "../prisma/prisma.service";
 import { PrismaModule } from "../prisma/prisma.module";
 import { NotificationsGateway } from "./notifications.gateway";
+import { AuthModule } from "src/auth/auth.module";
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule],
   controllers: [NotificationsController],
   providers: [
     NotificationsService,

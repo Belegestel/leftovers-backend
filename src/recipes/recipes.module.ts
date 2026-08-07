@@ -5,11 +5,11 @@ import { PrismaModule } from "../prisma/prisma.module";
 import { RecipesRepository } from "./recipes.repository";
 import { FilesModule } from "src/files/files.module";
 import { RecipesCacheService } from "./recipes-cache.service";
-import { NotificationsService } from "src/notifications/notifications.service";
+import { NotificationsModule } from "src/notifications/notifications.module";
 
 @Module({
-  imports: [PrismaModule, FilesModule],
+  imports: [PrismaModule, FilesModule, NotificationsModule],
   controllers: [RecipesController],
-  providers: [RecipesService, RecipesRepository, RecipesCacheService, NotificationsService],
+  providers: [RecipesService, RecipesRepository, RecipesCacheService],
 })
 export class RecipesModule {}

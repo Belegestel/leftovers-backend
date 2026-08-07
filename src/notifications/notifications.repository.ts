@@ -1,6 +1,15 @@
 import { PrismaService } from "../prisma/prisma.service";
+import {
+  NotificationVariant,
+  NotifVariantToPrisma,
+} from "./notification-variant.enum";
 import { NotificationModel } from "./notification.model";
 import { Injectable } from "@nestjs/common";
+import type { InputJsonValue } from "@prisma/client/runtime/client";
+
+export type NotificationData = {
+  recipeTitle: string;
+};
 
 @Injectable()
 export class NotificationsRepository {
@@ -26,17 +35,17 @@ export class NotificationsRepository {
   }
 
   async createNotification(
-    title: string,
-    description: string,
+    variant: NotificationVariant,
+    data: NotificationData,
     userId: number,
-  ): Promise<number> {
+  ): Promise<NotificationModel> {
     const notif = await this.prisma.notification.create({
       data: {
-        title,
-        description,
+        type: NotifVariantToPrisma(variant),
+        data: data as InputJsonValue,
         userId,
       },
     });
-    return notif.id;
+    return NotificationModel.fromPrisma(notif);
   }
 }

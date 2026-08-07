@@ -23,7 +23,6 @@ import { RateRecipe } from "./dto/rateRecipe.dto";
 import { EditRecipe } from "./dto/editRecipe.dto";
 import { SingleCategory } from "./dto/responses/categoriesResponse.dto";
 import { NotificationsService } from "src/notifications/notifications.service";
-import { CreateNotification } from "src/notifications/dto/createNotification.dto";
 
 @Injectable()
 export class RecipesService {
@@ -153,15 +152,18 @@ export class RecipesService {
 
   async editRecipe(dto: EditRecipe): Promise<boolean> {
     const edit = await this.recipesRepository.editRecipe(dto);
-    if (edit) {
+    const recipe = await this.recipesRepository.findById(
+      dto.recipeId,
+      dto.userId,
+    );
+    if (edit && recipe) {
       const users = await this.recipesRepository.getUsersSaving(dto.recipeId);
       await Promise.all(
-        users.map((user) =>
-          this.notifService.createAndNotify(
-            user,
-            CreateNotification.from("A recipe has been updated", "Indeed"),
+        users
+          .filter((user) => user !== recipe.authorId)
+          .map((user) =>
+            this.notifService.recipeChangeNotif(user, recipe.title),
           ),
-        ),
       );
     }
     return edit;
