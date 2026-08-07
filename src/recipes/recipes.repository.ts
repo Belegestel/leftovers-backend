@@ -28,7 +28,8 @@ export class RecipesRepository {
       return cacheResult;
     }
     const categoryList = recipeQuery?.category?.length
-      ? recipeQuery.category.map((c) => categoryFromString(c)) : undefined;
+      ? recipeQuery.category.map((c) => categoryFromString(c))
+      : undefined;
 
     const searchConditions: RecipeWhereInput[] = [];
 
@@ -74,7 +75,7 @@ export class RecipesRepository {
     }
     if (recipeQuery?.authored && userId !== undefined) {
       searchConditions.push({
-        authorId: userId, 
+        authorId: userId,
       });
     }
 
@@ -349,5 +350,22 @@ export class RecipesRepository {
       where: { id: recipeId, authorId: userId },
     });
     return !!recipe;
+  }
+
+  async getUsersSaving(recipeId: number): Promise<number[]> {
+    const recipe = await this.prisma.recipe.findFirst({
+      where: { id: recipeId },
+      select: {
+        savedBy: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+    if (recipe === null) {
+      return [];
+    }
+    return recipe.savedBy.map((user) => user.id);
   }
 }

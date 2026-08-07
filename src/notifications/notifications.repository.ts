@@ -24,4 +24,19 @@ export class NotificationsRepository {
       },
     });
   }
+
+  async createNotification(
+    title: string,
+    description: string,
+    userId: number,
+  ): Promise<number> {
+    const notif = await this.prisma.notification.create({
+      data: {
+        title,
+        description,
+        userId,
+      },
+    });
+    return notif.id;
+  }
 }

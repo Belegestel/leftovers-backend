@@ -119,16 +119,20 @@ model PasswordResetRequest {
   @@map("password_reset_requests")
 }
 
+enum NotificationType {
+  RECIPE_EDIT
+}
+
 model Notification {
-  id          Int    @id @default(autoincrement())
-  title       String
-  description String
+  id        Int              @id @default(autoincrement())
+  type      NotificationType
+  data      Json             // dynamic translation variables
+  isRead    Boolean          @default(false) @map("is_read")
 
-  isRead Boolean @default(false) @map("is_read")
+  userId    Int              @map("user_id")
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  userId    Int      @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime         @default(now()) @map("created_at")
 
   @@index([userId])
   @@map("notification")
