@@ -18,16 +18,21 @@ export class NotificationModel {
   @ApiProperty()
   isRead: boolean;
 
+  @ApiProperty()
+  createdAt: Date;
+
   private constructor(
     id: number,
     variant: NotificationVariant,
     data: Record<string, unknown>,
     isRead: boolean,
+    createdAt: Date,
   ) {
     this.id = id;
     this.variant = variant;
     this.data = data;
     this.isRead = isRead;
+    this.createdAt = createdAt;
   }
 
   static fromPrisma(prismaNotif: Notification): NotificationModel {
@@ -36,6 +41,7 @@ export class NotificationModel {
       NotifVariantFromPrisma(prismaNotif.type),
       prismaNotif.data as Record<string, unknown>,
       prismaNotif.isRead,
+      prismaNotif.createdAt,
     );
   }
 }
