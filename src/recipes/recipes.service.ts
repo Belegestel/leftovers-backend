@@ -161,8 +161,9 @@ export class RecipesService {
       await Promise.all(
         users
           .filter((user) => user !== recipe.authorId)
-          .map((user) =>
-            this.notifService.recipeChangeNotif(user, recipe.title),
+          .map(
+            async (user) =>
+              await this.notifService.recipeChangeNotif(user, recipe.title),
           ),
       );
     }

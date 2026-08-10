@@ -31,8 +31,8 @@ export class NotificationsGateway
 
       const payload = await this.jwtService.verifyAsync(token);
 
-      this.clients.set(payload.userId, socket);
-    } catch {
+      this.clients.set(payload.sub, socket);
+    } catch (err) {
       socket.disconnect();
     }
   }
