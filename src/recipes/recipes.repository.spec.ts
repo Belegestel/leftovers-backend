@@ -98,6 +98,9 @@ describe("RecipesRepository", () => {
 
       await repository.findAll(undefined, {
         category: [RecipeCategory.LUNCH],
+        ratingOrderIncr: false,
+        dateOrderIncr: true,
+        details: false,
       });
 
       expect(mockPrismaService.recipe.findMany).toHaveBeenCalledWith(

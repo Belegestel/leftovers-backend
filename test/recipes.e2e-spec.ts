@@ -1,4 +1,4 @@
-import { RecipesCacheService } from "../../src/recipes/recipes-cache.service";
+import { RecipesCacheService } from "../src/recipes/recipes-cache.service";
 import { INestApplication } from "@nestjs/common";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createE2EApp } from "./utils/create-e2e-app";
