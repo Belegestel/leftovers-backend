@@ -32,10 +32,10 @@ export class RecipeQueryFilters {
   details: boolean;
 
   @ApiProperty()
-  saved: boolean;
+  saved?: boolean;
 
   @ApiProperty()
-  authored: boolean;
+  authored?: boolean;
 
   private constructor(
     userId?: number,
@@ -61,8 +61,8 @@ export class RecipeQueryFilters {
     this.ingredients = ingredients;
     this.steps = steps;
     this.details = details ?? false;
-    this.saved = saved ?? false;
-    this.authored = authored ?? false;
+    this.saved = saved;
+    this.authored = authored;
   }
   static from(
     userId: number | undefined,

@@ -32,18 +32,19 @@ model User {
 
   refreshTokens RefreshToken[]
 
-  recipes Recipe[] @relation("RecipeAuthor")
-  savedRecipes Recipe[] @relation("SavedRecipes")
-  ratedRecipes RecipeRating[]
+  recipes       Recipe[]       @relation("RecipeAuthor")
+  savedRecipes  Recipe[]       @relation("SavedRecipes")
+  ratedRecipes  RecipeRating[]
+  notifications Notification[]
 
   @@map("users")
 }
 
 model RefreshToken {
-  id        Int      @id @default(autoincrement())
-  tokenHash String   @unique @map("token_hash")
-  userId Int @map("user_id")
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int    @id @default(autoincrement())
+  tokenHash String @unique @map("token_hash")
+  userId    Int    @map("user_id")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
@@ -90,7 +91,7 @@ model Recipe {
   ratings  RecipeRating[]
   category RecipeCategory
 
-  imageKey    String?      @map("image_key")
+  imageKey String? @map("image_key")
 
   @@map("recipe")
 }
@@ -116,4 +117,23 @@ model PasswordResetRequest {
 
   @@index([email])
   @@map("password_reset_requests")
+}
+
+enum NotificationType {
+  RECIPE_EDIT
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  type      NotificationType
+  data      Json             // dynamic translation variables
+  isRead    Boolean          @default(false) @map("is_read")
+
+  userId    Int              @map("user_id")
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("notification")
 }

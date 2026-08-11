@@ -1,3 +1,4 @@
+import { RecipesCacheService } from "../src/recipes/recipes-cache.service";
 import { INestApplication } from "@nestjs/common";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createE2EApp } from "./utils/create-e2e-app";
@@ -10,15 +11,18 @@ import { RecipeCategory } from "../src/recipes/recipe-categories.enum";
 describe("Recipes E2E", () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let recipesCacheService: RecipesCacheService;
 
   beforeAll(async () => {
     const setup = await createE2EApp();
     app = setup.app;
     prisma = setup.prisma;
+    recipesCacheService = setup.recipesCacheService;
   });
 
   beforeEach(async () => {
     await clearDatabase(prisma);
+    await recipesCacheService.invalidateRecipeCache();
     jest.clearAllMocks();
   });
 

@@ -16,20 +16,20 @@ import { CreateRecipeImageUploadUrl } from "./dto/createRecipeImageUploadUrl.dto
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { RecipeImageUploadUrl } from "./dto/recipeImageUploadUrl.dto";
-import {
-  allRecipeCategories,
-} from "./recipe-categories.enum";
+import { allRecipeCategories } from "./recipe-categories.enum";
 import { BookmarkRecipe } from "./dto/bookmarkRecipe.dto";
 import { UnbookmarkRecipe } from "./dto/unbookmarkRecipe.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { EditRecipe } from "./dto/editRecipe.dto";
 import { SingleCategory } from "./dto/responses/categoriesResponse.dto";
+import { NotificationsService } from "../notifications/notifications.service";
 
 @Injectable()
 export class RecipesService {
   constructor(
     private readonly recipesRepository: RecipesRepository,
     private readonly filesService: FilesService,
+    private readonly notifService: NotificationsService,
   ) {}
 
   async findAll(
@@ -151,7 +151,23 @@ export class RecipesService {
   }
 
   async editRecipe(dto: EditRecipe): Promise<boolean> {
-    return await this.recipesRepository.editRecipe(dto);
+    const edit = await this.recipesRepository.editRecipe(dto);
+    const recipe = await this.recipesRepository.findById(
+      dto.recipeId,
+      dto.userId,
+    );
+    if (edit && recipe) {
+      const users = await this.recipesRepository.getUsersSaving(dto.recipeId);
+      await Promise.all(
+        users
+          .filter((user) => user !== recipe.authorId)
+          .map(
+            async (user) =>
+              await this.notifService.recipeChangeNotif(user, recipe.title),
+          ),
+      );
+    }
+    return edit;
   }
 
   async deleteRecipe(recipeId: number, userId: number): Promise<boolean> {

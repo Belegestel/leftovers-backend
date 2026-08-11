@@ -49,26 +49,33 @@ export class RecipesCacheService {
         this.cache.get<string[]>(this.recipeCacheIndexKey),
       )) ?? [];
     if (!currentKeys.includes(newKey)) {
-      await this.withTimeout(this.cache.set(this.recipeCacheIndexKey, [newKey, ...currentKeys]));
+      await this.withTimeout(
+        this.cache.set(this.recipeCacheIndexKey, [newKey, ...currentKeys]),
+      );
     }
   }
 
   async invalidateRecipeCache(userId?: number): Promise<void> {
     const cachedKeys =
-      (await this.withTimeout(this.cache.get<string[]>(this.recipeCacheIndexKey))) ?? [];
-
+      (await this.withTimeout(
+        this.cache.get<string[]>(this.recipeCacheIndexKey),
+      )) ?? [];
     const keysToDelete = cachedKeys.filter((key: string) =>
       userId === undefined
         ? key.startsWith("recipes:")
         : key.startsWith(`recipes:${userId}:`),
     );
 
-    await Promise.all(keysToDelete.map((key) => this.withTimeout(this.cache.del(key))));
+    await Promise.all(
+      keysToDelete.map((key) => this.withTimeout(this.cache.del(key))),
+    );
     const remainingKeys = cachedKeys.filter(
       (key) => !keysToDelete.includes(key),
     );
 
-    await this.withTimeout(this.cache.set(this.recipeCacheIndexKey, remainingKeys));
+    await this.withTimeout(
+      this.cache.set(this.recipeCacheIndexKey, remainingKeys),
+    );
   }
 
   private getRecipeCacheKey(

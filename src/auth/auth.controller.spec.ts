@@ -64,7 +64,7 @@ describe("AuthController", () => {
       email: "john.doe@email.com",
       password: "password",
     };
-    const expectedResult: LoginResult = { accessToken: "jwt-token" };
+    const expectedResult: LoginResult = { accessToken: "jwt-token", refreshToken: "refresh-token" };
 
     mockAuthService.login.mockResolvedValue(expectedResult);
 

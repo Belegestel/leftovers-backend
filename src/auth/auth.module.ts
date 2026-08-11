@@ -20,12 +20,18 @@ import { PasswordResetRepository } from "./password-reset.repository";
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.getOrThrow<string>("JWT_SECRET"),
+        secret: config.getOrThrow<string>("ACCESS_TOKEN_SECRET"),
         signOptions: { expiresIn: "24h" },
       }),
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, SignupRequestsRepository, JwtStrategy, PasswordResetRepository],
+  providers: [
+    AuthService,
+    SignupRequestsRepository,
+    JwtStrategy,
+    PasswordResetRepository,
+  ],
+  exports: [JwtModule],
 })
 export class AuthModule {}

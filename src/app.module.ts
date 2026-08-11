@@ -8,6 +8,7 @@ import { EmailModule } from "./email/email.module";
 import { RecipesModule } from "./recipes/recipes.module";
 import { FilesModule } from "./files/files.module";
 import { CacheModule } from "@nestjs/cache-manager";
+import { NotificationsModule } from './notifications/notifications.module';
 import KeyvRedis from "@keyv/redis";
 
 const THREE_MINUTES = 3 * 60 * 1000;
@@ -31,6 +32,7 @@ const THREE_MINUTES = 3 * 60 * 1000;
     EmailModule,
     RecipesModule,
     FilesModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
