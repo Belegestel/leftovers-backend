@@ -24,6 +24,7 @@ export class RecipesRepository {
     recipeQuery?: RecipeQueryFilters,
   ): Promise<Recipe[]> {
     const cacheResult = await this.cacheService.findAll(userId, recipeQuery);
+
     if (cacheResult) {
       return cacheResult;
     }

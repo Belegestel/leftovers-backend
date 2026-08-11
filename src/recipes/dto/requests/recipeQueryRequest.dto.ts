@@ -32,23 +32,26 @@ export class RecipeQueryRequest {
 
   @ApiPropertyOptional({ example: "true" })
   @IsOptional()
-  @ToBoolean()
+  @ToBoolean(true)
   details?: boolean;
 
   @ApiPropertyOptional({ example: "true" })
   @IsOptional()
-  @ToBoolean()
+  @ToBoolean(true)
   saved?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
+  @ToBoolean(true)
   dateOrderIncr?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
+  @ToBoolean(true)
   ratingOrderIncr?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
+  @ToBoolean(true)
   authored?: boolean;
 }
