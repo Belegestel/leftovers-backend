@@ -23,6 +23,8 @@ import { RateRecipe } from "./dto/rateRecipe.dto";
 import { EditRecipe } from "./dto/editRecipe.dto";
 import { SingleCategory } from "./dto/responses/categoriesResponse.dto";
 import { NotificationsService } from "../notifications/notifications.service";
+import { GetRecipeSuggestions } from "./dto/getRecipeSuggestions.dto";
+import { RecipeSuggestions } from "./dto/recipeSuggestions.dto";
 
 @Injectable()
 export class RecipesService {
@@ -172,5 +174,10 @@ export class RecipesService {
 
   async deleteRecipe(recipeId: number, userId: number): Promise<boolean> {
     return await this.recipesRepository.deleteRecipe(recipeId, userId);
+  }
+
+  async getSuggestions(dto: GetRecipeSuggestions): Promise<RecipeSuggestions> {
+    const resp = await this.recipesRepository.getSuggestions(dto.userId, dto.query);
+    return RecipeSuggestions.from(resp);
   }
 }

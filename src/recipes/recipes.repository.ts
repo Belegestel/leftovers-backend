@@ -48,7 +48,10 @@ export class RecipesRepository {
     } else {
       if (recipeQuery?.title) {
         searchConditions.push({
-          title: { contains: recipeQuery.title, mode: "insensitive" },
+          title: {
+            contains: recipeQuery.title,
+            mode: "insensitive",
+          },
         });
       }
 
@@ -367,5 +370,20 @@ export class RecipesRepository {
       return [];
     }
     return recipe.savedBy.map((user) => user.id);
+  }
+
+  async getSuggestions(userId: number, query: string): Promise<string[]> {
+    return (
+      await this.prisma.recipe.findMany({
+        where: {
+          title: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      })
+    )
+      .filter((recipe) => recipe.authorId === userId || recipe.isPublic)
+      .map((recipe) => recipe.title);
   }
 }
