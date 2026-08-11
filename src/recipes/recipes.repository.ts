@@ -373,7 +373,7 @@ export class RecipesRepository {
   }
 
   async getSuggestions(userId: number, query: string): Promise<string[]> {
-    return (
+    const data = (
       await this.prisma.recipe.findMany({
         where: {
           title: {
@@ -385,5 +385,6 @@ export class RecipesRepository {
     )
       .filter((recipe) => recipe.authorId === userId || recipe.isPublic)
       .map((recipe) => recipe.title);
+    return [...new Set(data)];
   }
 }
