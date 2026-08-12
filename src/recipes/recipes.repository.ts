@@ -343,6 +343,13 @@ export class RecipesRepository {
         isPublic: dto.isPublic,
       },
     });
+    if (dto.title) {
+      if (recipe.isPublic) {
+        this.cacheService.invalidateRecipeSuggestionsCache();
+      } else {
+        this.cacheService.invalidateRecipeSuggestionsCache(dto.userId);
+      }
+    }
     if (recipe) {
       return true;
     }
@@ -374,6 +381,12 @@ export class RecipesRepository {
   }
 
   async getSuggestions(userId: number, query: string): Promise<string[]> {
+    const cacheResult = await this.cacheService.getSuggestions(userId, query);
+
+    if (cacheResult !== undefined) {
+      return cacheResult;
+    }
+
     const data = (
       await this.prisma.recipe.findMany({
         where: {
@@ -386,6 +399,8 @@ export class RecipesRepository {
     )
       .filter((recipe) => recipe.authorId === userId || recipe.isPublic)
       .map((recipe) => recipe.title);
-    return [...new Set(data)];
+    const result = [...new Set(data)];
+    await this.cacheService.setSuggestions(result, query, userId);
+    return result;
   }
 }
