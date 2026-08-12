@@ -58,10 +58,10 @@ describe("RecipesRepository", () => {
         limit: 10,
       } as RecipeQueryFilters);
       expect(result).toEqual(cachedRecipes);
-      expect(mockCacheService.findAll).toHaveBeenCalledWith(
-        undefined,
-        { page: 0, limit: 10},
-      );
+      expect(mockCacheService.findAll).toHaveBeenCalledWith(undefined, {
+        page: 0,
+        limit: 10,
+      });
       expect(mockPrismaService.recipe.findMany).not.toHaveBeenCalled();
     });
 
@@ -87,10 +87,7 @@ describe("RecipesRepository", () => {
 
       const filters = { page: 0, limit: 10 } as RecipeQueryFilters;
 
-      const result = await repository.findAll(
-        undefined,
-        filters,
-      );
+      const result = await repository.findAll(undefined, filters);
 
       expect(mockPrismaService.recipe.findMany).toHaveBeenCalled();
 
@@ -215,5 +212,118 @@ describe("RecipesRepository", () => {
 
       expect(mockCacheService.invalidateRecipeCache).toHaveBeenCalled();
     });
+  });
+
+  describe("pagination", () => {
+    it("returns the first page of recipes", async () => {
+      mockCacheService.findAll.mockResolvedValue(undefined);
+
+      const recipes = [
+        {
+          id: 1,
+          title: "Recipe 1",
+          ratings: [],
+          savedBy: [],
+        },
+        {
+          id: 2,
+          title: "Recipe 2",
+          ratings: [],
+          savedBy: [],
+        },
+        {
+          id: 3,
+          title: "Recipe 3",
+          ratings: [],
+          savedBy: [],
+        },
+      ];
+
+      mockPrismaService.recipe.findMany.mockResolvedValue(recipes);
+
+      const filters = {
+        page: 0,
+        limit: 2,
+      } as RecipeQueryFilters;
+
+      const result = await repository.findAll(undefined, filters);
+
+      expect(result).toHaveLength(2);
+      expect(result.map((recipe) => recipe.id)).toEqual([1, 2]);
+    });
+  });
+
+  it("returns the requested page of recipes", async () => {
+    mockCacheService.findAll.mockResolvedValue(undefined);
+
+    mockPrismaService.recipe.findMany.mockResolvedValue([
+      {
+        id: 1,
+        title: "Recipe 1",
+        ratings: [],
+        savedBy: [],
+      },
+      {
+        id: 2,
+        title: "Recipe 2",
+        ratings: [],
+        savedBy: [],
+      },
+      {
+        id: 3,
+        title: "Recipe 3",
+        ratings: [],
+        savedBy: [],
+      },
+      {
+        id: 4,
+        title: "Recipe 4",
+        ratings: [],
+        savedBy: [],
+      },
+      {
+        id: 5,
+        title: "Recipe 5",
+        ratings: [],
+        savedBy: [],
+      },
+    ]);
+
+    const filters = {
+      page: 1,
+      limit: 2,
+    } as RecipeQueryFilters;
+
+    const result = await repository.findAll(undefined, filters);
+
+    expect(result.map((recipe) => recipe.id)).toEqual([3, 4]);
+  });
+
+  it("returns an empty array when the requested page is past the end", async () => {
+    mockCacheService.findAll.mockResolvedValue(undefined);
+
+    mockPrismaService.recipe.findMany.mockResolvedValue([
+      {
+        id: 1,
+        title: "Recipe 1",
+        ratings: [],
+        savedBy: [],
+      },
+      {
+        id: 2,
+        title: "Recipe 2",
+        ratings: [],
+        savedBy: [],
+      },
+    ]);
+
+    const filters = {
+      page: 1,
+      limit: 2,
+    } as RecipeQueryFilters;
+
+    const result = await repository.findAll(undefined, filters);
+
+    expect(result).toEqual([]);
   });
 });
