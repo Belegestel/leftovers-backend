@@ -1,8 +1,23 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 import { ToBoolean } from "../../../common/toBoolean";
+import { Transform } from "class-transformer";
 
 export class RecipeQueryRequest {
+  // Pagination
+
+  @ApiPropertyOptional()
+  @Transform(({ value }) => (value === undefined ? 0 : Number(value)))
+  @IsNumber()
+  @IsOptional()
+  page?: number;
+
+  @ApiPropertyOptional()
+  @Transform(({ value }) => (value === undefined ? 20 : Number(value)))
+  @IsNumber()
+  @IsOptional()
+  limit?: number;
+
   // Filter
   @ApiPropertyOptional()
   @IsOptional()

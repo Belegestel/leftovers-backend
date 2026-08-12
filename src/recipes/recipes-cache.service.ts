@@ -84,7 +84,12 @@ export class RecipesCacheService {
     userId?: number,
     filters?: RecipeQueryFilters,
   ): string {
-    return `recipes:${userId ?? "anonymous"}:${JSON.stringify(filters ?? {})}`;
+    const { page, limit, ...cacheFilters } = filters ?? {
+      page: undefined,
+      limit: undefined,
+    };
+
+    return `recipes:${userId ?? "anonymous"}:${JSON.stringify(cacheFilters)}`;
   }
 
   private getRecipeSuggestionKey(
@@ -101,7 +106,10 @@ export class RecipesCacheService {
       )) ?? [];
     if (!currentKeys.includes(newKey)) {
       await this.withTimeout(
-        this.cache.set(this.recipeSuggestionCacheIndexKey, [newKey, ...currentKeys]),
+        this.cache.set(this.recipeSuggestionCacheIndexKey, [
+          newKey,
+          ...currentKeys,
+        ]),
       );
     }
   }

@@ -6,6 +6,7 @@ import { mockCacheService } from "../../test/unit/mocks/mockCacheService";
 import { RecipeCategory } from "./recipe-categories.enum";
 import { mockPrismaService } from "../../test/unit/mocks/mockPrismaService";
 import { Recipe } from "./recipes.model";
+import { RecipeQueryFilters } from "./dto/recipeQueryFilters.dto";
 
 describe("RecipesRepository", () => {
   let repository: RecipesRepository;
@@ -52,11 +53,14 @@ describe("RecipesRepository", () => {
         },
       ];
       mockCacheService.findAll.mockResolvedValue(cachedRecipes);
-      const result = await repository.findAll();
+      const result = await repository.findAll(undefined, {
+        page: 0,
+        limit: 10,
+      } as RecipeQueryFilters);
       expect(result).toEqual(cachedRecipes);
       expect(mockCacheService.findAll).toHaveBeenCalledWith(
         undefined,
-        undefined,
+        { page: 0, limit: 10},
       );
       expect(mockPrismaService.recipe.findMany).not.toHaveBeenCalled();
     });
@@ -81,14 +85,19 @@ describe("RecipesRepository", () => {
         },
       ]);
 
-      const result = await repository.findAll();
+      const filters = { page: 0, limit: 10 } as RecipeQueryFilters;
+
+      const result = await repository.findAll(
+        undefined,
+        filters,
+      );
 
       expect(mockPrismaService.recipe.findMany).toHaveBeenCalled();
 
       expect(mockCacheService.setFindAll).toHaveBeenCalledWith(
         result,
         undefined,
-        undefined,
+        filters,
       );
     });
 
@@ -101,7 +110,7 @@ describe("RecipesRepository", () => {
         ratingOrderIncr: false,
         dateOrderIncr: true,
         details: false,
-      });
+      } as RecipeQueryFilters);
 
       expect(mockPrismaService.recipe.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -122,7 +131,7 @@ describe("RecipesRepository", () => {
       mockCacheService.findAll.mockResolvedValue(undefined);
       mockPrismaService.recipe.findMany.mockResolvedValue([]);
 
-      await repository.findAll(10);
+      await repository.findAll(10, {} as RecipeQueryFilters);
 
       expect(mockPrismaService.recipe.findMany).toHaveBeenCalledWith(
         expect.objectContaining({

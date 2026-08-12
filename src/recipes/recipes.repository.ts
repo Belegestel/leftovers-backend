@@ -19,14 +19,18 @@ export class RecipesRepository {
     private cacheService: RecipesCacheService,
   ) {}
 
+  private paginate(recipes: Recipe[], page: number, limit: number): Recipe[] {
+    return recipes.slice(page * limit, (page + 1) * limit);
+  }
+
   async findAll(
-    userId?: number,
-    recipeQuery?: RecipeQueryFilters,
+    userId: number | undefined,
+    recipeQuery: RecipeQueryFilters,
   ): Promise<Recipe[]> {
     const cacheResult = await this.cacheService.findAll(userId, recipeQuery);
 
     if (cacheResult) {
-      return cacheResult;
+      return this.paginate(cacheResult, recipeQuery.page, recipeQuery.limit);
     }
     const categoryList = recipeQuery?.category?.length
       ? recipeQuery.category.map((c) => categoryFromString(c))
@@ -147,7 +151,7 @@ export class RecipesRepository {
       });
 
     await this.cacheService.setFindAll(resultFiltered, userId, recipeQuery);
-    return resultFiltered;
+    return this.paginate(resultFiltered, recipeQuery.page, recipeQuery.limit);
   }
 
   async create(
