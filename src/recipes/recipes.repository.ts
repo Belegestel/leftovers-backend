@@ -93,9 +93,6 @@ export class RecipesRepository {
     } else {
       conditions.push({ isPublic: true });
     }
-    if (categoryList?.length) {
-      conditions.push({ category: { in: categoryList } });
-    }
 
     if (categoryList?.length) {
       conditions.push({
@@ -107,6 +104,14 @@ export class RecipesRepository {
       conditions.push({
         OR: searchConditions,
       });
+    }
+
+    if (recipeQuery.saved !== undefined && userId !== undefined) {
+      if (recipeQuery.saved) {
+        conditions.push({ savedBy: { some: { id: userId } } });
+      } else {
+        conditions.push({ savedBy: { none: { id: userId } } });
+      }
     }
 
     const orderBy: Prisma.RecipeOrderByWithRelationInput[] = [];
@@ -135,11 +140,6 @@ export class RecipesRepository {
     const resultFiltered = result
       .map((value) =>
         Recipe.fromPrisma(value, userId ? value.savedBy.length > 0 : false),
-      )
-      .filter((recipe: Recipe) =>
-        recipeQuery?.saved === undefined
-          ? true
-          : recipe.isBookmarked === recipeQuery.saved,
       )
       .sort((a, b) => {
         if (recipeQuery?.ratingOrderIncr !== undefined) {
@@ -349,9 +349,9 @@ export class RecipesRepository {
     });
     if (dto.title) {
       if (recipe.isPublic) {
-        this.cacheService.invalidateRecipeSuggestionsCache();
+        await this.cacheService.invalidateRecipeSuggestionsCache();
       } else {
-        this.cacheService.invalidateRecipeSuggestionsCache(dto.userId);
+        await this.cacheService.invalidateRecipeSuggestionsCache(dto.userId);
       }
     }
     if (recipe) {
@@ -384,7 +384,10 @@ export class RecipesRepository {
     return recipe.savedBy.map((user) => user.id);
   }
 
-  async getSuggestions(userId: number, query: string): Promise<string[]> {
+  async getSuggestions(
+    userId: number | undefined,
+    query: string,
+  ): Promise<string[]> {
     const cacheResult = await this.cacheService.getSuggestions(userId, query);
 
     if (cacheResult !== undefined) {
@@ -398,11 +401,11 @@ export class RecipesRepository {
             contains: query,
             mode: "insensitive",
           },
+          OR: [{ authorId: userId }, { isPublic: true }],
         },
+        select: { title: true },
       })
-    )
-      .filter((recipe) => recipe.authorId === userId || recipe.isPublic)
-      .map((recipe) => recipe.title);
+    ).map((recipe) => recipe.title);
     const result = [...new Set(data)];
     await this.cacheService.setSuggestions(result, query, userId);
     return result;
