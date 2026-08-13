@@ -5,6 +5,15 @@ import { categoryFromString, RecipeCategory } from "../recipe-categories.enum";
 export class RecipeQueryFilters {
   @ApiPropertyOptional()
   userId?: number;
+
+  // Pagination
+
+  @ApiProperty()
+  page: number;
+
+  @ApiProperty()
+  limit: number;
+
   // Filter
   @ApiPropertyOptional()
   category?: RecipeCategory[];
@@ -38,6 +47,8 @@ export class RecipeQueryFilters {
   authored?: boolean;
 
   private constructor(
+    page: number,
+    limit: number,
     userId?: number,
     category?: string,
     ratingOrderIncr?: boolean,
@@ -63,12 +74,16 @@ export class RecipeQueryFilters {
     this.details = details ?? false;
     this.saved = saved;
     this.authored = authored;
+    this.page = page;
+    this.limit = limit;
   }
   static from(
     userId: number | undefined,
     recipeQueryRequest: RecipeQueryRequest | undefined,
   ): RecipeQueryFilters {
     return new RecipeQueryFilters(
+      recipeQueryRequest?.page ?? 0,
+      recipeQueryRequest?.limit ?? 20,
       userId,
       recipeQueryRequest?.category,
       recipeQueryRequest?.ratingOrderIncr,

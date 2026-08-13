@@ -19,13 +19,18 @@ export class RecipesRepository {
     private cacheService: RecipesCacheService,
   ) {}
 
+  private paginate(recipes: Recipe[], page: number, limit: number): Recipe[] {
+    return recipes.slice(page * limit, (page + 1) * limit);
+  }
+
   async findAll(
-    userId?: number,
-    recipeQuery?: RecipeQueryFilters,
+    userId: number | undefined,
+    recipeQuery: RecipeQueryFilters,
   ): Promise<Recipe[]> {
     const cacheResult = await this.cacheService.findAll(userId, recipeQuery);
+
     if (cacheResult) {
-      return cacheResult;
+      return this.paginate(cacheResult, recipeQuery.page, recipeQuery.limit);
     }
     const categoryList = recipeQuery?.category?.length
       ? recipeQuery.category.map((c) => categoryFromString(c))
@@ -48,7 +53,10 @@ export class RecipesRepository {
     } else {
       if (recipeQuery?.title) {
         searchConditions.push({
-          title: { contains: recipeQuery.title, mode: "insensitive" },
+          title: {
+            contains: recipeQuery.title,
+            mode: "insensitive",
+          },
         });
       }
 
@@ -85,9 +93,6 @@ export class RecipesRepository {
     } else {
       conditions.push({ isPublic: true });
     }
-    if (categoryList?.length) {
-      conditions.push({ category: { in: categoryList } });
-    }
 
     if (categoryList?.length) {
       conditions.push({
@@ -99,6 +104,14 @@ export class RecipesRepository {
       conditions.push({
         OR: searchConditions,
       });
+    }
+
+    if (recipeQuery.saved !== undefined && userId !== undefined) {
+      if (recipeQuery.saved) {
+        conditions.push({ savedBy: { some: { id: userId } } });
+      } else {
+        conditions.push({ savedBy: { none: { id: userId } } });
+      }
     }
 
     const orderBy: Prisma.RecipeOrderByWithRelationInput[] = [];
@@ -128,11 +141,6 @@ export class RecipesRepository {
       .map((value) =>
         Recipe.fromPrisma(value, userId ? value.savedBy.length > 0 : false),
       )
-      .filter((recipe: Recipe) =>
-        recipeQuery?.saved === undefined
-          ? true
-          : recipe.isBookmarked === recipeQuery.saved,
-      )
       .sort((a, b) => {
         if (recipeQuery?.ratingOrderIncr !== undefined) {
           return recipeQuery.ratingOrderIncr
@@ -143,7 +151,7 @@ export class RecipesRepository {
       });
 
     await this.cacheService.setFindAll(resultFiltered, userId, recipeQuery);
-    return resultFiltered;
+    return this.paginate(resultFiltered, recipeQuery.page, recipeQuery.limit);
   }
 
   async create(
@@ -339,6 +347,13 @@ export class RecipesRepository {
         isPublic: dto.isPublic,
       },
     });
+    if (dto.title) {
+      if (recipe.isPublic) {
+        await this.cacheService.invalidateRecipeSuggestionsCache();
+      } else {
+        await this.cacheService.invalidateRecipeSuggestionsCache(dto.userId);
+      }
+    }
     if (recipe) {
       return true;
     }
@@ -367,5 +382,32 @@ export class RecipesRepository {
       return [];
     }
     return recipe.savedBy.map((user) => user.id);
+  }
+
+  async getSuggestions(
+    userId: number | undefined,
+    query: string,
+  ): Promise<string[]> {
+    const cacheResult = await this.cacheService.getSuggestions(userId, query);
+
+    if (cacheResult !== undefined) {
+      return cacheResult;
+    }
+
+    const data = (
+      await this.prisma.recipe.findMany({
+        where: {
+          title: {
+            contains: query,
+            mode: "insensitive",
+          },
+          OR: [{ authorId: userId }, { isPublic: true }],
+        },
+        select: { title: true },
+      })
+    ).map((recipe) => recipe.title);
+    const result = [...new Set(data)];
+    await this.cacheService.setSuggestions(result, query, userId);
+    return result;
   }
 }

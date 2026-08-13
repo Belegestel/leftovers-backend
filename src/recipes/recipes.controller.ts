@@ -49,6 +49,9 @@ import { RateRecipeRequest } from "./dto/requests/rateRecipeRequest.dto";
 import { RateRecipe } from "./dto/rateRecipe.dto";
 import { EditRecipeRequest } from "./dto/requests/editRecipeRequest.dto";
 import { EditRecipe } from "./dto/editRecipe.dto";
+import { RecipeSuggestionsRequest } from "./dto/requests/recipeSuggestionsRequest.dto";
+import { RecipeSuggestionsResponse } from "./dto/responses/recipeSuggestionsResponse.dto";
+import { GetRecipeSuggestions } from "./dto/getRecipeSuggestions.dto";
 
 @ApiTags("Recipes")
 @Controller("recipes")
@@ -140,6 +143,18 @@ export class RecipesController {
     const input = CreateRecipe.from(dto);
     const recipe = await this.recipesService.createRecipe(userId, input);
     return CreateRecipeResponse.from(recipe);
+  }
+
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('/suggestions')
+  async getRecipeSuggestions(
+    @Query() dto: RecipeSuggestionsRequest,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<RecipeSuggestionsResponse> {
+    const userId = req.user?.userId;
+    const input = GetRecipeSuggestions.from(dto, userId);
+    const result = await this.recipesService.getSuggestions(input);
+    return RecipeSuggestionsResponse.from(result);
   }
 
   @ApiOperation({ summary: "Returns a list of recipe categories" })
