@@ -44,6 +44,7 @@ describe("NotificationsController (e2e)", () => {
 
   afterAll(async () => {
     await clearDatabase(prisma);
+    await app.close();
   });
 
   describe("GET /notifications", () => {
