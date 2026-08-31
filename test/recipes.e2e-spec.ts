@@ -7,6 +7,7 @@ import { createUserAndLogin } from "./utils/create-user-and-login";
 import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { RecipeCategory } from "../src/recipes/recipe-categories.enum";
+import { Recipe } from "../src/recipes/recipes.model";
 
 describe("Recipes E2E", () => {
   let app: INestApplication;
@@ -118,7 +119,7 @@ describe("Recipes E2E", () => {
       .set("Authorization", `Bearer ${userA.token}`)
       .expect(200);
 
-    const titles = response.body.recipes.map((r) => r.title);
+    const titles = response.body.recipes.map((r: Recipe) => r.title);
 
     expect(titles).toContain("Public recipe");
     expect(titles).toContain("Private recipe");
@@ -470,7 +471,8 @@ describe("Recipes E2E", () => {
     let response = await getRecipes();
 
     expect(
-      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+      response.body.recipes.find((r: Recipe) => r.id === recipe.id)
+        .isBookmarked,
     ).toBe(false);
 
     await request(app.getHttpServer())
@@ -481,17 +483,19 @@ describe("Recipes E2E", () => {
     response = await getRecipes();
 
     expect(
-      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+      response.body.recipes.find((r: Recipe) => r.id === recipe.id)
+        .isBookmarked,
     ).toBe(true);
 
-    const resp = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post(`/recipes/${recipe.id}/unbookmark`)
       .set("Authorization", `Bearer ${user.token}`);
 
     response = await getRecipes();
 
     expect(
-      response.body.recipes.find((r) => r.id === recipe.id).isBookmarked,
+      response.body.recipes.find((r: Recipe) => r.id === recipe.id)
+        .isBookmarked,
     ).toBe(false);
   });
 });
