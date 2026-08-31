@@ -1,11 +1,9 @@
 import { INestApplication } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
 import request from "supertest";
-
-import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createUserAndLogin } from "./utils/create-user-and-login";
 import { clearDatabase } from "./utils/clear-db";
+import { createE2EApp } from "./utils/create-e2e-app";
 
 describe("NotificationsController (e2e)", () => {
   let app: INestApplication;
@@ -16,15 +14,10 @@ describe("NotificationsController (e2e)", () => {
   let notificationId: number;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const setup = await createE2EApp();
 
-    app = moduleFixture.createNestApplication();
-
-    await app.init();
-
-    prisma = app.get(PrismaService);
+    app = setup.app;
+    prisma = setup.prisma;
 
     const result = await createUserAndLogin(
       app,
